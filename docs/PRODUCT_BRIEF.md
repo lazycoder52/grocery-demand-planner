@@ -18,11 +18,11 @@ Across an expanding-window **5-fold rolling-origin backtest** (origins stepping 
 - **28-Day Moving Average:** **23.65% Mean WAPE** (MAE: 114.12 units).
 - **7-Day Seasonal Naive:** **16.33% Mean WAPE** (MAE: 78.99 units).
 
-Our **selected LightGBM global regressor** captures bi-weekly paydays (15th and month-end), non-transferred public holidays, and promotional velocity, achieving **13.56% Mean WAPE** (MAE: 65.55 units, Bias: **-0.81%**), delivering **+2.77 percentage points of Forecast Value Added (FVA)** (**16.95% relative error reduction**).
+Our **headline result** across the 5-fold backtest demonstrates that the **selected LightGBM global regressor** captures bi-weekly paydays (15th and month-end), non-transferred public holidays, and promotional velocity, achieving **13.56% Mean WAPE** (MAE: 65.55 units, Bias: **-0.81%**) compared to **16.33% Mean WAPE** for 7-day Seasonal Naive, delivering **+2.77 percentage points of Forecast Value Added (FVA)** (**16.95% relative error reduction**).
 
-On the final untouched **16-day holdout confirmation** (2017-07-31 to 2017-08-15, representing **13,319,179.78 units sold** across **28,512 store-family-day combinations**), the selected model achieves **15.16% WAPE** (MAE: 70.81 units, Bias: **+2.85%**) vs. **20.67% WAPE** for 7-day Seasonal Naive (**+5.51 pts FVA**, a **26.65% relative error reduction**).
+As a single-window operational confirmation, on the final untouched **16-day holdout** (2017-07-31 to 2017-08-15, representing **13,319,179.78 units sold** across **28,512 store-family-day combinations**), the selected model achieves **15.16% WAPE** (MAE: 70.81 units, Bias: **+2.85%**) vs. **20.67% WAPE** for 7-day Seasonal Naive (**+5.51 pts FVA**, a **26.65% relative error reduction**). The holdout window is noticeably harder for the heuristic baseline due to the compounding volatility of the month-turn restocking surge and the Tuesday, August 15 payday.
 
-*Note on WAPE and Bias:* WAPE is volume-weighted, measuring aggregate unit errors across chain revenue. The holdout's +2.85% bias reflects log-inversion convexity ($\exp(\hat{y}) - 1$), providing an intentional buffer against high-penalty stockouts during mid-month payday volume spikes.
+*Note on WAPE and Bias:* WAPE is volume-weighted ($\text{WAPE} = \frac{\sum |y - \hat{y}|}{\sum y}$), evaluating aggregate unit error across total chain volume rather than averaging percentage errors across SKUs. Bias was +2.85% on the holdout and averaged -0.81% across folds (range -4.0% to +1.9%), showing no systematic directional bias.
 
 ---
 
@@ -44,9 +44,9 @@ graph TD
     A --> C["On-Shelf Fill Rate (%)"]
     B --> D["Forecast Value Added (FVA vs Baseline)"]
     C --> D
-    D --> E["WAPE: 15.16% (vs 20.67% Baseline)"]
-    D --> F["Bias: +2.85% (Controls Over/Under Stocking)"]
-    D --> G["MAE: 70.81 units (vs 96.54 Baseline)"]
+    D --> E["Mean WAPE: 13.56% (vs 16.33% Baseline)"]
+    D --> F["Mean Bias: -0.81% (Range -4.0% to +1.9%)"]
+    D --> G["Mean MAE: 65.55 units (vs 78.99 Baseline)"]
     E --> H["Intermittent Families (7 families >50% zero-rate)"]
     E --> I["High-Velocity Staples (Grocery I, Beverages)"]
 ```
@@ -65,6 +65,8 @@ graph TD
    All stores close on Christmas Day (**4 dates missing**: 2013-12-25, 2014-12-25, 2015-12-25, 2016-12-25). Demand for December 25 is treated as deterministically zero.
 5. **Demand Intermittency:**
    **7 product families** exhibit $>50\%$ zero-sales days (e.g., `BOOKS` at **96.96%**, `BABY CARE` at **94.13%**). WAPE is the mandatory evaluation metric; percentage metrics with individual item denominators (MAPE) are structurally invalid.
+6. **Training Window Inception (2015-01-01):**
+   Training intentionally begins on **2015-01-01** rather than 2013-01-01. Promotional data was unrecorded in 2013 (0%) and only partially phased in during mid-2014; starting at 2015-01-01 ensures that all 16-to-28-day lags and rolling aggregates have complete promotional history, avoids artificial zero-sales biases from late-opening stores (e.g., Store 53 in May 2014, Store 20 in Feb 2015), and provides 2.5 years of clean, consistent post-inception data for gradient boosting.
 
 ---
 
