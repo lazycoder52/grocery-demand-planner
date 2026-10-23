@@ -26,6 +26,7 @@ from demand_planner.evaluation.metrics import (
     calc_wape,
     evaluate_predictions,
 )
+from demand_planner.features.build import build_features
 
 
 def test_metric_calculations_exact():
@@ -187,3 +188,95 @@ def test_run_baseline_benchmarks_end_to_end(tiny_favorita_files: dict[str, Path]
         assert "naive" in fold["results"]
         assert "seasonal_naive_7d" in fold["results"]
         assert "moving_average_28d" in fold["results"]
+
+
+def test_backtest_folds_strict_temporal_isolation_and_no_feature_leakage(
+    tiny_favorita_files: dict[str, Path],
+):
+    """Prove that across every backtest fold, no training row or feature value
+
+    uses data after that fold's forecast origin (including rolling means and lags).
+    """
+    train_df = pd.read_csv(tiny_favorita_files["train"])
+    stores_df = pd.read_csv(tiny_favorita_files["stores"])
+    holidays_df = pd.read_csv(tiny_favorita_files["holidays"])
+
+    cv_folds, holdout = generate_rolling_folds(
+        train_df,
+        n_folds=5,
+        horizon_days=16,
+        fold_step_days=16,
+        holdout_days=16,
+    )
+
+    all_splits = [*cv_folds, holdout]
+    lag_and_rolling_features = [
+        "lag_16",
+        "lag_21",
+        "lag_28",
+        "rolling_mean_7_lag16",
+        "rolling_mean_28_lag16",
+    ]
+
+    for split in all_splits:
+        origin = pd.to_datetime(split.origin_date)
+
+        # 1. Row-level temporal isolation:
+        # No training row can have date > origin
+        assert pd.to_datetime(split.train_df["date"]).max() <= origin, (
+            f"Fold {split.fold_idx} training set contains dates > origin ({origin})"
+        )
+
+        # No test row can have date <= origin
+        assert pd.to_datetime(split.test_df["date"]).min() > origin, (
+            f"Fold {split.fold_idx} test set contains dates <= origin ({origin})"
+        )
+
+        # Test set must not exceed horizon_days (16 days)
+        test_max_date = pd.to_datetime(split.test_df["date"]).max()
+        assert test_max_date <= origin + pd.Timedelta(days=16), (
+            f"Fold {split.fold_idx} test set exceeds 16-day horizon ({test_max_date})"
+        )
+
+        # 2. Feature-level zero-leakage proof:
+        # Build features on unperturbed data up to origin + 16 days
+        combined_unperturbed = pd.concat([split.train_df, split.test_df], ignore_index=True)
+        feats_unperturbed, _ = build_features(
+            combined_unperturbed, stores_df=stores_df, holidays_df=holidays_df
+        )
+
+        # Deliberately perturb/corrupt all actual sales occurring AFTER the origin date
+        # (simulating arbitrary future volatility / external spikes)
+        combined_perturbed = combined_unperturbed.copy()
+        post_origin_mask = pd.to_datetime(combined_perturbed["date"]) > origin
+        combined_perturbed.loc[post_origin_mask, "sales"] = (
+            combined_perturbed.loc[post_origin_mask, "sales"] * 1000.0 + 99999.0
+        )
+
+        feats_perturbed, _ = build_features(
+            combined_perturbed, stores_df=stores_df, holidays_df=holidays_df
+        )
+
+        # A. In training rows (date <= origin):
+        # Every single feature must be 100% identical
+        train_idx = feats_unperturbed[pd.to_datetime(feats_unperturbed["date"]) <= origin].index
+        for col in lag_and_rolling_features:
+            assert np.allclose(
+                feats_unperturbed.loc[train_idx, col],
+                feats_perturbed.loc[train_idx, col],
+                rtol=1e-5,
+                atol=1e-5,
+            ), f"Fold {split.fold_idx}: Feature {col} in train changed after mutating future sales!"
+
+        # B. In test rows (origin < date <= origin + 16):
+        # Crucial: All lag and rolling features MUST ALSO be 100% identical!
+        # If any lag was < 16 (e.g. lag 1) or rolling mean included unlagged future sales,
+        # mutating post-origin sales would change the feature values in the test window.
+        test_idx = feats_unperturbed[pd.to_datetime(feats_unperturbed["date"]) > origin].index
+        for col in lag_and_rolling_features:
+            assert np.allclose(
+                feats_unperturbed.loc[test_idx, col],
+                feats_perturbed.loc[test_idx, col],
+                rtol=1e-5,
+                atol=1e-5,
+            ), f"Fold {split.fold_idx}: Feature {col} in test set leaked post-origin data!"
