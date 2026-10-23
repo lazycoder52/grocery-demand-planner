@@ -299,3 +299,46 @@ def test_backtest_folds_strict_temporal_isolation_and_no_feature_leakage(
                 rtol=1e-5,
                 atol=1e-5,
             ), f"Fold {split.fold_idx}: Feature {col} in test set leaked post-origin data!"
+
+
+def test_seasonal_naive_quantiles_baseline(tiny_favorita_files: dict[str, Path]):
+    """Verify seasonal naive quantile baseline produces non-negative, ordered predictions."""
+    from demand_planner.evaluation.baselines import predict_seasonal_naive_quantiles
+
+    train_df = pd.read_csv(tiny_favorita_files["train"])
+    train_df["date"] = pd.to_datetime(train_df["date"])
+    origin = train_df["date"].max() - pd.Timedelta(days=16)
+
+    hist_df = train_df[train_df["date"] <= origin]
+    test_df = train_df[train_df["date"] > origin].copy()
+
+    preds, res_df = predict_seasonal_naive_quantiles(
+        hist_df, test_df, lookback_days=28, alphas=(0.1, 0.5, 0.9)
+    )
+
+    assert "p10" in preds and "p50" in preds and "p90" in preds
+    assert (preds["p10"] >= 0.0).all()
+    assert (preds["p50"] >= preds["p10"]).all()
+    assert (preds["p90"] >= preds["p50"]).all()
+    assert len(res_df) == len(test_df)
+
+
+def test_compute_daytype_metrics():
+    """Verify daytype metrics correctly partition payday regimes."""
+    from demand_planner.models.lightgbm import compute_daytype_metrics
+
+    dates = pd.date_range("2017-08-01", periods=16, freq="D")
+    df = pd.DataFrame(
+        {
+            "date": dates,
+            "sales": np.array([100.0] * 16),
+            "pred_lgbm": np.array([110.0] * 16),
+            "pred_seasonal_naive": np.array([90.0] * 16),
+        }
+    )
+
+    daytypes = compute_daytype_metrics(df)
+    assert "by_payday_week" in daytypes
+    assert "by_exact_payday" in daytypes
+    assert "payday_regime" in daytypes["by_payday_week"]
+    assert "other_regime" in daytypes["by_payday_week"]

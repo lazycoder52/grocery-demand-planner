@@ -111,6 +111,16 @@ def _register_models_stage() -> None:
 
         models_data = {
             "model_status": "Selected model",
+            "preopening_rows_handling": {
+                "training": (
+                    "Excluded pre-opening zero rows based on earliest positive sale "
+                    "date per store (55,308 rows dropped post-2015)"
+                ),
+                "evaluation": (
+                    "0 pre-opening rows in evaluation; all stores open prior to test "
+                    "origin (Store 52 opened 2017-04-20)"
+                ),
+            },
             "cv_5_fold": cv_results,
             "holdout_confirmation": holdout_summary,
             "quantile_models": {
@@ -123,6 +133,7 @@ def _register_models_stage() -> None:
             "forecast_value_added_vs_seasonal_naive": holdout_summary[
                 "forecast_value_added_vs_seasonal_naive"
             ],
+            "daytype_breakdown_holdout": holdout_summary.get("daytype_breakdown", {}),
         }
 
         update_metrics_json(models_data, section="models")

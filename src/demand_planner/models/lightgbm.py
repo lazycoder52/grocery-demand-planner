@@ -52,6 +52,69 @@ def predict_lightgbm(
     return np.expm1(raw_preds).clip(min=0.0)
 
 
+def get_store_opening_dates(
+    sales_df: pd.DataFrame,
+    date_col: str = "date",
+    store_col: str = "store_nbr",
+    target_col: str = "sales",
+) -> dict[int, pd.Timestamp]:
+    """Find the earliest date with positive sales for each store."""
+    pos = sales_df[sales_df[target_col] > 0]
+    return pos.groupby(store_col)[date_col].min().to_dict()
+
+
+def compute_daytype_metrics(
+    test_df: pd.DataFrame,
+    date_col: str = "date",
+    target_col: str = "sales",
+    model_pred_col: str = "pred_lgbm",
+    baseline_pred_col: str = "pred_seasonal_naive",
+) -> dict[str, Any]:
+    """Compute WAPE and Bias partitioned by payday week vs other weeks and exact paydays."""
+    from demand_planner.evaluation.metrics import calc_bias, calc_wape
+
+    df = test_df.copy()
+    dates = pd.to_datetime(df[date_col])
+    all_dates = pd.date_range(
+        dates.min() - pd.Timedelta(days=7), dates.max() + pd.Timedelta(days=7)
+    )
+    cal = pd.DataFrame({"date": all_dates})
+    cal["week"] = cal["date"].dt.to_period("W-SUN")
+    cal["is_payday"] = (cal["date"].dt.day == 15) | (cal["date"].dt.is_month_end)
+    payday_weeks = set(cal.groupby("week")["is_payday"].any()[lambda x: x].index)
+
+    df["_week"] = dates.dt.to_period("W-SUN")
+    df["is_payday_week"] = df["_week"].isin(payday_weeks)
+    df["is_exact_payday"] = (dates.dt.day == 15) | (dates.dt.is_month_end)
+
+    results: dict[str, Any] = {}
+    for flag_col, key in [
+        ("is_payday_week", "by_payday_week"),
+        ("is_exact_payday", "by_exact_payday"),
+    ]:
+        regimes: dict[str, Any] = {}
+        for val, grp in df.groupby(flag_col):
+            label = "payday_regime" if val else "other_regime"
+            y_true = grp[target_col].to_numpy()
+            y_mod = grp[model_pred_col].to_numpy()
+            y_base = grp[baseline_pred_col].to_numpy()
+            w_mod = calc_wape(y_true, y_mod)
+            w_base = calc_wape(y_true, y_base)
+            b_mod = calc_bias(y_true, y_mod)
+            b_base = calc_bias(y_true, y_base)
+            fva_pts = float(round(w_base - w_mod, 4))
+            regimes[label] = {
+                "n_samples": int(len(grp)),
+                "model_wape": w_mod,
+                "model_bias": b_mod,
+                "baseline_wape": w_base,
+                "baseline_bias": b_base,
+                "fva_wape_pts": fva_pts,
+            }
+        results[key] = regimes
+    return results
+
+
 def evaluate_model_vs_baselines(
     sales_df: pd.DataFrame,
     holdout_origin: pd.Timestamp | str,
@@ -60,6 +123,7 @@ def evaluate_model_vs_baselines(
     start_train_date: str = "2015-01-01",
     target_col: str = "sales",
     params: dict[str, Any] | None = None,
+    exclude_preopening: bool = True,
 ) -> tuple[dict[str, Any], pd.DataFrame]:
     """Train LightGBM and benchmark against Naive, Seasonal Naive, and MA28 on holdout.
 
@@ -79,6 +143,8 @@ def evaluate_model_vs_baselines(
         Target sales column.
     params : dict[str, Any] | None
         Optional LightGBM hyperparameters.
+    exclude_preopening : bool
+        If True, excludes rows before a store's first opening date from training.
 
     Returns
     -------
@@ -96,6 +162,11 @@ def evaluate_model_vs_baselines(
 
     # Training and test masks
     train_mask = (df_feat["date"] <= origin) & (df_feat["date"] >= pd.to_datetime(start_train_date))
+    if exclude_preopening:
+        opening_dates = get_store_opening_dates(df_raw, target_col=target_col)
+        is_open = df_feat["store_nbr"].map(opening_dates)
+        train_mask = train_mask & (df_feat["date"] >= is_open)
+
     test_mask = df_feat["date"] > origin
 
     X_train = df_feat.loc[train_mask, feature_names]
@@ -141,6 +212,13 @@ def evaluate_model_vs_baselines(
     fva_wape_pts = float(round(snaive_wape - lgbm_wape, 4))
     fva_relative_pct = float(round((fva_wape_pts / snaive_wape) * 100.0, 2))
 
+    daytype_metrics = compute_daytype_metrics(
+        test_df,
+        target_col=target_col,
+        model_pred_col="pred_lgbm",
+        baseline_pred_col="pred_seasonal_naive",
+    )
+
     summary: dict[str, Any] = {
         "holdout_origin": origin.strftime("%Y-%m-%d"),
         "test_start_date": test_df["date"].min().strftime("%Y-%m-%d"),
@@ -156,6 +234,7 @@ def evaluate_model_vs_baselines(
             "wape_reduction_percentage_points": fva_wape_pts,
             "relative_error_reduction_pct": fva_relative_pct,
         },
+        "daytype_breakdown": daytype_metrics,
         "by_family": {
             fam: {
                 "lightgbm": lgbm_eval["by_family"][fam],
@@ -192,6 +271,7 @@ def run_rolling_origin_cv(
     start_train_date: str = "2015-01-01",
     target_col: str = "sales",
     params: dict[str, Any] | None = None,
+    exclude_preopening: bool = True,
 ) -> dict[str, Any]:
     """Execute rolling-origin cross-validation backtest across N expanding-window folds.
 
@@ -217,6 +297,8 @@ def run_rolling_origin_cv(
         Target sales column.
     params : dict[str, Any] | None
         Optional LightGBM hyperparameters.
+    exclude_preopening : bool
+        If True, excludes rows before a store's first opening date from training.
 
     Returns
     -------
@@ -255,6 +337,11 @@ def run_rolling_origin_cv(
             f.origin_date.strftime("%Y-%m-%d"),
         )
         train_mask = (df_feat["date"] <= f.origin_date) & (df_feat["date"] >= start_date)
+        if exclude_preopening:
+            opening_dates = get_store_opening_dates(df_raw, target_col=target_col)
+            is_open = df_feat["store_nbr"].map(opening_dates)
+            train_mask = train_mask & (df_feat["date"] >= is_open)
+
         test_mask = (df_feat["date"] > f.origin_date) & (
             df_feat["date"] <= f.origin_date + pd.Timedelta(days=horizon_days)
         )
@@ -287,6 +374,12 @@ def run_rolling_origin_cv(
         naive_eval = evaluate_predictions(test_df, true_col=target_col, pred_col="pred_naive")
 
         fva_pts = float(round(snaive_eval["overall"]["wape"] - lgbm_eval["overall"]["wape"], 4))
+        daytype_metrics = compute_daytype_metrics(
+            test_df,
+            target_col=target_col,
+            model_pred_col="pred_lgbm",
+            baseline_pred_col="pred_snaive",
+        )
 
         fold_records.append(
             {
@@ -300,6 +393,7 @@ def run_rolling_origin_cv(
                 "moving_average_28d": ma28_eval["overall"],
                 "naive": naive_eval["overall"],
                 "fva_wape_pts": fva_pts,
+                "daytype_breakdown": daytype_metrics,
             }
         )
 
