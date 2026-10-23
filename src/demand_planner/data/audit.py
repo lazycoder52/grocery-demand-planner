@@ -99,7 +99,7 @@ def audit_dataset(con: duckdb.DuckDBPyConnection) -> dict[str, Any]:
                 round(max(sales), 2) as max_sales
             FROM train
             GROUP BY family
-            ORDER BY zero_share_pct DESC
+            ORDER BY zero_share_pct DESC, family ASC
         """).df()
 
         family_stats = {}
@@ -242,6 +242,7 @@ def update_metrics_json(
     existing["audit"] = audit_results
     with path.open("w", encoding="utf-8") as fh:
         json.dump(existing, fh, indent=2)
+        fh.write("\n")
     log.info("Saved audit metrics to %s", path)
 
 
