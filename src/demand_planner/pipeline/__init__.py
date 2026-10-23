@@ -83,10 +83,41 @@ def _register_models_stage() -> None:
             start_train_date="2015-01-01",
         )
 
+        log.info("Running 5-fold rolling-origin cross-validation for LightGBM quantiles...")
+        from demand_planner.models.quantile import (
+            evaluate_quantile_holdout,
+            run_quantile_cv,
+        )
+
+        quantile_cv_results = run_quantile_cv(
+            train_df,
+            stores_df=stores_df,
+            holidays_df=holidays_df,
+            start_train_date="2015-01-01",
+        )
+
+        log.info("Evaluating quantile models on holdout...")
+        quantile_holdout_summary, quantile_preds = evaluate_quantile_holdout(
+            train_df,
+            holdout_origin=holdout_origin,
+            stores_df=stores_df,
+            holidays_df=holidays_df,
+            start_train_date="2015-01-01",
+        )
+
+        test_preds["pred_p10"] = quantile_preds["pred_p10"]
+        test_preds["pred_p50"] = quantile_preds["pred_p50"]
+        test_preds["pred_p90"] = quantile_preds["pred_p90"]
+
         models_data = {
             "model_status": "Selected model",
             "cv_5_fold": cv_results,
             "holdout_confirmation": holdout_summary,
+            "quantile_models": {
+                "nominal_coverage_pct": 80.0,
+                "cv_5_fold": quantile_cv_results,
+                "holdout_confirmation": quantile_holdout_summary,
+            },
             "by_family": holdout_summary["by_family"],
             "models": holdout_summary["models"],
             "forecast_value_added_vs_seasonal_naive": holdout_summary[

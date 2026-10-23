@@ -21,7 +21,9 @@ from demand_planner.evaluation.baselines import (
 )
 from demand_planner.evaluation.metrics import (
     calc_bias,
+    calc_empirical_coverage,
     calc_mae,
+    calc_pinball_loss,
     calc_rmsle,
     calc_wape,
     evaluate_predictions,
@@ -57,6 +59,23 @@ def test_metric_calculations_exact():
     # Zero denominator edge case
     assert calc_wape(np.array([0.0, 0.0]), np.array([0.0, 0.0])) == 0.0
     assert calc_wape(np.array([0.0, 0.0]), np.array([5.0, 5.0])) == 100.0
+
+
+def test_pinball_loss_and_empirical_coverage():
+    """Verify pinball loss and interval coverage calculation accuracy."""
+    y_true = np.array([10.0, 20.0, 30.0])
+    y_pred = np.array([20.0, 10.0, 30.0])
+
+    # alpha = 0.5 (loss = 0.5 * MAE = 0.5 * (10 + 10 + 0) / 3 = 3.3333)
+    assert abs(calc_pinball_loss(y_true, y_pred, 0.5) - 3.3333) < 0.01
+
+    # coverage calculation: 2 of 3 in interval
+    y_lower = np.array([5.0, 15.0, 25.0])
+    y_upper = np.array([15.0, 25.0, 28.0])
+    assert abs(calc_empirical_coverage(y_true, y_lower, y_upper) - 66.6667) < 0.01
+
+    with pytest.raises(ValueError, match="alpha must be strictly between 0 and 1"):
+        calc_pinball_loss(y_true, y_pred, 1.5)
 
 
 def test_evaluate_predictions_grouped():

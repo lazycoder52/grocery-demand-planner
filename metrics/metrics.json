@@ -1474,6 +1474,124 @@
         }
       }
     },
+    "quantile_models": {
+      "nominal_coverage_pct": 80.0,
+      "cv_5_fold": {
+        "n_folds": 5,
+        "horizon_days": 16,
+        "fold_step_days": 16,
+        "folds": [
+          {
+            "fold_idx": 1,
+            "origin_date": "2017-05-11",
+            "test_start_date": "2017-05-12",
+            "test_end_date": "2017-05-27",
+            "metrics": {
+              "pinball_loss_p10": 23.9709,
+              "pinball_loss_p50": 38.7186,
+              "pinball_loss_p90": 22.5712,
+              "mean_pinball_loss": 28.4202,
+              "coverage_p10_p90_pct": 79.7278,
+              "nominal_coverage_pct": 80.0,
+              "below_p10_pct": 9.5293,
+              "above_p90_pct": 10.7428,
+              "n_samples": 28512
+            }
+          },
+          {
+            "fold_idx": 2,
+            "origin_date": "2017-05-27",
+            "test_start_date": "2017-05-28",
+            "test_end_date": "2017-06-12",
+            "metrics": {
+              "pinball_loss_p10": 27.2969,
+              "pinball_loss_p50": 37.6511,
+              "pinball_loss_p90": 19.4978,
+              "mean_pinball_loss": 28.1486,
+              "coverage_p10_p90_pct": 83.6034,
+              "nominal_coverage_pct": 80.0,
+              "below_p10_pct": 8.5262,
+              "above_p90_pct": 7.8704,
+              "n_samples": 28512
+            }
+          },
+          {
+            "fold_idx": 3,
+            "origin_date": "2017-06-12",
+            "test_start_date": "2017-06-13",
+            "test_end_date": "2017-06-28",
+            "metrics": {
+              "pinball_loss_p10": 22.2048,
+              "pinball_loss_p50": 31.4495,
+              "pinball_loss_p90": 17.7357,
+              "mean_pinball_loss": 23.7967,
+              "coverage_p10_p90_pct": 82.5582,
+              "nominal_coverage_pct": 80.0,
+              "below_p10_pct": 9.3996,
+              "above_p90_pct": 8.0422,
+              "n_samples": 28512
+            }
+          },
+          {
+            "fold_idx": 4,
+            "origin_date": "2017-06-28",
+            "test_start_date": "2017-06-29",
+            "test_end_date": "2017-07-14",
+            "metrics": {
+              "pinball_loss_p10": 23.6596,
+              "pinball_loss_p50": 30.7643,
+              "pinball_loss_p90": 18.4904,
+              "mean_pinball_loss": 24.3048,
+              "coverage_p10_p90_pct": 85.8972,
+              "nominal_coverage_pct": 80.0,
+              "below_p10_pct": 6.6533,
+              "above_p90_pct": 7.4495,
+              "n_samples": 28512
+            }
+          },
+          {
+            "fold_idx": 5,
+            "origin_date": "2017-07-14",
+            "test_start_date": "2017-07-15",
+            "test_end_date": "2017-07-30",
+            "metrics": {
+              "pinball_loss_p10": 23.6706,
+              "pinball_loss_p50": 33.395,
+              "pinball_loss_p90": 20.2943,
+              "mean_pinball_loss": 25.7866,
+              "coverage_p10_p90_pct": 83.3859,
+              "nominal_coverage_pct": 80.0,
+              "below_p10_pct": 7.439,
+              "above_p90_pct": 9.1751,
+              "n_samples": 28512
+            }
+          }
+        ],
+        "mean_metrics": {
+          "mean_pinball_loss_p10": 24.1606,
+          "mean_pinball_loss_p50": 34.3957,
+          "mean_pinball_loss_p90": 19.7179,
+          "mean_pinball_loss": 26.0914,
+          "mean_coverage_p10_p90_pct": 83.0345,
+          "std_coverage_p10_p90_pct": 2.225,
+          "nominal_coverage_pct": 80.0
+        }
+      },
+      "holdout_confirmation": {
+        "pinball_loss_p10": 23.2126,
+        "pinball_loss_p50": 36.8516,
+        "pinball_loss_p90": 21.787,
+        "mean_pinball_loss": 27.2837,
+        "coverage_p10_p90_pct": 82.8914,
+        "nominal_coverage_pct": 80.0,
+        "below_p10_pct": 8.6385,
+        "above_p90_pct": 8.4701,
+        "n_samples": 28512,
+        "holdout_origin": "2017-07-30",
+        "test_start_date": "2017-07-31",
+        "test_end_date": "2017-08-15"
+      }
+    },
     "by_family": {
       "AUTOMOTIVE": {
         "lightgbm": {

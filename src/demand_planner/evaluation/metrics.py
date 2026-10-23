@@ -61,6 +61,35 @@ def calc_rmsle(y_true: np.ndarray | pd.Series, y_pred: np.ndarray | pd.Series) -
     return float(round(float(np.sqrt(np.mean((log_pred - log_actual) ** 2))), 4))
 
 
+def calc_pinball_loss(
+    y_true: np.ndarray | pd.Series, y_pred: np.ndarray | pd.Series, alpha: float
+) -> float:
+    """Calculate Pinball Loss (Quantile Loss) for quantile alpha in (0, 1).
+
+    L_alpha(y, y_hat) = mean(max(alpha * (y - y_hat), (alpha - 1.0) * (y - y_hat)))
+    """
+    if not (0.0 < alpha < 1.0):
+        raise ValueError(f"Quantile alpha must be strictly between 0 and 1, got {alpha}")
+    y = np.asarray(y_true, dtype=np.float64)
+    y_hat = np.asarray(y_pred, dtype=np.float64)
+    diff = y - y_hat
+    loss = np.maximum(alpha * diff, (alpha - 1.0) * diff)
+    return float(round(float(np.mean(loss)), 4))
+
+
+def calc_empirical_coverage(
+    y_true: np.ndarray | pd.Series,
+    y_lower: np.ndarray | pd.Series,
+    y_upper: np.ndarray | pd.Series,
+) -> float:
+    """Calculate empirical coverage percentage: fraction of y_true in [y_lower, y_upper] * 100."""
+    y = np.asarray(y_true, dtype=np.float64)
+    lower = np.asarray(y_lower, dtype=np.float64)
+    upper = np.asarray(y_upper, dtype=np.float64)
+    in_interval = (y >= lower) & (y <= upper)
+    return float(round(float(np.mean(in_interval) * 100.0), 4))
+
+
 def evaluate_predictions(
     df: pd.DataFrame,
     true_col: str = "sales",
