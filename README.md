@@ -130,9 +130,10 @@ pre-commit run --all-files
 
 ## 5. Known Limitations
 
-- **Sales $\ne$ True Demand (Censoring):** Point-of-sale data records fulfilled sales. When a store stocks out, recorded sales drop to zero regardless of true customer demand.
-- **Lack of Physical Inventory Balances:** The public dataset provides transactions and sales without live on-hand stock or lead-time variance; inventory safety stock must be parameterized via simulation.
+- **Favorita Inventory Data Absence & Demand Censoring:** Corporación Favorita has no inventory data, on-hand balances, or recorded lead times. Sales are used as a demand proxy and are censored by stockouts, so simulated fill rates are optimistic upper bounds; all replenishment simulation results are assumption-driven and parameter-contingent (with zero assumed holding or penalty costs).
+- **Sales $\ne$ True Demand (Censoring):** Point-of-sale data records fulfilled transactions. When a store stocks out, recorded sales drop to zero regardless of true customer demand.
 - **Observational Promotional Lift:** Promotional assignments are observational historical records, not randomized A/B experiments.
+
 
 ---
 

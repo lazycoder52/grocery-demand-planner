@@ -149,6 +149,67 @@ def _register_models_stage() -> None:
 _register_models_stage()
 
 
+def _register_simulation_stage() -> None:
+    import pandas as pd
+
+    from demand_planner.config import OUTPUTS
+    from demand_planner.data.audit import update_metrics_json
+    from demand_planner.simulation import (
+        PeriodicReviewSimulator,
+        SimConfig,
+        plot_replenishment_tradeoff,
+    )
+
+    def stage_simulation() -> None:
+        log.info("Starting replenishment simulation stage...")
+        cfg = SimConfig.from_yaml("config/sim_config.yaml")
+        oof_path = OUTPUTS / "oof_and_holdout_predictions.parquet"
+        if not oof_path.exists():
+            log.warning("Predictions file %s not found, skipping simulation stage", oof_path)
+            return
+
+        df_preds = pd.read_parquet(oof_path)
+        sim = PeriodicReviewSimulator(df_preds, config=cfg)
+        sim_df = sim.run_all_simulations()
+
+        tradeoff_chart = plot_replenishment_tradeoff(sim_df)
+        log.info("Saved replenishment trade-off chart to %s", tradeoff_chart)
+
+        records = sim_df.to_dict(orient="records")
+        sim_data = {
+            "simulation_window": {
+                "start_date": sim.dates[0].strftime("%Y-%m-%d"),
+                "end_date": sim.dates[-1].strftime("%Y-%m-%d"),
+                "total_days": sim.n_days,
+                "n_store_families": sim.n_series,
+            },
+            "parameters": {
+                "review_period_days": cfg.review_period_days,
+                "lead_times_days": list(cfg.lead_times_days),
+                "service_levels": list(cfg.service_levels),
+                "seed": cfg.seed,
+                "extrapolation_rule_l14": (
+                    "L=14 (R+L=21d) exceeds the 16-day model horizon; forecasts are "
+                    "extrapolated proportionally over the protection window."
+                ),
+                "data_limitations": (
+                    "Favorita has no inventory data; sales are a demand proxy and are "
+                    "censored by stockouts, so fill rates are optimistic; "
+                    "results are assumption-driven."
+                ),
+            },
+            "policies": records,
+        }
+
+        update_metrics_json(sim_data, section="replenishment_simulation")
+        log.info("Recorded %d replenishment policy simulations to metrics.json", len(records))
+
+    STAGES["simulation"] = stage_simulation
+
+
+_register_simulation_stage()
+
+
 def _register_reports_stage() -> None:
     from demand_planner.reports.charts import generate_all_charts
 
