@@ -414,3 +414,95 @@ def evaluate_quantile_holdout(
     metrics["by_family"] = by_family
 
     return metrics, test_df
+
+
+def generate_all_predictions(
+    sales_df: pd.DataFrame,
+    stores_df: pd.DataFrame | None = None,
+    holidays_df: pd.DataFrame | None = None,
+    start_train_date: str = "2015-01-01",
+    target_col: str = "sales",
+    exclude_preopening: bool = True,
+    n_folds: int = 5,
+    horizon_days: int = 16,
+    fold_step_days: int = 16,
+    holdout_days: int = 16,
+    params: dict[str, Any] | None = None,
+) -> pd.DataFrame:
+    """Generate out-of-fold and holdout predictions for point and quantile models."""
+    from demand_planner.evaluation.backtest import generate_rolling_folds
+    from demand_planner.evaluation.baselines import predict_seasonal_naive
+    from demand_planner.models.lightgbm import (
+        get_store_opening_dates,
+        predict_lightgbm,
+        train_lightgbm,
+    )
+
+    df_raw = sales_df.copy()
+    df_raw["date"] = pd.to_datetime(df_raw["date"])
+
+    df_feat, feature_names = build_features(
+        df_raw, stores_df=stores_df, holidays_df=holidays_df, target_col=target_col
+    )
+
+    cv_folds, holdout = generate_rolling_folds(
+        df_raw,
+        n_folds=n_folds,
+        horizon_days=horizon_days,
+        fold_step_days=fold_step_days,
+        holdout_days=holdout_days,
+    )
+
+    all_splits = [(f"fold_{f.fold_idx}", f.fold_idx, f) for f in cv_folds] + [
+        ("holdout", 0, holdout)
+    ]
+
+    start_date = pd.to_datetime(start_train_date)
+    opening_dates = (
+        get_store_opening_dates(df_raw, target_col=target_col) if exclude_preopening else None
+    )
+    is_open = df_feat["store_nbr"].map(opening_dates) if opening_dates else None
+
+    records = []
+    for split_name, fold_idx, split in all_splits:
+        if split_name == "holdout":
+            test_mask = df_feat["date"] > split.origin_date
+        else:
+            test_mask = (df_feat["date"] > split.origin_date) & (
+                df_feat["date"] <= split.origin_date + pd.Timedelta(days=horizon_days)
+            )
+
+        train_mask = (df_feat["date"] <= split.origin_date) & (df_feat["date"] >= start_date)
+        if is_open is not None:
+            train_mask = train_mask & (df_feat["date"] >= is_open)
+
+        X_train = df_feat.loc[train_mask, feature_names]
+        y_train = np.log1p(df_feat.loc[train_mask, target_col])
+        X_test = df_feat.loc[test_mask, feature_names]
+        test_sub = df_feat.loc[test_mask, ["date", "store_nbr", "family", target_col]].copy()
+
+        pt_mod = train_lightgbm(X_train, y_train, params=params)
+        test_sub["pred_lgbm"] = predict_lightgbm(pt_mod, X_test).astype(np.float32)
+
+        hist_raw = df_raw[df_raw["date"] <= split.origin_date]
+        test_sub = predict_seasonal_naive(
+            hist_raw, test_sub, target_col=target_col, pred_col="pred_snaive"
+        )
+        test_sub["pred_snaive"] = test_sub["pred_snaive"].astype(np.float32)
+
+        q_mods = train_lightgbm_quantiles(X_train, y_train, alphas=(0.1, 0.5, 0.9), params=params)
+        q_preds = predict_lightgbm_quantiles(q_mods, X_test)
+        test_sub["pred_p10"] = q_preds["p10"].astype(np.float32)
+        test_sub["pred_p50"] = q_preds["p50"].astype(np.float32)
+        test_sub["pred_p90"] = q_preds["p90"].astype(np.float32)
+
+        test_sub["split"] = split_name
+        test_sub["fold_idx"] = np.int8(fold_idx)
+        test_sub[target_col] = test_sub[target_col].astype(np.float32)
+        test_sub["store_nbr"] = test_sub["store_nbr"].astype(np.int16)
+        test_sub["family"] = test_sub["family"].astype("category")
+        test_sub["split"] = test_sub["split"].astype("category")
+
+        records.append(test_sub)
+
+    return pd.concat(records, ignore_index=True)

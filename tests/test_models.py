@@ -267,3 +267,53 @@ def test_get_store_opening_dates_and_preopening_exclusion():
     open_dates = get_store_opening_dates(df)
     assert open_dates[1] == pd.Timestamp("2017-01-02")
     assert open_dates[2] == pd.Timestamp("2017-01-04")
+
+
+def test_generate_all_predictions_and_oof_export(tiny_favorita_files: dict[str, Path]):
+    """Verify generate_all_predictions generates valid out-of-fold and holdout predictions."""
+    from demand_planner.models.quantile import generate_all_predictions
+
+    train_df = pd.read_csv(tiny_favorita_files["train"])
+    stores_df = pd.read_csv(tiny_favorita_files["stores"])
+    holidays_df = pd.read_csv(tiny_favorita_files["holidays"])
+
+    oof_df = generate_all_predictions(
+        train_df,
+        stores_df=stores_df,
+        holidays_df=holidays_df,
+        n_folds=2,
+        horizon_days=16,
+        fold_step_days=16,
+        holdout_days=16,
+        start_train_date="2016-01-01",
+        params={"n_estimators": 10, "min_child_samples": 5},
+    )
+
+    expected_cols = {
+        "date",
+        "store_nbr",
+        "family",
+        "sales",
+        "pred_lgbm",
+        "pred_snaive",
+        "pred_p10",
+        "pred_p50",
+        "pred_p90",
+        "split",
+        "fold_idx",
+    }
+    assert expected_cols.issubset(set(oof_df.columns))
+    assert (oof_df["pred_lgbm"] >= 0.0).all()
+    assert (oof_df["pred_p10"] <= oof_df["pred_p50"]).all()
+    assert (oof_df["pred_p50"] <= oof_df["pred_p90"]).all()
+    assert set(oof_df["split"].unique()) == {"fold_1", "fold_2", "holdout"}
+
+    # If the production file exists, verify CI constraints (< 5 MB)
+    prod_file = Path("outputs/oof_and_holdout_predictions.parquet")
+    if prod_file.exists():
+        size_mb = prod_file.stat().st_size / (1024 * 1024)
+        assert size_mb < 5.0, f"oof_and_holdout_predictions.parquet exceeds 5 MB: {size_mb:.2f} MB"
+        prod_df = pd.read_parquet(prod_file)
+        assert len(prod_df) == 171072
+        assert (prod_df["pred_p10"] <= prod_df["pred_p50"]).all()
+        assert (prod_df["pred_p50"] <= prod_df["pred_p90"]).all()
