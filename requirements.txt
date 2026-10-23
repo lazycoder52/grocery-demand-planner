@@ -1,0 +1,7 @@
+# Runtime dependencies for the Streamlit app (reads precomputed outputs only).
+numpy==2.5.0
+pandas==3.0.3
+pyarrow==26.0.0
+PyYAML==6.0.3
+plotly==7.1.0
+streamlit==1.66.1
