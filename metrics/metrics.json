@@ -2740,12 +2740,12 @@
         "is_sensitivity_extrapolation": false,
         "service_level": NaN,
         "z_value": 0.0,
-        "fill_rate_pct": 98.0,
-        "stockout_day_share_pct": 5.15,
-        "average_inventory_units": 3597680.73,
-        "inventory_turns": 85.46,
+        "fill_rate_pct": 96.74,
+        "stockout_day_share_pct": 6.9,
+        "average_inventory_units": 3689348.24,
+        "inventory_turns": 82.27,
         "inventory_turns_note": "Idealized metric under continuous fractional ordering without case packs, MOQs, or warehouse dispatch constraints.",
-        "total_sales_units": 69072302.25,
+        "total_sales_units": 68187203.0,
         "total_demand_units": 70483472.12,
         "simulation_days": 96,
         "evaluated_days": 82,
@@ -2759,12 +2759,31 @@
         "is_sensitivity_extrapolation": false,
         "service_level": NaN,
         "z_value": 0.0,
-        "fill_rate_pct": 98.16,
-        "stockout_day_share_pct": 6.21,
-        "average_inventory_units": 3555563.26,
-        "inventory_turns": 86.62,
+        "fill_rate_pct": 97.28,
+        "stockout_day_share_pct": 7.26,
+        "average_inventory_units": 3498242.62,
+        "inventory_turns": 87.24,
         "inventory_turns_note": "Idealized metric under continuous fractional ordering without case packs, MOQs, or warehouse dispatch constraints.",
-        "total_sales_units": 69187124.31,
+        "total_sales_units": 68564334.62,
+        "total_demand_units": 70483472.12,
+        "simulation_days": 96,
+        "evaluated_days": 82,
+        "warmup_days_excluded": 14,
+        "n_store_families": 1782
+      },
+      {
+        "policy": "lightgbm_point",
+        "policy_label": "LightGBM Point",
+        "lead_time_days": 3,
+        "is_sensitivity_extrapolation": false,
+        "service_level": NaN,
+        "z_value": 0.0,
+        "fill_rate_pct": 97.57,
+        "stockout_day_share_pct": 7.2,
+        "average_inventory_units": 3552571.13,
+        "inventory_turns": 86.17,
+        "inventory_turns_note": "Idealized metric under continuous fractional ordering without case packs, MOQs, or warehouse dispatch constraints.",
+        "total_sales_units": 68770998.5,
         "total_demand_units": 70483472.12,
         "simulation_days": 96,
         "evaluated_days": 82,
@@ -2778,12 +2797,12 @@
         "is_sensitivity_extrapolation": false,
         "service_level": 0.9,
         "z_value": 1.2815515655446004,
-        "fill_rate_pct": 99.17,
-        "stockout_day_share_pct": 2.24,
-        "average_inventory_units": 4163596.28,
-        "inventory_turns": 74.73,
+        "fill_rate_pct": 98.74,
+        "stockout_day_share_pct": 2.82,
+        "average_inventory_units": 4076709.37,
+        "inventory_turns": 75.99,
         "inventory_turns_note": "Idealized metric under continuous fractional ordering without case packs, MOQs, or warehouse dispatch constraints.",
-        "total_sales_units": 69900294.81,
+        "total_sales_units": 69593867.94,
         "total_demand_units": 70483472.12,
         "simulation_days": 96,
         "evaluated_days": 82,
@@ -2797,164 +2816,240 @@
         "is_sensitivity_extrapolation": false,
         "service_level": 0.95,
         "z_value": 1.6448536269514722,
-        "fill_rate_pct": 99.34,
-        "stockout_day_share_pct": 1.69,
-        "average_inventory_units": 4344749.94,
-        "inventory_turns": 71.73,
-        "inventory_turns_note": "Idealized metric under continuous fractional ordering without case packs, MOQs, or warehouse dispatch constraints.",
-        "total_sales_units": 70016681.31,
-        "total_demand_units": 70483472.12,
-        "simulation_days": 96,
-        "evaluated_days": 82,
-        "warmup_days_excluded": 14,
-        "n_store_families": 1782
-      },
-      {
-        "policy": "lightgbm_p50_safety_stock",
-        "policy_label": "LightGBM P50 + SS (98%)",
-        "lead_time_days": 3,
-        "is_sensitivity_extrapolation": false,
-        "service_level": 0.98,
-        "z_value": 2.0537489106318225,
-        "fill_rate_pct": 99.49,
-        "stockout_day_share_pct": 1.2,
-        "average_inventory_units": 4551067.18,
-        "inventory_turns": 68.59,
-        "inventory_turns_note": "Idealized metric under continuous fractional ordering without case packs, MOQs, or warehouse dispatch constraints.",
-        "total_sales_units": 70124013.06,
-        "total_demand_units": 70483472.12,
-        "simulation_days": 96,
-        "evaluated_days": 82,
-        "warmup_days_excluded": 14,
-        "n_store_families": 1782
-      },
-      {
-        "policy": "seasonal_naive_safety_stock",
-        "policy_label": "Seasonal Naive + SS (90%)",
-        "lead_time_days": 3,
-        "is_sensitivity_extrapolation": false,
-        "service_level": 0.9,
-        "z_value": 1.2815515655446004,
-        "fill_rate_pct": 99.46,
-        "stockout_day_share_pct": 1.23,
-        "average_inventory_units": 4463435.08,
-        "inventory_turns": 69.91,
-        "inventory_turns_note": "Idealized metric under continuous fractional ordering without case packs, MOQs, or warehouse dispatch constraints.",
-        "total_sales_units": 70101386.12,
-        "total_demand_units": 70483472.12,
-        "simulation_days": 96,
-        "evaluated_days": 82,
-        "warmup_days_excluded": 14,
-        "n_store_families": 1782
-      },
-      {
-        "policy": "seasonal_naive_safety_stock",
-        "policy_label": "Seasonal Naive + SS (95%)",
-        "lead_time_days": 3,
-        "is_sensitivity_extrapolation": false,
-        "service_level": 0.95,
-        "z_value": 1.6448536269514722,
-        "fill_rate_pct": 99.62,
-        "stockout_day_share_pct": 0.86,
-        "average_inventory_units": 4726794.75,
-        "inventory_turns": 66.12,
-        "inventory_turns_note": "Idealized metric under continuous fractional ordering without case packs, MOQs, or warehouse dispatch constraints.",
-        "total_sales_units": 70217015.94,
-        "total_demand_units": 70483472.12,
-        "simulation_days": 96,
-        "evaluated_days": 82,
-        "warmup_days_excluded": 14,
-        "n_store_families": 1782
-      },
-      {
-        "policy": "seasonal_naive_safety_stock",
-        "policy_label": "Seasonal Naive + SS (98%)",
-        "lead_time_days": 3,
-        "is_sensitivity_extrapolation": false,
-        "service_level": 0.98,
-        "z_value": 2.0537489106318225,
-        "fill_rate_pct": 99.74,
-        "stockout_day_share_pct": 0.59,
-        "average_inventory_units": 5028627.95,
-        "inventory_turns": 62.23,
-        "inventory_turns_note": "Idealized metric under continuous fractional ordering without case packs, MOQs, or warehouse dispatch constraints.",
-        "total_sales_units": 70300209.75,
-        "total_demand_units": 70483472.12,
-        "simulation_days": 96,
-        "evaluated_days": 82,
-        "warmup_days_excluded": 14,
-        "n_store_families": 1782
-      },
-      {
-        "policy": "summed_p90",
-        "policy_label": "Summed Daily P90 (Conservative Upper Bound)",
-        "lead_time_days": 3,
-        "is_sensitivity_extrapolation": false,
-        "service_level": NaN,
-        "z_value": 0.0,
-        "fill_rate_pct": 99.73,
-        "stockout_day_share_pct": 0.24,
-        "average_inventory_units": 5632327.88,
-        "inventory_turns": 55.55,
-        "inventory_turns_note": "Idealized metric under continuous fractional ordering without case packs, MOQs, or warehouse dispatch constraints.",
-        "total_sales_units": 70291699.31,
-        "total_demand_units": 70483472.12,
-        "simulation_days": 96,
-        "evaluated_days": 82,
-        "warmup_days_excluded": 14,
-        "n_store_families": 1782
-      },
-      {
-        "policy": "seasonal_naive",
-        "policy_label": "Seasonal Naive (7-Day)",
-        "lead_time_days": 7,
-        "is_sensitivity_extrapolation": false,
-        "service_level": NaN,
-        "z_value": 0.0,
-        "fill_rate_pct": 97.26,
-        "stockout_day_share_pct": 6.86,
-        "average_inventory_units": 3222212.56,
-        "inventory_turns": 94.7,
-        "inventory_turns_note": "Idealized metric under continuous fractional ordering without case packs, MOQs, or warehouse dispatch constraints.",
-        "total_sales_units": 68551638.94,
-        "total_demand_units": 70483472.12,
-        "simulation_days": 96,
-        "evaluated_days": 82,
-        "warmup_days_excluded": 14,
-        "n_store_families": 1782
-      },
-      {
-        "policy": "lightgbm_p50",
-        "policy_label": "LightGBM P50",
-        "lead_time_days": 7,
-        "is_sensitivity_extrapolation": false,
-        "service_level": NaN,
-        "z_value": 0.0,
-        "fill_rate_pct": 97.73,
-        "stockout_day_share_pct": 8.12,
-        "average_inventory_units": 3268363.97,
-        "inventory_turns": 93.81,
-        "inventory_turns_note": "Idealized metric under continuous fractional ordering without case packs, MOQs, or warehouse dispatch constraints.",
-        "total_sales_units": 68881840.69,
-        "total_demand_units": 70483472.12,
-        "simulation_days": 96,
-        "evaluated_days": 82,
-        "warmup_days_excluded": 14,
-        "n_store_families": 1782
-      },
-      {
-        "policy": "lightgbm_p50_safety_stock",
-        "policy_label": "LightGBM P50 + SS (90%)",
-        "lead_time_days": 7,
-        "is_sensitivity_extrapolation": false,
-        "service_level": 0.9,
-        "z_value": 1.2815515655446004,
         "fill_rate_pct": 98.99,
-        "stockout_day_share_pct": 3.05,
-        "average_inventory_units": 3978861.68,
-        "inventory_turns": 78.05,
+        "stockout_day_share_pct": 2.15,
+        "average_inventory_units": 4252397.35,
+        "inventory_turns": 73.03,
         "inventory_turns_note": "Idealized metric under continuous fractional ordering without case packs, MOQs, or warehouse dispatch constraints.",
-        "total_sales_units": 69768981.88,
+        "total_sales_units": 69769109.5,
+        "total_demand_units": 70483472.12,
+        "simulation_days": 96,
+        "evaluated_days": 82,
+        "warmup_days_excluded": 14,
+        "n_store_families": 1782
+      },
+      {
+        "policy": "lightgbm_p50_safety_stock",
+        "policy_label": "LightGBM P50 + SS (98%)",
+        "lead_time_days": 3,
+        "is_sensitivity_extrapolation": false,
+        "service_level": 0.98,
+        "z_value": 2.0537489106318225,
+        "fill_rate_pct": 99.21,
+        "stockout_day_share_pct": 1.55,
+        "average_inventory_units": 4454236.68,
+        "inventory_turns": 69.88,
+        "inventory_turns_note": "Idealized metric under continuous fractional ordering without case packs, MOQs, or warehouse dispatch constraints.",
+        "total_sales_units": 69927016.81,
+        "total_demand_units": 70483472.12,
+        "simulation_days": 96,
+        "evaluated_days": 82,
+        "warmup_days_excluded": 14,
+        "n_store_families": 1782
+      },
+      {
+        "policy": "lightgbm_point_safety_stock",
+        "policy_label": "LightGBM Point + SS (90%)",
+        "lead_time_days": 3,
+        "is_sensitivity_extrapolation": false,
+        "service_level": 0.9,
+        "z_value": 1.2815515655446004,
+        "fill_rate_pct": 98.92,
+        "stockout_day_share_pct": 2.68,
+        "average_inventory_units": 4139244.81,
+        "inventory_turns": 74.98,
+        "inventory_turns_note": "Idealized metric under continuous fractional ordering without case packs, MOQs, or warehouse dispatch constraints.",
+        "total_sales_units": 69722561.06,
+        "total_demand_units": 70483472.12,
+        "simulation_days": 96,
+        "evaluated_days": 82,
+        "warmup_days_excluded": 14,
+        "n_store_families": 1782
+      },
+      {
+        "policy": "lightgbm_point_safety_stock",
+        "policy_label": "LightGBM Point + SS (95%)",
+        "lead_time_days": 3,
+        "is_sensitivity_extrapolation": false,
+        "service_level": 0.95,
+        "z_value": 1.6448536269514722,
+        "fill_rate_pct": 99.12,
+        "stockout_day_share_pct": 1.98,
+        "average_inventory_units": 4318207.25,
+        "inventory_turns": 72.02,
+        "inventory_turns_note": "Idealized metric under continuous fractional ordering without case packs, MOQs, or warehouse dispatch constraints.",
+        "total_sales_units": 69865135.81,
+        "total_demand_units": 70483472.12,
+        "simulation_days": 96,
+        "evaluated_days": 82,
+        "warmup_days_excluded": 14,
+        "n_store_families": 1782
+      },
+      {
+        "policy": "lightgbm_point_safety_stock",
+        "policy_label": "LightGBM Point + SS (98%)",
+        "lead_time_days": 3,
+        "is_sensitivity_extrapolation": false,
+        "service_level": 0.98,
+        "z_value": 2.0537489106318225,
+        "fill_rate_pct": 99.3,
+        "stockout_day_share_pct": 1.44,
+        "average_inventory_units": 4522945.79,
+        "inventory_turns": 68.88,
+        "inventory_turns_note": "Idealized metric under continuous fractional ordering without case packs, MOQs, or warehouse dispatch constraints.",
+        "total_sales_units": 69992111.69,
+        "total_demand_units": 70483472.12,
+        "simulation_days": 96,
+        "evaluated_days": 82,
+        "warmup_days_excluded": 14,
+        "n_store_families": 1782
+      },
+      {
+        "policy": "seasonal_naive_safety_stock",
+        "policy_label": "Seasonal Naive + SS (90%)",
+        "lead_time_days": 3,
+        "is_sensitivity_extrapolation": false,
+        "service_level": 0.9,
+        "z_value": 1.2815515655446004,
+        "fill_rate_pct": 98.82,
+        "stockout_day_share_pct": 2.25,
+        "average_inventory_units": 4515101.62,
+        "inventory_turns": 68.66,
+        "inventory_turns_note": "Idealized metric under continuous fractional ordering without case packs, MOQs, or warehouse dispatch constraints.",
+        "total_sales_units": 69649652.25,
+        "total_demand_units": 70483472.12,
+        "simulation_days": 96,
+        "evaluated_days": 82,
+        "warmup_days_excluded": 14,
+        "n_store_families": 1782
+      },
+      {
+        "policy": "seasonal_naive_safety_stock",
+        "policy_label": "Seasonal Naive + SS (95%)",
+        "lead_time_days": 3,
+        "is_sensitivity_extrapolation": false,
+        "service_level": 0.95,
+        "z_value": 1.6448536269514722,
+        "fill_rate_pct": 99.1,
+        "stockout_day_share_pct": 1.64,
+        "average_inventory_units": 4771248.74,
+        "inventory_turns": 65.16,
+        "inventory_turns_note": "Idealized metric under continuous fractional ordering without case packs, MOQs, or warehouse dispatch constraints.",
+        "total_sales_units": 69846709.44,
+        "total_demand_units": 70483472.12,
+        "simulation_days": 96,
+        "evaluated_days": 82,
+        "warmup_days_excluded": 14,
+        "n_store_families": 1782
+      },
+      {
+        "policy": "seasonal_naive_safety_stock",
+        "policy_label": "Seasonal Naive + SS (98%)",
+        "lead_time_days": 3,
+        "is_sensitivity_extrapolation": false,
+        "service_level": 0.98,
+        "z_value": 2.0537489106318225,
+        "fill_rate_pct": 99.33,
+        "stockout_day_share_pct": 1.19,
+        "average_inventory_units": 5065499.91,
+        "inventory_turns": 61.52,
+        "inventory_turns_note": "Idealized metric under continuous fractional ordering without case packs, MOQs, or warehouse dispatch constraints.",
+        "total_sales_units": 70011750.88,
+        "total_demand_units": 70483472.12,
+        "simulation_days": 96,
+        "evaluated_days": 82,
+        "warmup_days_excluded": 14,
+        "n_store_families": 1782
+      },
+      {
+        "policy": "summed_p90",
+        "policy_label": "Summed Daily P90 (Conservative Upper Bound)",
+        "lead_time_days": 3,
+        "is_sensitivity_extrapolation": false,
+        "service_level": NaN,
+        "z_value": 0.0,
+        "fill_rate_pct": 99.5,
+        "stockout_day_share_pct": 0.38,
+        "average_inventory_units": 5439014.45,
+        "inventory_turns": 57.4,
+        "inventory_turns_note": "Idealized metric under continuous fractional ordering without case packs, MOQs, or warehouse dispatch constraints.",
+        "total_sales_units": 70132724.62,
+        "total_demand_units": 70483472.12,
+        "simulation_days": 96,
+        "evaluated_days": 82,
+        "warmup_days_excluded": 14,
+        "n_store_families": 1782
+      },
+      {
+        "policy": "seasonal_naive",
+        "policy_label": "Seasonal Naive (7-Day)",
+        "lead_time_days": 7,
+        "is_sensitivity_extrapolation": false,
+        "service_level": NaN,
+        "z_value": 0.0,
+        "fill_rate_pct": 96.3,
+        "stockout_day_share_pct": 8.19,
+        "average_inventory_units": 3792635.86,
+        "inventory_turns": 79.67,
+        "inventory_turns_note": "Idealized metric under continuous fractional ordering without case packs, MOQs, or warehouse dispatch constraints.",
+        "total_sales_units": 67878233.47,
+        "total_demand_units": 70483472.12,
+        "simulation_days": 96,
+        "evaluated_days": 82,
+        "warmup_days_excluded": 14,
+        "n_store_families": 1782
+      },
+      {
+        "policy": "lightgbm_p50",
+        "policy_label": "LightGBM P50",
+        "lead_time_days": 7,
+        "is_sensitivity_extrapolation": false,
+        "service_level": NaN,
+        "z_value": 0.0,
+        "fill_rate_pct": 97.2,
+        "stockout_day_share_pct": 8.52,
+        "average_inventory_units": 3484863.12,
+        "inventory_turns": 87.51,
+        "inventory_turns_note": "Idealized metric under continuous fractional ordering without case packs, MOQs, or warehouse dispatch constraints.",
+        "total_sales_units": 68508585.88,
+        "total_demand_units": 70483472.12,
+        "simulation_days": 96,
+        "evaluated_days": 82,
+        "warmup_days_excluded": 14,
+        "n_store_families": 1782
+      },
+      {
+        "policy": "lightgbm_point",
+        "policy_label": "LightGBM Point",
+        "lead_time_days": 7,
+        "is_sensitivity_extrapolation": false,
+        "service_level": NaN,
+        "z_value": 0.0,
+        "fill_rate_pct": 97.39,
+        "stockout_day_share_pct": 8.89,
+        "average_inventory_units": 3557097.84,
+        "inventory_turns": 85.9,
+        "inventory_turns_note": "Idealized metric under continuous fractional ordering without case packs, MOQs, or warehouse dispatch constraints.",
+        "total_sales_units": 68644345.66,
+        "total_demand_units": 70483472.12,
+        "simulation_days": 96,
+        "evaluated_days": 82,
+        "warmup_days_excluded": 14,
+        "n_store_families": 1782
+      },
+      {
+        "policy": "lightgbm_p50_safety_stock",
+        "policy_label": "LightGBM P50 + SS (90%)",
+        "lead_time_days": 7,
+        "is_sensitivity_extrapolation": false,
+        "service_level": 0.9,
+        "z_value": 1.2815515655446004,
+        "fill_rate_pct": 98.65,
+        "stockout_day_share_pct": 3.55,
+        "average_inventory_units": 4179522.93,
+        "inventory_turns": 74.05,
+        "inventory_turns_note": "Idealized metric under continuous fractional ordering without case packs, MOQs, or warehouse dispatch constraints.",
+        "total_sales_units": 69534705.62,
         "total_demand_units": 70483472.12,
         "simulation_days": 96,
         "evaluated_days": 82,
@@ -2968,12 +3063,12 @@
         "is_sensitivity_extrapolation": false,
         "service_level": 0.95,
         "z_value": 1.6448536269514722,
-        "fill_rate_pct": 99.2,
-        "stockout_day_share_pct": 2.26,
-        "average_inventory_units": 4192821.19,
-        "inventory_turns": 74.23,
+        "fill_rate_pct": 98.9,
+        "stockout_day_share_pct": 2.73,
+        "average_inventory_units": 4390896.58,
+        "inventory_turns": 70.66,
         "inventory_turns_note": "Idealized metric under continuous fractional ordering without case packs, MOQs, or warehouse dispatch constraints.",
-        "total_sales_units": 69916220.38,
+        "total_sales_units": 69705015.56,
         "total_demand_units": 70483472.12,
         "simulation_days": 96,
         "evaluated_days": 82,
@@ -2987,12 +3082,69 @@
         "is_sensitivity_extrapolation": false,
         "service_level": 0.98,
         "z_value": 2.0537489106318225,
-        "fill_rate_pct": 99.36,
-        "stockout_day_share_pct": 1.63,
-        "average_inventory_units": 4438550.28,
-        "inventory_turns": 70.24,
+        "fill_rate_pct": 99.11,
+        "stockout_day_share_pct": 2.02,
+        "average_inventory_units": 4633807.56,
+        "inventory_turns": 67.1,
         "inventory_turns_note": "Idealized metric under continuous fractional ordering without case packs, MOQs, or warehouse dispatch constraints.",
-        "total_sales_units": 70035364.44,
+        "total_sales_units": 69852895.62,
+        "total_demand_units": 70483472.12,
+        "simulation_days": 96,
+        "evaluated_days": 82,
+        "warmup_days_excluded": 14,
+        "n_store_families": 1782
+      },
+      {
+        "policy": "lightgbm_point_safety_stock",
+        "policy_label": "LightGBM Point + SS (90%)",
+        "lead_time_days": 7,
+        "is_sensitivity_extrapolation": false,
+        "service_level": 0.9,
+        "z_value": 1.2815515655446004,
+        "fill_rate_pct": 98.73,
+        "stockout_day_share_pct": 3.56,
+        "average_inventory_units": 4264473.22,
+        "inventory_turns": 72.64,
+        "inventory_turns_note": "Idealized metric under continuous fractional ordering without case packs, MOQs, or warehouse dispatch constraints.",
+        "total_sales_units": 69590579.19,
+        "total_demand_units": 70483472.12,
+        "simulation_days": 96,
+        "evaluated_days": 82,
+        "warmup_days_excluded": 14,
+        "n_store_families": 1782
+      },
+      {
+        "policy": "lightgbm_point_safety_stock",
+        "policy_label": "LightGBM Point + SS (95%)",
+        "lead_time_days": 7,
+        "is_sensitivity_extrapolation": false,
+        "service_level": 0.95,
+        "z_value": 1.6448536269514722,
+        "fill_rate_pct": 98.96,
+        "stockout_day_share_pct": 2.73,
+        "average_inventory_units": 4477885.31,
+        "inventory_turns": 69.33,
+        "inventory_turns_note": "Idealized metric under continuous fractional ordering without case packs, MOQs, or warehouse dispatch constraints.",
+        "total_sales_units": 69747282.62,
+        "total_demand_units": 70483472.12,
+        "simulation_days": 96,
+        "evaluated_days": 82,
+        "warmup_days_excluded": 14,
+        "n_store_families": 1782
+      },
+      {
+        "policy": "lightgbm_point_safety_stock",
+        "policy_label": "LightGBM Point + SS (98%)",
+        "lead_time_days": 7,
+        "is_sensitivity_extrapolation": false,
+        "service_level": 0.98,
+        "z_value": 2.0537489106318225,
+        "fill_rate_pct": 99.14,
+        "stockout_day_share_pct": 1.98,
+        "average_inventory_units": 4723641.27,
+        "inventory_turns": 65.85,
+        "inventory_turns_note": "Idealized metric under continuous fractional ordering without case packs, MOQs, or warehouse dispatch constraints.",
+        "total_sales_units": 69877292.19,
         "total_demand_units": 70483472.12,
         "simulation_days": 96,
         "evaluated_days": 82,
@@ -3006,12 +3158,12 @@
         "is_sensitivity_extrapolation": false,
         "service_level": 0.9,
         "z_value": 1.2815515655446004,
-        "fill_rate_pct": 99.24,
-        "stockout_day_share_pct": 1.64,
-        "average_inventory_units": 4236197.21,
-        "inventory_turns": 73.49,
+        "fill_rate_pct": 98.48,
+        "stockout_day_share_pct": 3.02,
+        "average_inventory_units": 4786291.58,
+        "inventory_turns": 64.55,
         "inventory_turns_note": "Idealized metric under continuous fractional ordering without case packs, MOQs, or warehouse dispatch constraints.",
-        "total_sales_units": 69944528.38,
+        "total_sales_units": 69410636.94,
         "total_demand_units": 70483472.12,
         "simulation_days": 96,
         "evaluated_days": 82,
@@ -3025,12 +3177,12 @@
         "is_sensitivity_extrapolation": false,
         "service_level": 0.95,
         "z_value": 1.6448536269514722,
-        "fill_rate_pct": 99.45,
-        "stockout_day_share_pct": 1.09,
-        "average_inventory_units": 4550879.33,
-        "inventory_turns": 68.56,
+        "fill_rate_pct": 98.81,
+        "stockout_day_share_pct": 2.27,
+        "average_inventory_units": 5091975.08,
+        "inventory_turns": 60.88,
         "inventory_turns_note": "Idealized metric under continuous fractional ordering without case packs, MOQs, or warehouse dispatch constraints.",
-        "total_sales_units": 70098839.38,
+        "total_sales_units": 69646676.56,
         "total_demand_units": 70483472.12,
         "simulation_days": 96,
         "evaluated_days": 82,
@@ -3044,12 +3196,12 @@
         "is_sensitivity_extrapolation": false,
         "service_level": 0.98,
         "z_value": 2.0537489106318225,
-        "fill_rate_pct": 99.62,
-        "stockout_day_share_pct": 0.72,
-        "average_inventory_units": 4911643.16,
-        "inventory_turns": 63.63,
+        "fill_rate_pct": 99.09,
+        "stockout_day_share_pct": 1.68,
+        "average_inventory_units": 5444585.9,
+        "inventory_turns": 57.1,
         "inventory_turns_note": "Idealized metric under continuous fractional ordering without case packs, MOQs, or warehouse dispatch constraints.",
-        "total_sales_units": 70213290.69,
+        "total_sales_units": 69841687.88,
         "total_demand_units": 70483472.12,
         "simulation_days": 96,
         "evaluated_days": 82,
@@ -3063,12 +3215,12 @@
         "is_sensitivity_extrapolation": false,
         "service_level": NaN,
         "z_value": 0.0,
-        "fill_rate_pct": 99.67,
-        "stockout_day_share_pct": 0.26,
-        "average_inventory_units": 5987306.64,
-        "inventory_turns": 52.23,
+        "fill_rate_pct": 99.44,
+        "stockout_day_share_pct": 0.45,
+        "average_inventory_units": 6149043.81,
+        "inventory_turns": 50.73,
         "inventory_turns_note": "Idealized metric under continuous fractional ordering without case packs, MOQs, or warehouse dispatch constraints.",
-        "total_sales_units": 70249825.69,
+        "total_sales_units": 70086013.94,
         "total_demand_units": 70483472.12,
         "simulation_days": 96,
         "evaluated_days": 82,
@@ -3082,12 +3234,12 @@
         "is_sensitivity_extrapolation": true,
         "service_level": NaN,
         "z_value": 0.0,
-        "fill_rate_pct": 97.05,
-        "stockout_day_share_pct": 7.48,
-        "average_inventory_units": 3243143.44,
-        "inventory_turns": 93.88,
+        "fill_rate_pct": 94.72,
+        "stockout_day_share_pct": 9.23,
+        "average_inventory_units": 4284575.58,
+        "inventory_turns": 69.36,
         "inventory_turns_note": "Idealized metric under continuous fractional ordering without case packs, MOQs, or warehouse dispatch constraints.",
-        "total_sales_units": 68403147.88,
+        "total_sales_units": 66761379.7,
         "total_demand_units": 70483472.12,
         "simulation_days": 96,
         "evaluated_days": 82,
@@ -3101,12 +3253,31 @@
         "is_sensitivity_extrapolation": true,
         "service_level": NaN,
         "z_value": 0.0,
-        "fill_rate_pct": 96.77,
-        "stockout_day_share_pct": 9.48,
-        "average_inventory_units": 3349345.49,
-        "inventory_turns": 90.64,
+        "fill_rate_pct": 94.83,
+        "stockout_day_share_pct": 10.31,
+        "average_inventory_units": 3810981.8,
+        "inventory_turns": 78.07,
         "inventory_turns_note": "Idealized metric under continuous fractional ordering without case packs, MOQs, or warehouse dispatch constraints.",
-        "total_sales_units": 68206317.28,
+        "total_sales_units": 66840443.09,
+        "total_demand_units": 70483472.12,
+        "simulation_days": 96,
+        "evaluated_days": 82,
+        "warmup_days_excluded": 14,
+        "n_store_families": 1782
+      },
+      {
+        "policy": "lightgbm_point",
+        "policy_label": "LightGBM Point",
+        "lead_time_days": 14,
+        "is_sensitivity_extrapolation": true,
+        "service_level": NaN,
+        "z_value": 0.0,
+        "fill_rate_pct": 95.28,
+        "stockout_day_share_pct": 10.7,
+        "average_inventory_units": 3914106.37,
+        "inventory_turns": 76.38,
+        "inventory_turns_note": "Idealized metric under continuous fractional ordering without case packs, MOQs, or warehouse dispatch constraints.",
+        "total_sales_units": 67159106.91,
         "total_demand_units": 70483472.12,
         "simulation_days": 96,
         "evaluated_days": 82,
@@ -3120,12 +3291,12 @@
         "is_sensitivity_extrapolation": true,
         "service_level": 0.9,
         "z_value": 1.2815515655446004,
-        "fill_rate_pct": 98.49,
-        "stockout_day_share_pct": 4.16,
-        "average_inventory_units": 4145417.54,
-        "inventory_turns": 74.54,
+        "fill_rate_pct": 96.94,
+        "stockout_day_share_pct": 5.3,
+        "average_inventory_units": 4546607.99,
+        "inventory_turns": 66.89,
         "inventory_turns_note": "Idealized metric under continuous fractional ordering without case packs, MOQs, or warehouse dispatch constraints.",
-        "total_sales_units": 69417586.12,
+        "total_sales_units": 68324700.42,
         "total_demand_units": 70483472.12,
         "simulation_days": 96,
         "evaluated_days": 82,
@@ -3139,12 +3310,12 @@
         "is_sensitivity_extrapolation": true,
         "service_level": 0.95,
         "z_value": 1.6448536269514722,
-        "fill_rate_pct": 98.77,
-        "stockout_day_share_pct": 3.2,
-        "average_inventory_units": 4397658.68,
-        "inventory_turns": 70.47,
+        "fill_rate_pct": 97.37,
+        "stockout_day_share_pct": 4.32,
+        "average_inventory_units": 4778949.67,
+        "inventory_turns": 63.92,
         "inventory_turns_note": "Idealized metric under continuous fractional ordering without case packs, MOQs, or warehouse dispatch constraints.",
-        "total_sales_units": 69618144.62,
+        "total_sales_units": 68629889.35,
         "total_demand_units": 70483472.12,
         "simulation_days": 96,
         "evaluated_days": 82,
@@ -3158,12 +3329,69 @@
         "is_sensitivity_extrapolation": true,
         "service_level": 0.98,
         "z_value": 2.0537489106318225,
-        "fill_rate_pct": 99.03,
-        "stockout_day_share_pct": 2.39,
-        "average_inventory_units": 4690802.18,
-        "inventory_turns": 66.24,
+        "fill_rate_pct": 97.78,
+        "stockout_day_share_pct": 3.45,
+        "average_inventory_units": 5051836.2,
+        "inventory_turns": 60.73,
         "inventory_turns_note": "Idealized metric under continuous fractional ordering without case packs, MOQs, or warehouse dispatch constraints.",
-        "total_sales_units": 69800099.94,
+        "total_sales_units": 68918867.77,
+        "total_demand_units": 70483472.12,
+        "simulation_days": 96,
+        "evaluated_days": 82,
+        "warmup_days_excluded": 14,
+        "n_store_families": 1782
+      },
+      {
+        "policy": "lightgbm_point_safety_stock",
+        "policy_label": "LightGBM Point + SS (90%)",
+        "lead_time_days": 14,
+        "is_sensitivity_extrapolation": true,
+        "service_level": 0.9,
+        "z_value": 1.2815515655446004,
+        "fill_rate_pct": 97.15,
+        "stockout_day_share_pct": 5.3,
+        "average_inventory_units": 4681797.7,
+        "inventory_turns": 65.1,
+        "inventory_turns_note": "Idealized metric under continuous fractional ordering without case packs, MOQs, or warehouse dispatch constraints.",
+        "total_sales_units": 68475741.46,
+        "total_demand_units": 70483472.12,
+        "simulation_days": 96,
+        "evaluated_days": 82,
+        "warmup_days_excluded": 14,
+        "n_store_families": 1782
+      },
+      {
+        "policy": "lightgbm_point_safety_stock",
+        "policy_label": "LightGBM Point + SS (95%)",
+        "lead_time_days": 14,
+        "is_sensitivity_extrapolation": true,
+        "service_level": 0.95,
+        "z_value": 1.6448536269514722,
+        "fill_rate_pct": 97.53,
+        "stockout_day_share_pct": 4.31,
+        "average_inventory_units": 4921307.84,
+        "inventory_turns": 62.18,
+        "inventory_turns_note": "Idealized metric under continuous fractional ordering without case packs, MOQs, or warehouse dispatch constraints.",
+        "total_sales_units": 68743302.48,
+        "total_demand_units": 70483472.12,
+        "simulation_days": 96,
+        "evaluated_days": 82,
+        "warmup_days_excluded": 14,
+        "n_store_families": 1782
+      },
+      {
+        "policy": "lightgbm_point_safety_stock",
+        "policy_label": "LightGBM Point + SS (98%)",
+        "lead_time_days": 14,
+        "is_sensitivity_extrapolation": true,
+        "service_level": 0.98,
+        "z_value": 2.0537489106318225,
+        "fill_rate_pct": 97.89,
+        "stockout_day_share_pct": 3.4,
+        "average_inventory_units": 5200068.05,
+        "inventory_turns": 59.06,
+        "inventory_turns_note": "Idealized metric under continuous fractional ordering without case packs, MOQs, or warehouse dispatch constraints.",
+        "total_sales_units": 68998373.96,
         "total_demand_units": 70483472.12,
         "simulation_days": 96,
         "evaluated_days": 82,
@@ -3177,12 +3405,12 @@
         "is_sensitivity_extrapolation": true,
         "service_level": 0.9,
         "z_value": 1.2815515655446004,
-        "fill_rate_pct": 99.29,
-        "stockout_day_share_pct": 1.87,
-        "average_inventory_units": 4419373.97,
-        "inventory_turns": 70.48,
+        "fill_rate_pct": 97.07,
+        "stockout_day_share_pct": 4.18,
+        "average_inventory_units": 5430286.44,
+        "inventory_turns": 56.08,
         "inventory_turns_note": "Idealized metric under continuous fractional ordering without case packs, MOQs, or warehouse dispatch constraints.",
-        "total_sales_units": 69980426.5,
+        "total_sales_units": 68420069.54,
         "total_demand_units": 70483472.12,
         "simulation_days": 96,
         "evaluated_days": 82,
@@ -3196,12 +3424,12 @@
         "is_sensitivity_extrapolation": true,
         "service_level": 0.95,
         "z_value": 1.6448536269514722,
-        "fill_rate_pct": 99.5,
-        "stockout_day_share_pct": 1.28,
-        "average_inventory_units": 4807901.2,
-        "inventory_turns": 64.93,
+        "fill_rate_pct": 97.51,
+        "stockout_day_share_pct": 3.34,
+        "average_inventory_units": 5789828.1,
+        "inventory_turns": 52.84,
         "inventory_turns_note": "Idealized metric under continuous fractional ordering without case packs, MOQs, or warehouse dispatch constraints.",
-        "total_sales_units": 70133046.94,
+        "total_sales_units": 68730351.55,
         "total_demand_units": 70483472.12,
         "simulation_days": 96,
         "evaluated_days": 82,
@@ -3215,12 +3443,12 @@
         "is_sensitivity_extrapolation": true,
         "service_level": 0.98,
         "z_value": 2.0537489106318225,
-        "fill_rate_pct": 99.64,
-        "stockout_day_share_pct": 0.88,
-        "average_inventory_units": 5258601.18,
-        "inventory_turns": 59.45,
+        "fill_rate_pct": 97.94,
+        "stockout_day_share_pct": 2.63,
+        "average_inventory_units": 6206012.73,
+        "inventory_turns": 49.51,
         "inventory_turns_note": "Idealized metric under continuous fractional ordering without case packs, MOQs, or warehouse dispatch constraints.",
-        "total_sales_units": 70231684.44,
+        "total_sales_units": 69030339.32,
         "total_demand_units": 70483472.12,
         "simulation_days": 96,
         "evaluated_days": 82,
@@ -3234,12 +3462,12 @@
         "is_sensitivity_extrapolation": true,
         "service_level": NaN,
         "z_value": 0.0,
-        "fill_rate_pct": 99.61,
-        "stockout_day_share_pct": 0.32,
-        "average_inventory_units": 7299239.13,
-        "inventory_turns": 42.81,
+        "fill_rate_pct": 98.85,
+        "stockout_day_share_pct": 0.72,
+        "average_inventory_units": 7545388.45,
+        "inventory_turns": 41.1,
         "inventory_turns_note": "Idealized metric under continuous fractional ordering without case packs, MOQs, or warehouse dispatch constraints.",
-        "total_sales_units": 70208356.0,
+        "total_sales_units": 69673667.1,
         "total_demand_units": 70483472.12,
         "simulation_days": 96,
         "evaluated_days": 82,
@@ -3250,279 +3478,2269 @@
     "target_fill_rate_tradeoffs": [
       {
         "lead_time_days": 3,
+        "comparison": "LightGBM P50 vs Seasonal Naive",
+        "forecaster": "LightGBM P50",
         "target_fill_rate_pct": 98.5,
-        "required_inventory_lightgbm": 3704149.2843478243,
-        "required_inventory_snaive": 3788840.129999997,
-        "pct_difference": -2.24,
-        "ci_95_pct_diff_low": -4.13,
-        "ci_95_pct_diff_high": 0.14,
-        "is_within_noise": true,
-        "interpretation": "Difference is within statistical noise (95% CI spans 0)"
+        "is_reachable": true,
+        "required_inventory_lightgbm": 3943248.82,
+        "required_inventory_snaive": 4312765.61,
+        "pct_difference": -8.57,
+        "ci_95_series_pct_diff_low": -10.63,
+        "ci_95_series_pct_diff_high": -6.67,
+        "ci_95_time_block_pct_diff_low": -13.28,
+        "ci_95_time_block_pct_diff_high": -1.38,
+        "is_within_noise_series": false,
+        "is_within_noise_time_block": false,
+        "interpretation": "LightGBM P50 vs S.Naive at 98.5% FR: -8.57% inventory (Series 95% CI: [-10.63%, -6.67%], Time-Block 95% CI: [-13.28%, -1.38%])"
       },
       {
         "lead_time_days": 3,
+        "comparison": "LightGBM P50 vs Seasonal Naive",
+        "forecaster": "LightGBM P50",
         "target_fill_rate_pct": 99.0,
-        "required_inventory_lightgbm": 4010772.731764709,
-        "required_inventory_snaive": 4058536.2803703714,
-        "pct_difference": -1.18,
-        "ci_95_pct_diff_low": -3.97,
-        "ci_95_pct_diff_high": 1.24,
-        "is_within_noise": true,
-        "interpretation": "Difference is within statistical noise (95% CI spans 0)"
+        "is_reachable": true,
+        "required_inventory_lightgbm": 4261028.3,
+        "required_inventory_snaive": 4668221.1,
+        "pct_difference": -8.72,
+        "ci_95_series_pct_diff_low": -10.61,
+        "ci_95_series_pct_diff_high": -6.65,
+        "ci_95_time_block_pct_diff_low": -13.12,
+        "ci_95_time_block_pct_diff_high": -3.03,
+        "is_within_noise_series": false,
+        "is_within_noise_time_block": false,
+        "interpretation": "LightGBM P50 vs S.Naive at 99.0% FR: -8.72% inventory (Series 95% CI: [-10.61%, -6.65%], Time-Block 95% CI: [-13.12%, -3.03%])"
       },
       {
         "lead_time_days": 3,
+        "comparison": "LightGBM P50 vs Seasonal Naive",
+        "forecaster": "LightGBM P50",
         "target_fill_rate_pct": 99.5,
-        "required_inventory_lightgbm": 4571271.286000006,
-        "required_inventory_snaive": 4520957.222727282,
-        "pct_difference": 1.11,
-        "ci_95_pct_diff_low": -2.6,
-        "ci_95_pct_diff_high": 4.63,
-        "is_within_noise": true,
-        "interpretation": "Difference is within statistical noise (95% CI spans 0)"
+        "is_reachable": false,
+        "required_inventory_lightgbm": null,
+        "required_inventory_snaive": null,
+        "pct_difference": null,
+        "ci_95_series_pct_diff_low": null,
+        "ci_95_series_pct_diff_high": null,
+        "ci_95_time_block_pct_diff_low": null,
+        "ci_95_time_block_pct_diff_high": null,
+        "is_within_noise_series": null,
+        "is_within_noise_time_block": null,
+        "model_grid_range_pct": [
+          97.28,
+          99.39
+        ],
+        "snaive_grid_range_pct": [
+          96.74,
+          99.5
+        ],
+        "interpretation": "Target 99.5% is unreachable on empirical z grid (LightGBM P50 range [97.28%, 99.39%], S.Naive range [96.74%, 99.50%])"
       },
       {
-        "lead_time_days": 7,
+        "lead_time_days": 3,
+        "comparison": "LightGBM Point vs Seasonal Naive",
+        "forecaster": "LightGBM Point",
         "target_fill_rate_pct": 98.5,
-        "required_inventory_lightgbm": 3620900.24625,
-        "required_inventory_snaive": 3697644.1620512833,
-        "pct_difference": -2.08,
-        "ci_95_pct_diff_low": -4.46,
-        "ci_95_pct_diff_high": 0.32,
-        "is_within_noise": true,
-        "interpretation": "Difference is within statistical noise (95% CI spans 0)"
+        "is_reachable": true,
+        "required_inventory_lightgbm": 3885987.83,
+        "required_inventory_snaive": 4312765.61,
+        "pct_difference": -9.9,
+        "ci_95_series_pct_diff_low": -11.71,
+        "ci_95_series_pct_diff_high": -7.87,
+        "ci_95_time_block_pct_diff_low": -13.45,
+        "ci_95_time_block_pct_diff_high": -0.68,
+        "is_within_noise_series": false,
+        "is_within_noise_time_block": false,
+        "interpretation": "LightGBM Point vs S.Naive at 98.5% FR: -9.90% inventory (Series 95% CI: [-11.71%, -7.87%], Time-Block 95% CI: [-13.45%, -0.68%])"
       },
       {
-        "lead_time_days": 7,
+        "lead_time_days": 3,
+        "comparison": "LightGBM Point vs Seasonal Naive",
+        "forecaster": "LightGBM Point",
         "target_fill_rate_pct": 99.0,
-        "required_inventory_lightgbm": 3988960.321538466,
-        "required_inventory_snaive": 4008398.82045455,
-        "pct_difference": -0.48,
-        "ci_95_pct_diff_low": -3.48,
-        "ci_95_pct_diff_high": 2.63,
-        "is_within_noise": true,
-        "interpretation": "Difference is within statistical noise (95% CI spans 0)"
+        "is_reachable": true,
+        "required_inventory_lightgbm": 4205234.31,
+        "required_inventory_snaive": 4668221.1,
+        "pct_difference": -9.92,
+        "ci_95_series_pct_diff_low": -12.18,
+        "ci_95_series_pct_diff_high": -7.67,
+        "ci_95_time_block_pct_diff_low": -14.44,
+        "ci_95_time_block_pct_diff_high": -2.42,
+        "is_within_noise_series": false,
+        "is_within_noise_time_block": false,
+        "interpretation": "LightGBM Point vs S.Naive at 99.0% FR: -9.92% inventory (Series 95% CI: [-12.18%, -7.67%], Time-Block 95% CI: [-14.44%, -2.42%])"
+      },
+      {
+        "lead_time_days": 3,
+        "comparison": "LightGBM Point vs Seasonal Naive",
+        "forecaster": "LightGBM Point",
+        "target_fill_rate_pct": 99.5,
+        "is_reachable": false,
+        "required_inventory_lightgbm": null,
+        "required_inventory_snaive": null,
+        "pct_difference": null,
+        "ci_95_series_pct_diff_low": null,
+        "ci_95_series_pct_diff_high": null,
+        "ci_95_time_block_pct_diff_low": null,
+        "ci_95_time_block_pct_diff_high": null,
+        "is_within_noise_series": null,
+        "is_within_noise_time_block": null,
+        "model_grid_range_pct": [
+          97.57,
+          99.46
+        ],
+        "snaive_grid_range_pct": [
+          96.74,
+          99.5
+        ],
+        "interpretation": "Target 99.5% is unreachable on empirical z grid (LightGBM Point range [97.57%, 99.46%], S.Naive range [96.74%, 99.50%])"
       },
       {
         "lead_time_days": 7,
+        "comparison": "LightGBM P50 vs Seasonal Naive",
+        "forecaster": "LightGBM P50",
+        "target_fill_rate_pct": 98.5,
+        "is_reachable": true,
+        "required_inventory_lightgbm": 4073314.09,
+        "required_inventory_snaive": 4804036.33,
+        "pct_difference": -15.21,
+        "ci_95_series_pct_diff_low": -17.14,
+        "ci_95_series_pct_diff_high": -12.81,
+        "ci_95_time_block_pct_diff_low": -19.74,
+        "ci_95_time_block_pct_diff_high": -8.7,
+        "is_within_noise_series": false,
+        "is_within_noise_time_block": false,
+        "interpretation": "LightGBM P50 vs S.Naive at 98.5% FR: -15.21% inventory (Series 95% CI: [-17.14%, -12.81%], Time-Block 95% CI: [-19.74%, -8.70%])"
+      },
+      {
+        "lead_time_days": 7,
+        "comparison": "LightGBM P50 vs Seasonal Naive",
+        "forecaster": "LightGBM P50",
+        "target_fill_rate_pct": 99.0,
+        "is_reachable": true,
+        "required_inventory_lightgbm": 4510195.86,
+        "required_inventory_snaive": 5321662.1,
+        "pct_difference": -15.25,
+        "ci_95_series_pct_diff_low": -18.21,
+        "ci_95_series_pct_diff_high": -12.48,
+        "ci_95_time_block_pct_diff_low": -19.87,
+        "ci_95_time_block_pct_diff_high": -8.79,
+        "is_within_noise_series": false,
+        "is_within_noise_time_block": false,
+        "interpretation": "LightGBM P50 vs S.Naive at 99.0% FR: -15.25% inventory (Series 95% CI: [-18.21%, -12.48%], Time-Block 95% CI: [-19.87%, -8.79%])"
+      },
+      {
+        "lead_time_days": 7,
+        "comparison": "LightGBM P50 vs Seasonal Naive",
+        "forecaster": "LightGBM P50",
         "target_fill_rate_pct": 99.5,
-        "required_inventory_lightgbm": 4711267.1,
-        "required_inventory_snaive": 4643078.44,
-        "pct_difference": 1.47,
-        "ci_95_pct_diff_low": -5.05,
-        "ci_95_pct_diff_high": 4.23,
-        "is_within_noise": true,
-        "interpretation": "Difference is within statistical noise (95% CI spans 0)"
+        "is_reachable": false,
+        "required_inventory_lightgbm": null,
+        "required_inventory_snaive": null,
+        "pct_difference": null,
+        "ci_95_series_pct_diff_low": null,
+        "ci_95_series_pct_diff_high": null,
+        "ci_95_time_block_pct_diff_low": null,
+        "ci_95_time_block_pct_diff_high": null,
+        "is_within_noise_series": null,
+        "is_within_noise_time_block": null,
+        "model_grid_range_pct": [
+          97.2,
+          99.28
+        ],
+        "snaive_grid_range_pct": [
+          96.3,
+          99.3
+        ],
+        "interpretation": "Target 99.5% is unreachable on empirical z grid (LightGBM P50 range [97.20%, 99.28%], S.Naive range [96.30%, 99.30%])"
+      },
+      {
+        "lead_time_days": 7,
+        "comparison": "LightGBM Point vs Seasonal Naive",
+        "forecaster": "LightGBM Point",
+        "target_fill_rate_pct": 98.5,
+        "is_reachable": true,
+        "required_inventory_lightgbm": 4089360.47,
+        "required_inventory_snaive": 4804036.33,
+        "pct_difference": -14.88,
+        "ci_95_series_pct_diff_low": -17.54,
+        "ci_95_series_pct_diff_high": -12.53,
+        "ci_95_time_block_pct_diff_low": -20.15,
+        "ci_95_time_block_pct_diff_high": -8.4,
+        "is_within_noise_series": false,
+        "is_within_noise_time_block": false,
+        "interpretation": "LightGBM Point vs S.Naive at 98.5% FR: -14.88% inventory (Series 95% CI: [-17.54%, -12.53%], Time-Block 95% CI: [-20.15%, -8.40%])"
+      },
+      {
+        "lead_time_days": 7,
+        "comparison": "LightGBM Point vs Seasonal Naive",
+        "forecaster": "LightGBM Point",
+        "target_fill_rate_pct": 99.0,
+        "is_reachable": true,
+        "required_inventory_lightgbm": 4528139.85,
+        "required_inventory_snaive": 5321662.1,
+        "pct_difference": -14.91,
+        "ci_95_series_pct_diff_low": -17.23,
+        "ci_95_series_pct_diff_high": -11.66,
+        "ci_95_time_block_pct_diff_low": -19.66,
+        "ci_95_time_block_pct_diff_high": -9.54,
+        "is_within_noise_series": false,
+        "is_within_noise_time_block": false,
+        "interpretation": "LightGBM Point vs S.Naive at 99.0% FR: -14.91% inventory (Series 95% CI: [-17.23%, -11.66%], Time-Block 95% CI: [-19.66%, -9.54%])"
+      },
+      {
+        "lead_time_days": 7,
+        "comparison": "LightGBM Point vs Seasonal Naive",
+        "forecaster": "LightGBM Point",
+        "target_fill_rate_pct": 99.5,
+        "is_reachable": false,
+        "required_inventory_lightgbm": null,
+        "required_inventory_snaive": null,
+        "pct_difference": null,
+        "ci_95_series_pct_diff_low": null,
+        "ci_95_series_pct_diff_high": null,
+        "ci_95_time_block_pct_diff_low": null,
+        "ci_95_time_block_pct_diff_high": null,
+        "is_within_noise_series": null,
+        "is_within_noise_time_block": null,
+        "model_grid_range_pct": [
+          97.39,
+          99.3
+        ],
+        "snaive_grid_range_pct": [
+          96.3,
+          99.3
+        ],
+        "interpretation": "Target 99.5% is unreachable on empirical z grid (LightGBM Point range [97.39%, 99.30%], S.Naive range [96.30%, 99.30%])"
       }
     ],
-    "per_family_matched_sl95_l3d": [
+    "per_family_matched_fill_rate": [
       {
         "family": "GROCERY I",
         "lead_time_days": 3,
-        "service_level": 0.95,
-        "lightgbm": {
-          "fill_rate_pct": 99.57,
-          "average_inventory_units": 1218859.69,
-          "stockout_day_share_pct": 0.7
-        },
-        "seasonal_naive": {
-          "fill_rate_pct": 99.82,
-          "average_inventory_units": 1354299.49,
-          "stockout_day_share_pct": 0.45
-        },
-        "inventory_difference_pct": -10.0
+        "target_fill_rate_pct": 98.5,
+        "is_reachable_p50": true,
+        "is_reachable_point": true,
+        "grid_fr_range_p50": [
+          97.73,
+          99.78
+        ],
+        "grid_fr_range_point": [
+          97.94,
+          99.83
+        ],
+        "grid_fr_range_snaive": [
+          97.09,
+          99.91
+        ],
+        "required_inventory_lightgbm_p50": 1054560.61,
+        "required_inventory_snaive": 1150334.46,
+        "pct_diff_p50_vs_snaive": -8.33,
+        "ci_95_p50_low": -12.06,
+        "ci_95_p50_high": -5.03,
+        "p50_ci_excludes_zero": true,
+        "is_statistically_significant_win_p50": true
+      },
+      {
+        "family": "GROCERY I",
+        "lead_time_days": 3,
+        "target_fill_rate_pct": 99.0,
+        "is_reachable_p50": true,
+        "is_reachable_point": true,
+        "grid_fr_range_p50": [
+          97.73,
+          99.78
+        ],
+        "grid_fr_range_point": [
+          97.94,
+          99.83
+        ],
+        "grid_fr_range_snaive": [
+          97.09,
+          99.91
+        ],
+        "required_inventory_lightgbm_p50": 1114363.52,
+        "required_inventory_snaive": 1213027.49,
+        "pct_diff_p50_vs_snaive": -8.13,
+        "ci_95_p50_low": -12.77,
+        "ci_95_p50_high": -4.57,
+        "p50_ci_excludes_zero": true,
+        "is_statistically_significant_win_p50": true
+      },
+      {
+        "family": "GROCERY I",
+        "lead_time_days": 3,
+        "target_fill_rate_pct": 99.5,
+        "is_reachable_p50": true,
+        "is_reachable_point": true,
+        "grid_fr_range_p50": [
+          97.73,
+          99.78
+        ],
+        "grid_fr_range_point": [
+          97.94,
+          99.83
+        ],
+        "grid_fr_range_snaive": [
+          97.09,
+          99.91
+        ],
+        "required_inventory_lightgbm_p50": 1209344.46,
+        "required_inventory_snaive": 1316916.54,
+        "pct_diff_p50_vs_snaive": -8.17,
+        "ci_95_p50_low": -13.03,
+        "ci_95_p50_high": -3.23,
+        "p50_ci_excludes_zero": true,
+        "is_statistically_significant_win_p50": true
+      },
+      {
+        "family": "GROCERY I",
+        "lead_time_days": 7,
+        "target_fill_rate_pct": 98.5,
+        "is_reachable_p50": true,
+        "is_reachable_point": true,
+        "grid_fr_range_p50": [
+          97.93,
+          99.81
+        ],
+        "grid_fr_range_point": [
+          97.86,
+          99.76
+        ],
+        "grid_fr_range_snaive": [
+          96.85,
+          99.82
+        ],
+        "required_inventory_lightgbm_p50": 1025331.87,
+        "required_inventory_snaive": 1219159.82,
+        "pct_diff_p50_vs_snaive": -15.9,
+        "ci_95_p50_low": -20.05,
+        "ci_95_p50_high": -11.2,
+        "p50_ci_excludes_zero": true,
+        "is_statistically_significant_win_p50": true
+      },
+      {
+        "family": "GROCERY I",
+        "lead_time_days": 7,
+        "target_fill_rate_pct": 99.0,
+        "is_reachable_p50": true,
+        "is_reachable_point": true,
+        "grid_fr_range_p50": [
+          97.93,
+          99.81
+        ],
+        "grid_fr_range_point": [
+          97.86,
+          99.76
+        ],
+        "grid_fr_range_snaive": [
+          96.85,
+          99.82
+        ],
+        "required_inventory_lightgbm_p50": 1094763.93,
+        "required_inventory_snaive": 1304520.17,
+        "pct_diff_p50_vs_snaive": -16.08,
+        "ci_95_p50_low": -20.57,
+        "ci_95_p50_high": -11.61,
+        "p50_ci_excludes_zero": true,
+        "is_statistically_significant_win_p50": true
+      },
+      {
+        "family": "GROCERY I",
+        "lead_time_days": 7,
+        "target_fill_rate_pct": 99.5,
+        "is_reachable_p50": true,
+        "is_reachable_point": true,
+        "grid_fr_range_p50": [
+          97.93,
+          99.81
+        ],
+        "grid_fr_range_point": [
+          97.86,
+          99.76
+        ],
+        "grid_fr_range_snaive": [
+          96.85,
+          99.82
+        ],
+        "required_inventory_lightgbm_p50": 1207719.27,
+        "required_inventory_snaive": 1443873.52,
+        "pct_diff_p50_vs_snaive": -16.36,
+        "ci_95_p50_low": -20.96,
+        "ci_95_p50_high": -10.86,
+        "p50_ci_excludes_zero": true,
+        "is_statistically_significant_win_p50": true
       },
       {
         "family": "BEVERAGES",
         "lead_time_days": 3,
-        "service_level": 0.95,
-        "lightgbm": {
-          "fill_rate_pct": 99.03,
-          "average_inventory_units": 959496.77,
-          "stockout_day_share_pct": 1.51
-        },
-        "seasonal_naive": {
-          "fill_rate_pct": 99.57,
-          "average_inventory_units": 1059289.53,
-          "stockout_day_share_pct": 0.81
-        },
-        "inventory_difference_pct": -9.42
+        "target_fill_rate_pct": 98.5,
+        "is_reachable_p50": true,
+        "is_reachable_point": true,
+        "grid_fr_range_p50": [
+          96.35,
+          99.07
+        ],
+        "grid_fr_range_point": [
+          97.05,
+          99.27
+        ],
+        "grid_fr_range_snaive": [
+          95.72,
+          99.24
+        ],
+        "required_inventory_lightgbm_p50": 944748.38,
+        "required_inventory_snaive": 1032933.82,
+        "pct_diff_p50_vs_snaive": -8.54,
+        "ci_95_p50_low": -12.21,
+        "ci_95_p50_high": -3.14,
+        "p50_ci_excludes_zero": true,
+        "is_statistically_significant_win_p50": true
+      },
+      {
+        "family": "BEVERAGES",
+        "lead_time_days": 3,
+        "target_fill_rate_pct": 99.0,
+        "is_reachable_p50": true,
+        "is_reachable_point": true,
+        "grid_fr_range_p50": [
+          96.35,
+          99.07
+        ],
+        "grid_fr_range_point": [
+          97.05,
+          99.27
+        ],
+        "grid_fr_range_snaive": [
+          95.72,
+          99.24
+        ],
+        "required_inventory_lightgbm_p50": 1026226.79,
+        "required_inventory_snaive": 1122720.41,
+        "pct_diff_p50_vs_snaive": -8.59,
+        "ci_95_p50_low": -13.62,
+        "ci_95_p50_high": -5.01,
+        "p50_ci_excludes_zero": true,
+        "is_statistically_significant_win_p50": true
+      },
+      {
+        "family": "BEVERAGES",
+        "lead_time_days": 3,
+        "target_fill_rate_pct": 99.5,
+        "is_reachable_p50": false,
+        "is_reachable_point": false,
+        "grid_fr_range_p50": [
+          96.35,
+          99.07
+        ],
+        "grid_fr_range_point": [
+          97.05,
+          99.27
+        ],
+        "grid_fr_range_snaive": [
+          95.72,
+          99.24
+        ],
+        "required_inventory_lightgbm_p50": null,
+        "required_inventory_snaive": null,
+        "pct_diff_p50_vs_snaive": null,
+        "ci_95_p50_low": null,
+        "ci_95_p50_high": null,
+        "p50_ci_excludes_zero": false,
+        "is_statistically_significant_win_p50": false
+      },
+      {
+        "family": "BEVERAGES",
+        "lead_time_days": 7,
+        "target_fill_rate_pct": 98.5,
+        "is_reachable_p50": true,
+        "is_reachable_point": true,
+        "grid_fr_range_p50": [
+          96.52,
+          99.04
+        ],
+        "grid_fr_range_point": [
+          97.22,
+          99.16
+        ],
+        "grid_fr_range_snaive": [
+          95.15,
+          99.0
+        ],
+        "required_inventory_lightgbm_p50": 958466.09,
+        "required_inventory_snaive": 1143142.62,
+        "pct_diff_p50_vs_snaive": -16.16,
+        "ci_95_p50_low": -21.53,
+        "ci_95_p50_high": -8.41,
+        "p50_ci_excludes_zero": true,
+        "is_statistically_significant_win_p50": true
+      },
+      {
+        "family": "BEVERAGES",
+        "lead_time_days": 7,
+        "target_fill_rate_pct": 99.0,
+        "is_reachable_p50": false,
+        "is_reachable_point": false,
+        "grid_fr_range_p50": [
+          96.52,
+          99.04
+        ],
+        "grid_fr_range_point": [
+          97.22,
+          99.16
+        ],
+        "grid_fr_range_snaive": [
+          95.15,
+          99.0
+        ],
+        "required_inventory_lightgbm_p50": null,
+        "required_inventory_snaive": null,
+        "pct_diff_p50_vs_snaive": null,
+        "ci_95_p50_low": null,
+        "ci_95_p50_high": null,
+        "p50_ci_excludes_zero": false,
+        "is_statistically_significant_win_p50": false
+      },
+      {
+        "family": "BEVERAGES",
+        "lead_time_days": 7,
+        "target_fill_rate_pct": 99.5,
+        "is_reachable_p50": false,
+        "is_reachable_point": false,
+        "grid_fr_range_p50": [
+          96.52,
+          99.04
+        ],
+        "grid_fr_range_point": [
+          97.22,
+          99.16
+        ],
+        "grid_fr_range_snaive": [
+          95.15,
+          99.0
+        ],
+        "required_inventory_lightgbm_p50": null,
+        "required_inventory_snaive": null,
+        "pct_diff_p50_vs_snaive": null,
+        "ci_95_p50_low": null,
+        "ci_95_p50_high": null,
+        "p50_ci_excludes_zero": false,
+        "is_statistically_significant_win_p50": false
       },
       {
         "family": "PRODUCE",
         "lead_time_days": 3,
-        "service_level": 0.95,
-        "lightgbm": {
-          "fill_rate_pct": 99.98,
-          "average_inventory_units": 628787.98,
-          "stockout_day_share_pct": 0.07
-        },
-        "seasonal_naive": {
-          "fill_rate_pct": 99.95,
-          "average_inventory_units": 630524.46,
-          "stockout_day_share_pct": 0.2
-        },
-        "inventory_difference_pct": -0.28
+        "target_fill_rate_pct": 98.5,
+        "is_reachable_p50": false,
+        "is_reachable_point": false,
+        "grid_fr_range_p50": [
+          98.92,
+          99.8
+        ],
+        "grid_fr_range_point": [
+          99.06,
+          99.76
+        ],
+        "grid_fr_range_snaive": [
+          98.38,
+          99.65
+        ],
+        "required_inventory_lightgbm_p50": null,
+        "required_inventory_snaive": null,
+        "pct_diff_p50_vs_snaive": null,
+        "ci_95_p50_low": null,
+        "ci_95_p50_high": null,
+        "p50_ci_excludes_zero": false,
+        "is_statistically_significant_win_p50": false
+      },
+      {
+        "family": "PRODUCE",
+        "lead_time_days": 3,
+        "target_fill_rate_pct": 99.0,
+        "is_reachable_p50": true,
+        "is_reachable_point": false,
+        "grid_fr_range_p50": [
+          98.92,
+          99.8
+        ],
+        "grid_fr_range_point": [
+          99.06,
+          99.76
+        ],
+        "grid_fr_range_snaive": [
+          98.38,
+          99.65
+        ],
+        "required_inventory_lightgbm_p50": 529006.89,
+        "required_inventory_snaive": 559945.94,
+        "pct_diff_p50_vs_snaive": -5.53,
+        "ci_95_p50_low": -8.77,
+        "ci_95_p50_high": -3.95,
+        "p50_ci_excludes_zero": true,
+        "is_statistically_significant_win_p50": true
+      },
+      {
+        "family": "PRODUCE",
+        "lead_time_days": 3,
+        "target_fill_rate_pct": 99.5,
+        "is_reachable_p50": true,
+        "is_reachable_point": true,
+        "grid_fr_range_p50": [
+          98.92,
+          99.8
+        ],
+        "grid_fr_range_point": [
+          99.06,
+          99.76
+        ],
+        "grid_fr_range_snaive": [
+          98.38,
+          99.65
+        ],
+        "required_inventory_lightgbm_p50": 578884.28,
+        "required_inventory_snaive": 636009.73,
+        "pct_diff_p50_vs_snaive": -8.98,
+        "ci_95_p50_low": -12.48,
+        "ci_95_p50_high": -4.5,
+        "p50_ci_excludes_zero": true,
+        "is_statistically_significant_win_p50": true
+      },
+      {
+        "family": "PRODUCE",
+        "lead_time_days": 7,
+        "target_fill_rate_pct": 98.5,
+        "is_reachable_p50": true,
+        "is_reachable_point": false,
+        "grid_fr_range_p50": [
+          98.38,
+          99.63
+        ],
+        "grid_fr_range_point": [
+          98.57,
+          99.58
+        ],
+        "grid_fr_range_snaive": [
+          97.58,
+          99.32
+        ],
+        "required_inventory_lightgbm_p50": 541603.3,
+        "required_inventory_snaive": 596383.69,
+        "pct_diff_p50_vs_snaive": -9.19,
+        "ci_95_p50_low": -14.19,
+        "ci_95_p50_high": -5.8,
+        "p50_ci_excludes_zero": true,
+        "is_statistically_significant_win_p50": true
+      },
+      {
+        "family": "PRODUCE",
+        "lead_time_days": 7,
+        "target_fill_rate_pct": 99.0,
+        "is_reachable_p50": true,
+        "is_reachable_point": true,
+        "grid_fr_range_p50": [
+          98.38,
+          99.63
+        ],
+        "grid_fr_range_point": [
+          98.57,
+          99.58
+        ],
+        "grid_fr_range_snaive": [
+          97.58,
+          99.32
+        ],
+        "required_inventory_lightgbm_p50": 580899.93,
+        "required_inventory_snaive": 658954.88,
+        "pct_diff_p50_vs_snaive": -11.85,
+        "ci_95_p50_low": -17.01,
+        "ci_95_p50_high": -7.01,
+        "p50_ci_excludes_zero": true,
+        "is_statistically_significant_win_p50": true
+      },
+      {
+        "family": "PRODUCE",
+        "lead_time_days": 7,
+        "target_fill_rate_pct": 99.5,
+        "is_reachable_p50": false,
+        "is_reachable_point": false,
+        "grid_fr_range_p50": [
+          98.38,
+          99.63
+        ],
+        "grid_fr_range_point": [
+          98.57,
+          99.58
+        ],
+        "grid_fr_range_snaive": [
+          97.58,
+          99.32
+        ],
+        "required_inventory_lightgbm_p50": null,
+        "required_inventory_snaive": null,
+        "pct_diff_p50_vs_snaive": null,
+        "ci_95_p50_low": null,
+        "ci_95_p50_high": null,
+        "p50_ci_excludes_zero": false,
+        "is_statistically_significant_win_p50": false
       },
       {
         "family": "CLEANING",
         "lead_time_days": 3,
-        "service_level": 0.95,
-        "lightgbm": {
-          "fill_rate_pct": 98.3,
-          "average_inventory_units": 384761.0,
-          "stockout_day_share_pct": 1.65
-        },
-        "seasonal_naive": {
-          "fill_rate_pct": 98.85,
-          "average_inventory_units": 465746.57,
-          "stockout_day_share_pct": 1.13
-        },
-        "inventory_difference_pct": -17.39
+        "target_fill_rate_pct": 98.5,
+        "is_reachable_p50": true,
+        "is_reachable_point": true,
+        "grid_fr_range_p50": [
+          95.51,
+          98.65
+        ],
+        "grid_fr_range_point": [
+          95.65,
+          98.64
+        ],
+        "grid_fr_range_snaive": [
+          95.13,
+          98.94
+        ],
+        "required_inventory_lightgbm_p50": 407072.15,
+        "required_inventory_snaive": 495631.51,
+        "pct_diff_p50_vs_snaive": -17.87,
+        "ci_95_p50_low": -24.33,
+        "ci_95_p50_high": -11.68,
+        "p50_ci_excludes_zero": true,
+        "is_statistically_significant_win_p50": true
+      },
+      {
+        "family": "CLEANING",
+        "lead_time_days": 3,
+        "target_fill_rate_pct": 99.0,
+        "is_reachable_p50": false,
+        "is_reachable_point": false,
+        "grid_fr_range_p50": [
+          95.51,
+          98.65
+        ],
+        "grid_fr_range_point": [
+          95.65,
+          98.64
+        ],
+        "grid_fr_range_snaive": [
+          95.13,
+          98.94
+        ],
+        "required_inventory_lightgbm_p50": null,
+        "required_inventory_snaive": null,
+        "pct_diff_p50_vs_snaive": null,
+        "ci_95_p50_low": null,
+        "ci_95_p50_high": null,
+        "p50_ci_excludes_zero": false,
+        "is_statistically_significant_win_p50": false
+      },
+      {
+        "family": "CLEANING",
+        "lead_time_days": 3,
+        "target_fill_rate_pct": 99.5,
+        "is_reachable_p50": false,
+        "is_reachable_point": false,
+        "grid_fr_range_p50": [
+          95.51,
+          98.65
+        ],
+        "grid_fr_range_point": [
+          95.65,
+          98.64
+        ],
+        "grid_fr_range_snaive": [
+          95.13,
+          98.94
+        ],
+        "required_inventory_lightgbm_p50": null,
+        "required_inventory_snaive": null,
+        "pct_diff_p50_vs_snaive": null,
+        "ci_95_p50_low": null,
+        "ci_95_p50_high": null,
+        "p50_ci_excludes_zero": false,
+        "is_statistically_significant_win_p50": false
+      },
+      {
+        "family": "CLEANING",
+        "lead_time_days": 7,
+        "target_fill_rate_pct": 98.5,
+        "is_reachable_p50": false,
+        "is_reachable_point": false,
+        "grid_fr_range_p50": [
+          94.94,
+          98.13
+        ],
+        "grid_fr_range_point": [
+          95.12,
+          98.13
+        ],
+        "grid_fr_range_snaive": [
+          94.69,
+          98.67
+        ],
+        "required_inventory_lightgbm_p50": null,
+        "required_inventory_snaive": null,
+        "pct_diff_p50_vs_snaive": null,
+        "ci_95_p50_low": null,
+        "ci_95_p50_high": null,
+        "p50_ci_excludes_zero": false,
+        "is_statistically_significant_win_p50": false
+      },
+      {
+        "family": "CLEANING",
+        "lead_time_days": 7,
+        "target_fill_rate_pct": 99.0,
+        "is_reachable_p50": false,
+        "is_reachable_point": false,
+        "grid_fr_range_p50": [
+          94.94,
+          98.13
+        ],
+        "grid_fr_range_point": [
+          95.12,
+          98.13
+        ],
+        "grid_fr_range_snaive": [
+          94.69,
+          98.67
+        ],
+        "required_inventory_lightgbm_p50": null,
+        "required_inventory_snaive": null,
+        "pct_diff_p50_vs_snaive": null,
+        "ci_95_p50_low": null,
+        "ci_95_p50_high": null,
+        "p50_ci_excludes_zero": false,
+        "is_statistically_significant_win_p50": false
+      },
+      {
+        "family": "CLEANING",
+        "lead_time_days": 7,
+        "target_fill_rate_pct": 99.5,
+        "is_reachable_p50": false,
+        "is_reachable_point": false,
+        "grid_fr_range_p50": [
+          94.94,
+          98.13
+        ],
+        "grid_fr_range_point": [
+          95.12,
+          98.13
+        ],
+        "grid_fr_range_snaive": [
+          94.69,
+          98.67
+        ],
+        "required_inventory_lightgbm_p50": null,
+        "required_inventory_snaive": null,
+        "pct_diff_p50_vs_snaive": null,
+        "ci_95_p50_low": null,
+        "ci_95_p50_high": null,
+        "p50_ci_excludes_zero": false,
+        "is_statistically_significant_win_p50": false
       },
       {
         "family": "DAIRY",
         "lead_time_days": 3,
-        "service_level": 0.95,
-        "lightgbm": {
-          "fill_rate_pct": 99.98,
-          "average_inventory_units": 263587.08,
-          "stockout_day_share_pct": 0.07
-        },
-        "seasonal_naive": {
-          "fill_rate_pct": 99.97,
-          "average_inventory_units": 262887.01,
-          "stockout_day_share_pct": 0.07
-        },
-        "inventory_difference_pct": 0.27
+        "target_fill_rate_pct": 98.5,
+        "is_reachable_p50": false,
+        "is_reachable_point": false,
+        "grid_fr_range_p50": [
+          99.02,
+          99.87
+        ],
+        "grid_fr_range_point": [
+          99.07,
+          99.89
+        ],
+        "grid_fr_range_snaive": [
+          98.61,
+          99.83
+        ],
+        "required_inventory_lightgbm_p50": null,
+        "required_inventory_snaive": null,
+        "pct_diff_p50_vs_snaive": null,
+        "ci_95_p50_low": null,
+        "ci_95_p50_high": null,
+        "p50_ci_excludes_zero": false,
+        "is_statistically_significant_win_p50": false
+      },
+      {
+        "family": "DAIRY",
+        "lead_time_days": 3,
+        "target_fill_rate_pct": 99.0,
+        "is_reachable_p50": false,
+        "is_reachable_point": false,
+        "grid_fr_range_p50": [
+          99.02,
+          99.87
+        ],
+        "grid_fr_range_point": [
+          99.07,
+          99.89
+        ],
+        "grid_fr_range_snaive": [
+          98.61,
+          99.83
+        ],
+        "required_inventory_lightgbm_p50": null,
+        "required_inventory_snaive": null,
+        "pct_diff_p50_vs_snaive": null,
+        "ci_95_p50_low": null,
+        "ci_95_p50_high": null,
+        "p50_ci_excludes_zero": false,
+        "is_statistically_significant_win_p50": false
+      },
+      {
+        "family": "DAIRY",
+        "lead_time_days": 3,
+        "target_fill_rate_pct": 99.5,
+        "is_reachable_p50": true,
+        "is_reachable_point": true,
+        "grid_fr_range_p50": [
+          99.02,
+          99.87
+        ],
+        "grid_fr_range_point": [
+          99.07,
+          99.89
+        ],
+        "grid_fr_range_snaive": [
+          98.61,
+          99.83
+        ],
+        "required_inventory_lightgbm_p50": 235197.78,
+        "required_inventory_snaive": 247062.55,
+        "pct_diff_p50_vs_snaive": -4.8,
+        "ci_95_p50_low": -8.31,
+        "ci_95_p50_high": -1.83,
+        "p50_ci_excludes_zero": true,
+        "is_statistically_significant_win_p50": true
+      },
+      {
+        "family": "DAIRY",
+        "lead_time_days": 7,
+        "target_fill_rate_pct": 98.5,
+        "is_reachable_p50": false,
+        "is_reachable_point": false,
+        "grid_fr_range_p50": [
+          98.91,
+          99.81
+        ],
+        "grid_fr_range_point": [
+          98.95,
+          99.85
+        ],
+        "grid_fr_range_snaive": [
+          98.39,
+          99.72
+        ],
+        "required_inventory_lightgbm_p50": null,
+        "required_inventory_snaive": null,
+        "pct_diff_p50_vs_snaive": null,
+        "ci_95_p50_low": null,
+        "ci_95_p50_high": null,
+        "p50_ci_excludes_zero": false,
+        "is_statistically_significant_win_p50": false
+      },
+      {
+        "family": "DAIRY",
+        "lead_time_days": 7,
+        "target_fill_rate_pct": 99.0,
+        "is_reachable_p50": true,
+        "is_reachable_point": true,
+        "grid_fr_range_p50": [
+          98.91,
+          99.81
+        ],
+        "grid_fr_range_point": [
+          98.95,
+          99.85
+        ],
+        "grid_fr_range_snaive": [
+          98.39,
+          99.72
+        ],
+        "required_inventory_lightgbm_p50": 226243.22,
+        "required_inventory_snaive": 245455.71,
+        "pct_diff_p50_vs_snaive": -7.83,
+        "ci_95_p50_low": -11.13,
+        "ci_95_p50_high": -4.04,
+        "p50_ci_excludes_zero": true,
+        "is_statistically_significant_win_p50": true
+      },
+      {
+        "family": "DAIRY",
+        "lead_time_days": 7,
+        "target_fill_rate_pct": 99.5,
+        "is_reachable_p50": true,
+        "is_reachable_point": true,
+        "grid_fr_range_p50": [
+          98.91,
+          99.81
+        ],
+        "grid_fr_range_point": [
+          98.95,
+          99.85
+        ],
+        "grid_fr_range_snaive": [
+          98.39,
+          99.72
+        ],
+        "required_inventory_lightgbm_p50": 256164.06,
+        "required_inventory_snaive": 282951.28,
+        "pct_diff_p50_vs_snaive": -9.47,
+        "ci_95_p50_low": -14.93,
+        "ci_95_p50_high": -5.06,
+        "p50_ci_excludes_zero": true,
+        "is_statistically_significant_win_p50": true
       },
       {
         "family": "BREAD/BAKERY",
         "lead_time_days": 3,
-        "service_level": 0.95,
-        "lightgbm": {
-          "fill_rate_pct": 99.88,
-          "average_inventory_units": 149524.5,
-          "stockout_day_share_pct": 0.2
-        },
-        "seasonal_naive": {
-          "fill_rate_pct": 99.93,
-          "average_inventory_units": 155309.58,
-          "stockout_day_share_pct": 0.27
-        },
-        "inventory_difference_pct": -3.72
+        "target_fill_rate_pct": 98.5,
+        "is_reachable_p50": true,
+        "is_reachable_point": true,
+        "grid_fr_range_p50": [
+          98.11,
+          99.57
+        ],
+        "grid_fr_range_point": [
+          98.11,
+          99.57
+        ],
+        "grid_fr_range_snaive": [
+          98.25,
+          99.72
+        ],
+        "required_inventory_lightgbm_p50": 126723.3,
+        "required_inventory_snaive": 129195.7,
+        "pct_diff_p50_vs_snaive": -1.91,
+        "ci_95_p50_low": -5.36,
+        "ci_95_p50_high": -0.03,
+        "p50_ci_excludes_zero": true,
+        "is_statistically_significant_win_p50": true
+      },
+      {
+        "family": "BREAD/BAKERY",
+        "lead_time_days": 3,
+        "target_fill_rate_pct": 99.0,
+        "is_reachable_p50": true,
+        "is_reachable_point": true,
+        "grid_fr_range_p50": [
+          98.11,
+          99.57
+        ],
+        "grid_fr_range_point": [
+          98.11,
+          99.57
+        ],
+        "grid_fr_range_snaive": [
+          98.25,
+          99.72
+        ],
+        "required_inventory_lightgbm_p50": 135478.84,
+        "required_inventory_snaive": 138817.63,
+        "pct_diff_p50_vs_snaive": -2.41,
+        "ci_95_p50_low": -5.06,
+        "ci_95_p50_high": 0.61,
+        "p50_ci_excludes_zero": false,
+        "is_statistically_significant_win_p50": false
+      },
+      {
+        "family": "BREAD/BAKERY",
+        "lead_time_days": 3,
+        "target_fill_rate_pct": 99.5,
+        "is_reachable_p50": true,
+        "is_reachable_point": true,
+        "grid_fr_range_p50": [
+          98.11,
+          99.57
+        ],
+        "grid_fr_range_point": [
+          98.11,
+          99.57
+        ],
+        "grid_fr_range_snaive": [
+          98.25,
+          99.72
+        ],
+        "required_inventory_lightgbm_p50": 152367.21,
+        "required_inventory_snaive": 155406.32,
+        "pct_diff_p50_vs_snaive": -1.96,
+        "ci_95_p50_low": -7.52,
+        "ci_95_p50_high": 2.14,
+        "p50_ci_excludes_zero": false,
+        "is_statistically_significant_win_p50": false
+      },
+      {
+        "family": "BREAD/BAKERY",
+        "lead_time_days": 7,
+        "target_fill_rate_pct": 98.5,
+        "is_reachable_p50": true,
+        "is_reachable_point": true,
+        "grid_fr_range_p50": [
+          97.89,
+          99.45
+        ],
+        "grid_fr_range_point": [
+          97.81,
+          99.44
+        ],
+        "grid_fr_range_snaive": [
+          97.91,
+          99.62
+        ],
+        "required_inventory_lightgbm_p50": 131385.26,
+        "required_inventory_snaive": 139363.85,
+        "pct_diff_p50_vs_snaive": -5.73,
+        "ci_95_p50_low": -10.48,
+        "ci_95_p50_high": -1.67,
+        "p50_ci_excludes_zero": true,
+        "is_statistically_significant_win_p50": true
+      },
+      {
+        "family": "BREAD/BAKERY",
+        "lead_time_days": 7,
+        "target_fill_rate_pct": 99.0,
+        "is_reachable_p50": true,
+        "is_reachable_point": true,
+        "grid_fr_range_p50": [
+          97.89,
+          99.45
+        ],
+        "grid_fr_range_point": [
+          97.81,
+          99.44
+        ],
+        "grid_fr_range_snaive": [
+          97.91,
+          99.62
+        ],
+        "required_inventory_lightgbm_p50": 143758.7,
+        "required_inventory_snaive": 152073.44,
+        "pct_diff_p50_vs_snaive": -5.47,
+        "ci_95_p50_low": -10.7,
+        "ci_95_p50_high": 0.29,
+        "p50_ci_excludes_zero": false,
+        "is_statistically_significant_win_p50": false
+      },
+      {
+        "family": "BREAD/BAKERY",
+        "lead_time_days": 7,
+        "target_fill_rate_pct": 99.5,
+        "is_reachable_p50": false,
+        "is_reachable_point": false,
+        "grid_fr_range_p50": [
+          97.89,
+          99.45
+        ],
+        "grid_fr_range_point": [
+          97.81,
+          99.44
+        ],
+        "grid_fr_range_snaive": [
+          97.91,
+          99.62
+        ],
+        "required_inventory_lightgbm_p50": null,
+        "required_inventory_snaive": null,
+        "pct_diff_p50_vs_snaive": null,
+        "ci_95_p50_low": null,
+        "ci_95_p50_high": null,
+        "p50_ci_excludes_zero": false,
+        "is_statistically_significant_win_p50": false
       },
       {
         "family": "POULTRY",
         "lead_time_days": 3,
-        "service_level": 0.95,
-        "lightgbm": {
-          "fill_rate_pct": 99.98,
-          "average_inventory_units": 122060.44,
-          "stockout_day_share_pct": 0.2
-        },
-        "seasonal_naive": {
-          "fill_rate_pct": 99.97,
-          "average_inventory_units": 126413.9,
-          "stockout_day_share_pct": 0.11
-        },
-        "inventory_difference_pct": -3.44
+        "target_fill_rate_pct": 98.5,
+        "is_reachable_p50": false,
+        "is_reachable_point": false,
+        "grid_fr_range_p50": [
+          99.26,
+          99.97
+        ],
+        "grid_fr_range_point": [
+          99.19,
+          99.94
+        ],
+        "grid_fr_range_snaive": [
+          98.98,
+          99.94
+        ],
+        "required_inventory_lightgbm_p50": null,
+        "required_inventory_snaive": null,
+        "pct_diff_p50_vs_snaive": null,
+        "ci_95_p50_low": null,
+        "ci_95_p50_high": null,
+        "p50_ci_excludes_zero": false,
+        "is_statistically_significant_win_p50": false
+      },
+      {
+        "family": "POULTRY",
+        "lead_time_days": 3,
+        "target_fill_rate_pct": 99.0,
+        "is_reachable_p50": false,
+        "is_reachable_point": false,
+        "grid_fr_range_p50": [
+          99.26,
+          99.97
+        ],
+        "grid_fr_range_point": [
+          99.19,
+          99.94
+        ],
+        "grid_fr_range_snaive": [
+          98.98,
+          99.94
+        ],
+        "required_inventory_lightgbm_p50": null,
+        "required_inventory_snaive": null,
+        "pct_diff_p50_vs_snaive": null,
+        "ci_95_p50_low": null,
+        "ci_95_p50_high": null,
+        "p50_ci_excludes_zero": false,
+        "is_statistically_significant_win_p50": false
+      },
+      {
+        "family": "POULTRY",
+        "lead_time_days": 3,
+        "target_fill_rate_pct": 99.5,
+        "is_reachable_p50": true,
+        "is_reachable_point": true,
+        "grid_fr_range_p50": [
+          99.26,
+          99.97
+        ],
+        "grid_fr_range_point": [
+          99.19,
+          99.94
+        ],
+        "grid_fr_range_snaive": [
+          98.98,
+          99.94
+        ],
+        "required_inventory_lightgbm_p50": 109770.08,
+        "required_inventory_snaive": 119309.17,
+        "pct_diff_p50_vs_snaive": -8.0,
+        "ci_95_p50_low": -14.35,
+        "ci_95_p50_high": -3.1,
+        "p50_ci_excludes_zero": true,
+        "is_statistically_significant_win_p50": true
+      },
+      {
+        "family": "POULTRY",
+        "lead_time_days": 7,
+        "target_fill_rate_pct": 98.5,
+        "is_reachable_p50": false,
+        "is_reachable_point": false,
+        "grid_fr_range_p50": [
+          99.42,
+          99.98
+        ],
+        "grid_fr_range_point": [
+          99.3,
+          99.94
+        ],
+        "grid_fr_range_snaive": [
+          98.86,
+          99.92
+        ],
+        "required_inventory_lightgbm_p50": null,
+        "required_inventory_snaive": null,
+        "pct_diff_p50_vs_snaive": null,
+        "ci_95_p50_low": null,
+        "ci_95_p50_high": null,
+        "p50_ci_excludes_zero": false,
+        "is_statistically_significant_win_p50": false
+      },
+      {
+        "family": "POULTRY",
+        "lead_time_days": 7,
+        "target_fill_rate_pct": 99.0,
+        "is_reachable_p50": false,
+        "is_reachable_point": false,
+        "grid_fr_range_p50": [
+          99.42,
+          99.98
+        ],
+        "grid_fr_range_point": [
+          99.3,
+          99.94
+        ],
+        "grid_fr_range_snaive": [
+          98.86,
+          99.92
+        ],
+        "required_inventory_lightgbm_p50": null,
+        "required_inventory_snaive": null,
+        "pct_diff_p50_vs_snaive": null,
+        "ci_95_p50_low": null,
+        "ci_95_p50_high": null,
+        "p50_ci_excludes_zero": false,
+        "is_statistically_significant_win_p50": false
+      },
+      {
+        "family": "POULTRY",
+        "lead_time_days": 7,
+        "target_fill_rate_pct": 99.5,
+        "is_reachable_p50": true,
+        "is_reachable_point": true,
+        "grid_fr_range_p50": [
+          99.42,
+          99.98
+        ],
+        "grid_fr_range_point": [
+          99.3,
+          99.94
+        ],
+        "grid_fr_range_snaive": [
+          98.86,
+          99.92
+        ],
+        "required_inventory_lightgbm_p50": 110685.66,
+        "required_inventory_snaive": 134630.11,
+        "pct_diff_p50_vs_snaive": -17.79,
+        "ci_95_p50_low": -28.96,
+        "ci_95_p50_high": -11.52,
+        "p50_ci_excludes_zero": true,
+        "is_statistically_significant_win_p50": true
       },
       {
         "family": "MEATS",
         "lead_time_days": 3,
-        "service_level": 0.95,
-        "lightgbm": {
-          "fill_rate_pct": 99.98,
-          "average_inventory_units": 115297.24,
-          "stockout_day_share_pct": 0.16
-        },
-        "seasonal_naive": {
-          "fill_rate_pct": 99.99,
-          "average_inventory_units": 116301.16,
-          "stockout_day_share_pct": 0.14
-        },
-        "inventory_difference_pct": -0.86
+        "target_fill_rate_pct": 98.5,
+        "is_reachable_p50": false,
+        "is_reachable_point": false,
+        "grid_fr_range_p50": [
+          98.57,
+          99.85
+        ],
+        "grid_fr_range_point": [
+          98.37,
+          99.76
+        ],
+        "grid_fr_range_snaive": [
+          98.59,
+          99.86
+        ],
+        "required_inventory_lightgbm_p50": null,
+        "required_inventory_snaive": null,
+        "pct_diff_p50_vs_snaive": null,
+        "ci_95_p50_low": null,
+        "ci_95_p50_high": null,
+        "p50_ci_excludes_zero": false,
+        "is_statistically_significant_win_p50": false
+      },
+      {
+        "family": "MEATS",
+        "lead_time_days": 3,
+        "target_fill_rate_pct": 99.0,
+        "is_reachable_p50": true,
+        "is_reachable_point": true,
+        "grid_fr_range_p50": [
+          98.57,
+          99.85
+        ],
+        "grid_fr_range_point": [
+          98.37,
+          99.76
+        ],
+        "grid_fr_range_snaive": [
+          98.59,
+          99.86
+        ],
+        "required_inventory_lightgbm_p50": 107983.81,
+        "required_inventory_snaive": 110439.6,
+        "pct_diff_p50_vs_snaive": -2.22,
+        "ci_95_p50_low": -6.72,
+        "ci_95_p50_high": 1.13,
+        "p50_ci_excludes_zero": false,
+        "is_statistically_significant_win_p50": false
+      },
+      {
+        "family": "MEATS",
+        "lead_time_days": 3,
+        "target_fill_rate_pct": 99.5,
+        "is_reachable_p50": true,
+        "is_reachable_point": true,
+        "grid_fr_range_p50": [
+          98.57,
+          99.85
+        ],
+        "grid_fr_range_point": [
+          98.37,
+          99.76
+        ],
+        "grid_fr_range_snaive": [
+          98.59,
+          99.86
+        ],
+        "required_inventory_lightgbm_p50": 118092.14,
+        "required_inventory_snaive": 121922.93,
+        "pct_diff_p50_vs_snaive": -3.14,
+        "ci_95_p50_low": -9.15,
+        "ci_95_p50_high": 1.96,
+        "p50_ci_excludes_zero": false,
+        "is_statistically_significant_win_p50": false
+      },
+      {
+        "family": "MEATS",
+        "lead_time_days": 7,
+        "target_fill_rate_pct": 98.5,
+        "is_reachable_p50": true,
+        "is_reachable_point": true,
+        "grid_fr_range_p50": [
+          97.51,
+          99.44
+        ],
+        "grid_fr_range_point": [
+          97.22,
+          99.21
+        ],
+        "grid_fr_range_snaive": [
+          97.77,
+          99.64
+        ],
+        "required_inventory_lightgbm_p50": 119850.59,
+        "required_inventory_snaive": 122874.85,
+        "pct_diff_p50_vs_snaive": -2.46,
+        "ci_95_p50_low": -8.59,
+        "ci_95_p50_high": 3.02,
+        "p50_ci_excludes_zero": false,
+        "is_statistically_significant_win_p50": false
+      },
+      {
+        "family": "MEATS",
+        "lead_time_days": 7,
+        "target_fill_rate_pct": 99.0,
+        "is_reachable_p50": true,
+        "is_reachable_point": true,
+        "grid_fr_range_p50": [
+          97.51,
+          99.44
+        ],
+        "grid_fr_range_point": [
+          97.22,
+          99.21
+        ],
+        "grid_fr_range_snaive": [
+          97.77,
+          99.64
+        ],
+        "required_inventory_lightgbm_p50": 129130.24,
+        "required_inventory_snaive": 133079.84,
+        "pct_diff_p50_vs_snaive": -2.97,
+        "ci_95_p50_low": -9.59,
+        "ci_95_p50_high": 3.49,
+        "p50_ci_excludes_zero": false,
+        "is_statistically_significant_win_p50": false
+      },
+      {
+        "family": "MEATS",
+        "lead_time_days": 7,
+        "target_fill_rate_pct": 99.5,
+        "is_reachable_p50": false,
+        "is_reachable_point": false,
+        "grid_fr_range_p50": [
+          97.51,
+          99.44
+        ],
+        "grid_fr_range_point": [
+          97.22,
+          99.21
+        ],
+        "grid_fr_range_snaive": [
+          97.77,
+          99.64
+        ],
+        "required_inventory_lightgbm_p50": null,
+        "required_inventory_snaive": null,
+        "pct_diff_p50_vs_snaive": null,
+        "ci_95_p50_low": null,
+        "ci_95_p50_high": null,
+        "p50_ci_excludes_zero": false,
+        "is_statistically_significant_win_p50": false
       },
       {
         "family": "DELI",
         "lead_time_days": 3,
-        "service_level": 0.95,
-        "lightgbm": {
-          "fill_rate_pct": 100.0,
-          "average_inventory_units": 91376.42,
-          "stockout_day_share_pct": 0.07
-        },
-        "seasonal_naive": {
-          "fill_rate_pct": 99.91,
-          "average_inventory_units": 95997.2,
-          "stockout_day_share_pct": 0.27
-        },
-        "inventory_difference_pct": -4.81
+        "target_fill_rate_pct": 98.5,
+        "is_reachable_p50": false,
+        "is_reachable_point": false,
+        "grid_fr_range_p50": [
+          99.31,
+          99.95
+        ],
+        "grid_fr_range_point": [
+          99.32,
+          99.94
+        ],
+        "grid_fr_range_snaive": [
+          98.42,
+          99.97
+        ],
+        "required_inventory_lightgbm_p50": null,
+        "required_inventory_snaive": null,
+        "pct_diff_p50_vs_snaive": null,
+        "ci_95_p50_low": null,
+        "ci_95_p50_high": null,
+        "p50_ci_excludes_zero": false,
+        "is_statistically_significant_win_p50": false
+      },
+      {
+        "family": "DELI",
+        "lead_time_days": 3,
+        "target_fill_rate_pct": 99.0,
+        "is_reachable_p50": false,
+        "is_reachable_point": false,
+        "grid_fr_range_p50": [
+          99.31,
+          99.95
+        ],
+        "grid_fr_range_point": [
+          99.32,
+          99.94
+        ],
+        "grid_fr_range_snaive": [
+          98.42,
+          99.97
+        ],
+        "required_inventory_lightgbm_p50": null,
+        "required_inventory_snaive": null,
+        "pct_diff_p50_vs_snaive": null,
+        "ci_95_p50_low": null,
+        "ci_95_p50_high": null,
+        "p50_ci_excludes_zero": false,
+        "is_statistically_significant_win_p50": false
+      },
+      {
+        "family": "DELI",
+        "lead_time_days": 3,
+        "target_fill_rate_pct": 99.5,
+        "is_reachable_p50": true,
+        "is_reachable_point": true,
+        "grid_fr_range_p50": [
+          99.31,
+          99.95
+        ],
+        "grid_fr_range_point": [
+          99.32,
+          99.94
+        ],
+        "grid_fr_range_snaive": [
+          98.42,
+          99.97
+        ],
+        "required_inventory_lightgbm_p50": 78313.89,
+        "required_inventory_snaive": 91582.15,
+        "pct_diff_p50_vs_snaive": -14.49,
+        "ci_95_p50_low": -17.67,
+        "ci_95_p50_high": -9.85,
+        "p50_ci_excludes_zero": true,
+        "is_statistically_significant_win_p50": true
+      },
+      {
+        "family": "DELI",
+        "lead_time_days": 7,
+        "target_fill_rate_pct": 98.5,
+        "is_reachable_p50": false,
+        "is_reachable_point": false,
+        "grid_fr_range_p50": [
+          99.54,
+          100.0
+        ],
+        "grid_fr_range_point": [
+          99.52,
+          99.97
+        ],
+        "grid_fr_range_snaive": [
+          98.26,
+          99.97
+        ],
+        "required_inventory_lightgbm_p50": null,
+        "required_inventory_snaive": null,
+        "pct_diff_p50_vs_snaive": null,
+        "ci_95_p50_low": null,
+        "ci_95_p50_high": null,
+        "p50_ci_excludes_zero": false,
+        "is_statistically_significant_win_p50": false
+      },
+      {
+        "family": "DELI",
+        "lead_time_days": 7,
+        "target_fill_rate_pct": 99.0,
+        "is_reachable_p50": false,
+        "is_reachable_point": false,
+        "grid_fr_range_p50": [
+          99.54,
+          100.0
+        ],
+        "grid_fr_range_point": [
+          99.52,
+          99.97
+        ],
+        "grid_fr_range_snaive": [
+          98.26,
+          99.97
+        ],
+        "required_inventory_lightgbm_p50": null,
+        "required_inventory_snaive": null,
+        "pct_diff_p50_vs_snaive": null,
+        "ci_95_p50_low": null,
+        "ci_95_p50_high": null,
+        "p50_ci_excludes_zero": false,
+        "is_statistically_significant_win_p50": false
+      },
+      {
+        "family": "DELI",
+        "lead_time_days": 7,
+        "target_fill_rate_pct": 99.5,
+        "is_reachable_p50": false,
+        "is_reachable_point": false,
+        "grid_fr_range_p50": [
+          99.54,
+          100.0
+        ],
+        "grid_fr_range_point": [
+          99.52,
+          99.97
+        ],
+        "grid_fr_range_snaive": [
+          98.26,
+          99.97
+        ],
+        "required_inventory_lightgbm_p50": null,
+        "required_inventory_snaive": null,
+        "pct_diff_p50_vs_snaive": null,
+        "ci_95_p50_low": null,
+        "ci_95_p50_high": null,
+        "p50_ci_excludes_zero": false,
+        "is_statistically_significant_win_p50": false
       },
       {
         "family": "PERSONAL CARE",
         "lead_time_days": 3,
-        "service_level": 0.95,
-        "lightgbm": {
-          "fill_rate_pct": 98.8,
-          "average_inventory_units": 88415.53,
-          "stockout_day_share_pct": 1.22
-        },
-        "seasonal_naive": {
-          "fill_rate_pct": 99.22,
-          "average_inventory_units": 97584.13,
-          "stockout_day_share_pct": 1.13
-        },
-        "inventory_difference_pct": -9.4
+        "target_fill_rate_pct": 98.5,
+        "is_reachable_p50": true,
+        "is_reachable_point": true,
+        "grid_fr_range_p50": [
+          94.49,
+          98.6
+        ],
+        "grid_fr_range_point": [
+          94.72,
+          98.84
+        ],
+        "grid_fr_range_snaive": [
+          92.62,
+          99.28
+        ],
+        "required_inventory_lightgbm_p50": 91588.2,
+        "required_inventory_snaive": 100633.4,
+        "pct_diff_p50_vs_snaive": -8.99,
+        "ci_95_p50_low": -14.1,
+        "ci_95_p50_high": -6.51,
+        "p50_ci_excludes_zero": true,
+        "is_statistically_significant_win_p50": true
+      },
+      {
+        "family": "PERSONAL CARE",
+        "lead_time_days": 3,
+        "target_fill_rate_pct": 99.0,
+        "is_reachable_p50": false,
+        "is_reachable_point": false,
+        "grid_fr_range_p50": [
+          94.49,
+          98.6
+        ],
+        "grid_fr_range_point": [
+          94.72,
+          98.84
+        ],
+        "grid_fr_range_snaive": [
+          92.62,
+          99.28
+        ],
+        "required_inventory_lightgbm_p50": null,
+        "required_inventory_snaive": null,
+        "pct_diff_p50_vs_snaive": null,
+        "ci_95_p50_low": null,
+        "ci_95_p50_high": null,
+        "p50_ci_excludes_zero": false,
+        "is_statistically_significant_win_p50": false
+      },
+      {
+        "family": "PERSONAL CARE",
+        "lead_time_days": 3,
+        "target_fill_rate_pct": 99.5,
+        "is_reachable_p50": false,
+        "is_reachable_point": false,
+        "grid_fr_range_p50": [
+          94.49,
+          98.6
+        ],
+        "grid_fr_range_point": [
+          94.72,
+          98.84
+        ],
+        "grid_fr_range_snaive": [
+          92.62,
+          99.28
+        ],
+        "required_inventory_lightgbm_p50": null,
+        "required_inventory_snaive": null,
+        "pct_diff_p50_vs_snaive": null,
+        "ci_95_p50_low": null,
+        "ci_95_p50_high": null,
+        "p50_ci_excludes_zero": false,
+        "is_statistically_significant_win_p50": false
+      },
+      {
+        "family": "PERSONAL CARE",
+        "lead_time_days": 7,
+        "target_fill_rate_pct": 98.5,
+        "is_reachable_p50": true,
+        "is_reachable_point": true,
+        "grid_fr_range_p50": [
+          94.51,
+          98.5
+        ],
+        "grid_fr_range_point": [
+          94.4,
+          98.57
+        ],
+        "grid_fr_range_snaive": [
+          92.85,
+          98.98
+        ],
+        "required_inventory_lightgbm_p50": 94841.51,
+        "required_inventory_snaive": 110670.03,
+        "pct_diff_p50_vs_snaive": -14.3,
+        "ci_95_p50_low": -20.13,
+        "ci_95_p50_high": -10.85,
+        "p50_ci_excludes_zero": true,
+        "is_statistically_significant_win_p50": true
+      },
+      {
+        "family": "PERSONAL CARE",
+        "lead_time_days": 7,
+        "target_fill_rate_pct": 99.0,
+        "is_reachable_p50": false,
+        "is_reachable_point": false,
+        "grid_fr_range_p50": [
+          94.51,
+          98.5
+        ],
+        "grid_fr_range_point": [
+          94.4,
+          98.57
+        ],
+        "grid_fr_range_snaive": [
+          92.85,
+          98.98
+        ],
+        "required_inventory_lightgbm_p50": null,
+        "required_inventory_snaive": null,
+        "pct_diff_p50_vs_snaive": null,
+        "ci_95_p50_low": null,
+        "ci_95_p50_high": null,
+        "p50_ci_excludes_zero": false,
+        "is_statistically_significant_win_p50": false
+      },
+      {
+        "family": "PERSONAL CARE",
+        "lead_time_days": 7,
+        "target_fill_rate_pct": 99.5,
+        "is_reachable_p50": false,
+        "is_reachable_point": false,
+        "grid_fr_range_p50": [
+          94.51,
+          98.5
+        ],
+        "grid_fr_range_point": [
+          94.4,
+          98.57
+        ],
+        "grid_fr_range_snaive": [
+          92.85,
+          98.98
+        ],
+        "required_inventory_lightgbm_p50": null,
+        "required_inventory_snaive": null,
+        "pct_diff_p50_vs_snaive": null,
+        "ci_95_p50_low": null,
+        "ci_95_p50_high": null,
+        "p50_ci_excludes_zero": false,
+        "is_statistically_significant_win_p50": false
       },
       {
         "family": "BABY CARE",
         "lead_time_days": 3,
-        "service_level": 0.95,
-        "lightgbm": {
-          "fill_rate_pct": 75.8,
-          "average_inventory_units": 99.17,
-          "stockout_day_share_pct": 3.55
-        },
-        "seasonal_naive": {
-          "fill_rate_pct": 91.43,
-          "average_inventory_units": 231.66,
-          "stockout_day_share_pct": 1.17
-        },
-        "inventory_difference_pct": -57.19
+        "target_fill_rate_pct": 98.5,
+        "is_reachable_p50": false,
+        "is_reachable_point": false,
+        "grid_fr_range_p50": [
+          27.71,
+          84.89
+        ],
+        "grid_fr_range_point": [
+          53.41,
+          88.96
+        ],
+        "grid_fr_range_snaive": [
+          68.23,
+          91.87
+        ],
+        "required_inventory_lightgbm_p50": null,
+        "required_inventory_snaive": null,
+        "pct_diff_p50_vs_snaive": null,
+        "ci_95_p50_low": null,
+        "ci_95_p50_high": null,
+        "p50_ci_excludes_zero": false,
+        "is_statistically_significant_win_p50": false
+      },
+      {
+        "family": "BABY CARE",
+        "lead_time_days": 3,
+        "target_fill_rate_pct": 99.0,
+        "is_reachable_p50": false,
+        "is_reachable_point": false,
+        "grid_fr_range_p50": [
+          27.71,
+          84.89
+        ],
+        "grid_fr_range_point": [
+          53.41,
+          88.96
+        ],
+        "grid_fr_range_snaive": [
+          68.23,
+          91.87
+        ],
+        "required_inventory_lightgbm_p50": null,
+        "required_inventory_snaive": null,
+        "pct_diff_p50_vs_snaive": null,
+        "ci_95_p50_low": null,
+        "ci_95_p50_high": null,
+        "p50_ci_excludes_zero": false,
+        "is_statistically_significant_win_p50": false
+      },
+      {
+        "family": "BABY CARE",
+        "lead_time_days": 3,
+        "target_fill_rate_pct": 99.5,
+        "is_reachable_p50": false,
+        "is_reachable_point": false,
+        "grid_fr_range_p50": [
+          27.71,
+          84.89
+        ],
+        "grid_fr_range_point": [
+          53.41,
+          88.96
+        ],
+        "grid_fr_range_snaive": [
+          68.23,
+          91.87
+        ],
+        "required_inventory_lightgbm_p50": null,
+        "required_inventory_snaive": null,
+        "pct_diff_p50_vs_snaive": null,
+        "ci_95_p50_low": null,
+        "ci_95_p50_high": null,
+        "p50_ci_excludes_zero": false,
+        "is_statistically_significant_win_p50": false
+      },
+      {
+        "family": "BABY CARE",
+        "lead_time_days": 7,
+        "target_fill_rate_pct": 98.5,
+        "is_reachable_p50": false,
+        "is_reachable_point": false,
+        "grid_fr_range_p50": [
+          26.53,
+          81.41
+        ],
+        "grid_fr_range_point": [
+          51.79,
+          87.81
+        ],
+        "grid_fr_range_snaive": [
+          68.94,
+          91.13
+        ],
+        "required_inventory_lightgbm_p50": null,
+        "required_inventory_snaive": null,
+        "pct_diff_p50_vs_snaive": null,
+        "ci_95_p50_low": null,
+        "ci_95_p50_high": null,
+        "p50_ci_excludes_zero": false,
+        "is_statistically_significant_win_p50": false
+      },
+      {
+        "family": "BABY CARE",
+        "lead_time_days": 7,
+        "target_fill_rate_pct": 99.0,
+        "is_reachable_p50": false,
+        "is_reachable_point": false,
+        "grid_fr_range_p50": [
+          26.53,
+          81.41
+        ],
+        "grid_fr_range_point": [
+          51.79,
+          87.81
+        ],
+        "grid_fr_range_snaive": [
+          68.94,
+          91.13
+        ],
+        "required_inventory_lightgbm_p50": null,
+        "required_inventory_snaive": null,
+        "pct_diff_p50_vs_snaive": null,
+        "ci_95_p50_low": null,
+        "ci_95_p50_high": null,
+        "p50_ci_excludes_zero": false,
+        "is_statistically_significant_win_p50": false
+      },
+      {
+        "family": "BABY CARE",
+        "lead_time_days": 7,
+        "target_fill_rate_pct": 99.5,
+        "is_reachable_p50": false,
+        "is_reachable_point": false,
+        "grid_fr_range_p50": [
+          26.53,
+          81.41
+        ],
+        "grid_fr_range_point": [
+          51.79,
+          87.81
+        ],
+        "grid_fr_range_snaive": [
+          68.94,
+          91.13
+        ],
+        "required_inventory_lightgbm_p50": null,
+        "required_inventory_snaive": null,
+        "pct_diff_p50_vs_snaive": null,
+        "ci_95_p50_low": null,
+        "ci_95_p50_high": null,
+        "p50_ci_excludes_zero": false,
+        "is_statistically_significant_win_p50": false
       },
       {
         "family": "BOOKS",
         "lead_time_days": 3,
-        "service_level": 0.95,
-        "lightgbm": {
-          "fill_rate_pct": 82.36,
-          "average_inventory_units": 93.55,
-          "stockout_day_share_pct": 0.59
-        },
-        "seasonal_naive": {
-          "fill_rate_pct": 99.23,
-          "average_inventory_units": 155.97,
-          "stockout_day_share_pct": 0.05
-        },
-        "inventory_difference_pct": -40.02
+        "target_fill_rate_pct": 98.5,
+        "is_reachable_p50": false,
+        "is_reachable_point": false,
+        "grid_fr_range_p50": [
+          18.45,
+          93.94
+        ],
+        "grid_fr_range_point": [
+          61.18,
+          97.51
+        ],
+        "grid_fr_range_snaive": [
+          71.29,
+          99.69
+        ],
+        "required_inventory_lightgbm_p50": null,
+        "required_inventory_snaive": null,
+        "pct_diff_p50_vs_snaive": null,
+        "ci_95_p50_low": null,
+        "ci_95_p50_high": null,
+        "p50_ci_excludes_zero": false,
+        "is_statistically_significant_win_p50": false
+      },
+      {
+        "family": "BOOKS",
+        "lead_time_days": 3,
+        "target_fill_rate_pct": 99.0,
+        "is_reachable_p50": false,
+        "is_reachable_point": false,
+        "grid_fr_range_p50": [
+          18.45,
+          93.94
+        ],
+        "grid_fr_range_point": [
+          61.18,
+          97.51
+        ],
+        "grid_fr_range_snaive": [
+          71.29,
+          99.69
+        ],
+        "required_inventory_lightgbm_p50": null,
+        "required_inventory_snaive": null,
+        "pct_diff_p50_vs_snaive": null,
+        "ci_95_p50_low": null,
+        "ci_95_p50_high": null,
+        "p50_ci_excludes_zero": false,
+        "is_statistically_significant_win_p50": false
+      },
+      {
+        "family": "BOOKS",
+        "lead_time_days": 3,
+        "target_fill_rate_pct": 99.5,
+        "is_reachable_p50": false,
+        "is_reachable_point": false,
+        "grid_fr_range_p50": [
+          18.45,
+          93.94
+        ],
+        "grid_fr_range_point": [
+          61.18,
+          97.51
+        ],
+        "grid_fr_range_snaive": [
+          71.29,
+          99.69
+        ],
+        "required_inventory_lightgbm_p50": null,
+        "required_inventory_snaive": null,
+        "pct_diff_p50_vs_snaive": null,
+        "ci_95_p50_low": null,
+        "ci_95_p50_high": null,
+        "p50_ci_excludes_zero": false,
+        "is_statistically_significant_win_p50": false
+      },
+      {
+        "family": "BOOKS",
+        "lead_time_days": 7,
+        "target_fill_rate_pct": 98.5,
+        "is_reachable_p50": false,
+        "is_reachable_point": false,
+        "grid_fr_range_p50": [
+          19.58,
+          93.81
+        ],
+        "grid_fr_range_point": [
+          61.73,
+          98.01
+        ],
+        "grid_fr_range_snaive": [
+          75.55,
+          99.93
+        ],
+        "required_inventory_lightgbm_p50": null,
+        "required_inventory_snaive": null,
+        "pct_diff_p50_vs_snaive": null,
+        "ci_95_p50_low": null,
+        "ci_95_p50_high": null,
+        "p50_ci_excludes_zero": false,
+        "is_statistically_significant_win_p50": false
+      },
+      {
+        "family": "BOOKS",
+        "lead_time_days": 7,
+        "target_fill_rate_pct": 99.0,
+        "is_reachable_p50": false,
+        "is_reachable_point": false,
+        "grid_fr_range_p50": [
+          19.58,
+          93.81
+        ],
+        "grid_fr_range_point": [
+          61.73,
+          98.01
+        ],
+        "grid_fr_range_snaive": [
+          75.55,
+          99.93
+        ],
+        "required_inventory_lightgbm_p50": null,
+        "required_inventory_snaive": null,
+        "pct_diff_p50_vs_snaive": null,
+        "ci_95_p50_low": null,
+        "ci_95_p50_high": null,
+        "p50_ci_excludes_zero": false,
+        "is_statistically_significant_win_p50": false
+      },
+      {
+        "family": "BOOKS",
+        "lead_time_days": 7,
+        "target_fill_rate_pct": 99.5,
+        "is_reachable_p50": false,
+        "is_reachable_point": false,
+        "grid_fr_range_p50": [
+          19.58,
+          93.81
+        ],
+        "grid_fr_range_point": [
+          61.73,
+          98.01
+        ],
+        "grid_fr_range_snaive": [
+          75.55,
+          99.93
+        ],
+        "required_inventory_lightgbm_p50": null,
+        "required_inventory_snaive": null,
+        "pct_diff_p50_vs_snaive": null,
+        "ci_95_p50_low": null,
+        "ci_95_p50_high": null,
+        "p50_ci_excludes_zero": false,
+        "is_statistically_significant_win_p50": false
       },
       {
         "family": "LAWN AND GARDEN",
         "lead_time_days": 3,
-        "service_level": 0.95,
-        "lightgbm": {
-          "fill_rate_pct": 99.82,
-          "average_inventory_units": 7292.11,
-          "stockout_day_share_pct": 0.52
-        },
-        "seasonal_naive": {
-          "fill_rate_pct": 99.92,
-          "average_inventory_units": 9516.26,
-          "stockout_day_share_pct": 0.11
-        },
-        "inventory_difference_pct": -23.37
+        "target_fill_rate_pct": 98.5,
+        "is_reachable_p50": true,
+        "is_reachable_point": true,
+        "grid_fr_range_p50": [
+          94.82,
+          99.92
+        ],
+        "grid_fr_range_point": [
+          95.06,
+          99.89
+        ],
+        "grid_fr_range_snaive": [
+          95.86,
+          99.98
+        ],
+        "required_inventory_lightgbm_p50": 4982.68,
+        "required_inventory_snaive": 5766.04,
+        "pct_diff_p50_vs_snaive": -13.59,
+        "ci_95_p50_low": -20.95,
+        "ci_95_p50_high": -6.04,
+        "p50_ci_excludes_zero": true,
+        "is_statistically_significant_win_p50": true
+      },
+      {
+        "family": "LAWN AND GARDEN",
+        "lead_time_days": 3,
+        "target_fill_rate_pct": 99.0,
+        "is_reachable_p50": true,
+        "is_reachable_point": true,
+        "grid_fr_range_p50": [
+          94.82,
+          99.92
+        ],
+        "grid_fr_range_point": [
+          95.06,
+          99.89
+        ],
+        "grid_fr_range_snaive": [
+          95.86,
+          99.98
+        ],
+        "required_inventory_lightgbm_p50": 5431.04,
+        "required_inventory_snaive": 6325.31,
+        "pct_diff_p50_vs_snaive": -14.14,
+        "ci_95_p50_low": -22.45,
+        "ci_95_p50_high": -3.22,
+        "p50_ci_excludes_zero": true,
+        "is_statistically_significant_win_p50": true
+      },
+      {
+        "family": "LAWN AND GARDEN",
+        "lead_time_days": 3,
+        "target_fill_rate_pct": 99.5,
+        "is_reachable_p50": true,
+        "is_reachable_point": true,
+        "grid_fr_range_p50": [
+          94.82,
+          99.92
+        ],
+        "grid_fr_range_point": [
+          95.06,
+          99.89
+        ],
+        "grid_fr_range_snaive": [
+          95.86,
+          99.98
+        ],
+        "required_inventory_lightgbm_p50": 6135.4,
+        "required_inventory_snaive": 7375.42,
+        "pct_diff_p50_vs_snaive": -16.81,
+        "ci_95_p50_low": -30.55,
+        "ci_95_p50_high": 0.1,
+        "p50_ci_excludes_zero": false,
+        "is_statistically_significant_win_p50": false
+      },
+      {
+        "family": "LAWN AND GARDEN",
+        "lead_time_days": 7,
+        "target_fill_rate_pct": 98.5,
+        "is_reachable_p50": true,
+        "is_reachable_point": true,
+        "grid_fr_range_p50": [
+          95.28,
+          99.93
+        ],
+        "grid_fr_range_point": [
+          95.4,
+          99.9
+        ],
+        "grid_fr_range_snaive": [
+          95.98,
+          100.0
+        ],
+        "required_inventory_lightgbm_p50": 4898.65,
+        "required_inventory_snaive": 6400.84,
+        "pct_diff_p50_vs_snaive": -23.47,
+        "ci_95_p50_low": -30.08,
+        "ci_95_p50_high": -13.47,
+        "p50_ci_excludes_zero": true,
+        "is_statistically_significant_win_p50": true
+      },
+      {
+        "family": "LAWN AND GARDEN",
+        "lead_time_days": 7,
+        "target_fill_rate_pct": 99.0,
+        "is_reachable_p50": true,
+        "is_reachable_point": true,
+        "grid_fr_range_p50": [
+          95.28,
+          99.93
+        ],
+        "grid_fr_range_point": [
+          95.4,
+          99.9
+        ],
+        "grid_fr_range_snaive": [
+          95.98,
+          100.0
+        ],
+        "required_inventory_lightgbm_p50": 5386.79,
+        "required_inventory_snaive": 6957.68,
+        "pct_diff_p50_vs_snaive": -22.58,
+        "ci_95_p50_low": -30.7,
+        "ci_95_p50_high": -13.06,
+        "p50_ci_excludes_zero": true,
+        "is_statistically_significant_win_p50": true
+      },
+      {
+        "family": "LAWN AND GARDEN",
+        "lead_time_days": 7,
+        "target_fill_rate_pct": 99.5,
+        "is_reachable_p50": true,
+        "is_reachable_point": true,
+        "grid_fr_range_p50": [
+          95.28,
+          99.93
+        ],
+        "grid_fr_range_point": [
+          95.4,
+          99.9
+        ],
+        "grid_fr_range_snaive": [
+          95.98,
+          100.0
+        ],
+        "required_inventory_lightgbm_p50": 6259.8,
+        "required_inventory_snaive": 8208.98,
+        "pct_diff_p50_vs_snaive": -23.74,
+        "ci_95_p50_low": -30.59,
+        "ci_95_p50_high": -12.64,
+        "p50_ci_excludes_zero": true,
+        "is_statistically_significant_win_p50": true
       }
     ]
   }

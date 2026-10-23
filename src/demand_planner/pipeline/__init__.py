@@ -193,13 +193,15 @@ def _register_simulation_stage() -> None:
             frontier_df, target_fill_rates=(98.5, 99.0, 99.5), n_bootstrap=200, seed=cfg.seed
         )
 
-        log.info("Computing per-family replenishment metrics at matched SL=0.95 (L=3d)...")
-        family_results = sim.simulate_by_family(lead_time_days=3, service_level=0.95)
+        log.info("Computing per-family matched fill-rate frontiers across L in {3, 7}...")
+        family_results = sim.simulate_by_family_matched_fill_rate(
+            frontier_df=frontier_df, lead_times=(3, 7), target_fill_rates=(98.5, 99.0, 99.5)
+        )
 
         tradeoff_chart = plot_replenishment_tradeoff(sim_df, frontier_df=frontier_df)
         log.info("Saved replenishment trade-off chart to %s", tradeoff_chart)
 
-        # Save small summary parquet (< 10 KB) for tracking
+        # Save small summary parquet (< 15 KB) for tracking
         summary_path = OUTPUTS / "sim_policy_summary.parquet"
         sim_df.to_parquet(summary_path, index=False)
         log.info("Saved tracked policy summary to %s (%d rows)", summary_path, len(sim_df))
@@ -231,7 +233,7 @@ def _register_simulation_stage() -> None:
             },
             "policies": sim_df.to_dict(orient="records"),
             "target_fill_rate_tradeoffs": tradeoffs,
-            "per_family_matched_sl95_l3d": family_results,
+            "per_family_matched_fill_rate": family_results,
         }
 
         update_metrics_json(sim_data, section="replenishment_simulation")

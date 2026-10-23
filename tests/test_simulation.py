@@ -309,3 +309,56 @@ def test_point_model_simulation_support(mock_predictions_df: pd.DataFrame):
     assert "LightGBM Point + SS" in res["policy_label"]
     assert 0.0 <= res["fill_rate_pct"] <= 100.0
     assert res["average_inventory_units"] >= 0.0
+
+
+def test_dual_bootstrap_target_fill_rate_tradeoff(mock_predictions_df: pd.DataFrame):
+    """Verify compute_target_fill_rate_tradeoff produces both series and
+    time-block bootstrap CIs.
+    """
+    cfg = SimConfig(
+        review_period_days=7,
+        lead_times_days=(3,),
+        warmup_days=7,
+        z_grid=(0.0, 1.0, 2.0),
+        seed=42,
+    )
+    sim = PeriodicReviewSimulator(mock_predictions_df, config=cfg)
+    frontier_df = sim.run_frontier(lead_times=(3,), z_values=(0.0, 1.0, 2.0))
+    tradeoffs = sim.compute_target_fill_rate_tradeoff(
+        frontier_df,
+        lead_times=(3,),
+        target_fill_rates=(98.5,),
+        n_bootstrap=30,
+    )
+    assert len(tradeoffs) >= 1
+    t = tradeoffs[0]
+    assert "ci_95_series_pct_diff_low" in t
+    assert "ci_95_series_pct_diff_high" in t
+    assert "ci_95_time_block_pct_diff_low" in t
+    assert "ci_95_time_block_pct_diff_high" in t
+    assert "target_fill_rate_pct" in t
+    assert "is_reachable" in t
+
+
+def test_family_matched_fill_rate_frontier(mock_predictions_df: pd.DataFrame):
+    """Verify per-family matched fill-rate analysis traces frontiers and handles reachability."""
+    cfg = SimConfig(
+        review_period_days=7,
+        lead_times_days=(3,),
+        warmup_days=7,
+        z_grid=(0.0, 1.0, 2.0),
+        seed=42,
+    )
+    sim = PeriodicReviewSimulator(mock_predictions_df, config=cfg)
+    fam_results = sim.simulate_by_family_matched_fill_rate(
+        lead_times=(3,),
+        target_fill_rates=(98.5,),
+        families=["GROCERY I", "BEVERAGES"],
+        n_bootstrap=25,
+    )
+    assert len(fam_results) == 2
+    for r in fam_results:
+        assert "family" in r
+        assert "is_reachable_p50" in r
+        assert "grid_fr_range_p50" in r
+        assert "p50_ci_excludes_zero" in r
