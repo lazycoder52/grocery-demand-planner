@@ -1,0 +1,11 @@
+# Forecasting and evaluation configuration.
+# Every assumption used by the pipeline lives here so results are reproducible.
+
+seed: 42
+
+evaluation:
+  horizon_days: 16          # matches the Kaggle test window
+  n_folds: 5                # rolling-origin folds (expanding window)
+  fold_step_days: 16        # distance between consecutive forecast origins
+  holdout_days: 16          # final holdout = last 16 days of train, evaluated once
+  primary_metric: wape
