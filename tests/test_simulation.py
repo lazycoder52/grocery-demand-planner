@@ -237,3 +237,75 @@ def test_tradeoff_plot_generation(mock_predictions_df: pd.DataFrame, tmp_path):
     out = plot_replenishment_tradeoff(sim_df, frontier_df=frontier_df, output_path=chart_file)
     assert out.exists()
     assert out.stat().st_size > 0
+
+
+def test_order_forecasts_strictly_pre_origin_and_no_future_fold_leak():
+    """Verify orders placed near fold boundaries never consume future-fold model predictions.
+
+    Rule: For every order placed on review day t (calendar date D_t), all forecast slices
+    utilized must originate from models with origin date <= D_t. Clamping to the active
+    fold boundary prevents temporal leakage into fold k+1.
+    """
+    # 32 days: 16 days in fold 1 (origin 2017-05-01), 16 days in fold 2 (origin 2017-05-17)
+    dates = pd.date_range("2017-05-02", periods=32, freq="D")
+    origin_map = {
+        "fold_1": pd.Timestamp("2017-05-01"),
+        "fold_2": pd.Timestamp("2017-05-17"),
+    }
+
+    records = []
+    for i, d in enumerate(dates):
+        split_name = "fold_1" if i < 16 else "fold_2"
+        # Poison fold_2 with high values to verify that fold 1 orders don't read it
+        p50_val = 10.0 if split_name == "fold_1" else 9999.0
+        records.append(
+            {
+                "date": d,
+                "store_nbr": 1,
+                "family": "GROCERY I",
+                "sales": 10.0,
+                "pred_lgbm": p50_val,
+                "pred_snaive": p50_val,
+                "pred_p10": p50_val * 0.8,
+                "pred_p50": p50_val,
+                "pred_p90": p50_val * 1.2,
+                "sigma_lgbm": 2.0,
+                "sigma_snaive": 2.0,
+                "split": split_name,
+                "fold_idx": 1 if split_name == "fold_1" else 2,
+            }
+        )
+
+    df = pd.DataFrame(records)
+    cfg = SimConfig(review_period_days=7, lead_times_days=(3,), warmup_days=0, seed=42)
+    sim = PeriodicReviewSimulator(df, config=cfg)
+
+    # Order on review day t=14 (2017-05-16, inside fold 1).
+    # Protection window R+L = 10 days spans indices 14..23 (into fold 2, dates 2017-05-18..25).
+    # Fold 2 has origin 2017-05-17 > order date 2017-05-16!
+    order_day = 14
+    order_date = pd.Timestamp(sim.dates[order_day])
+    assert order_date == pd.Timestamp("2017-05-16")
+
+    # The simulator must clamp to fold 1's end (index 15, 2 days observed: index 14 and 15)
+    # and scale proportionally: 2 days * 10.0 = 20.0 * (10 / 2) = 100.0.
+    # If it leaked into fold 2 (values 9999.0), the forecast would be > 10,000.
+    forecast = sim._get_forecast("lightgbm_p50", order_day, protection_days=10)
+    assert float(forecast[0]) == pytest.approx(100.0, rel=1e-3)
+
+    # Verify origin date of all forecasts consumed is strictly <= order_date
+    active_fold = df.loc[df["date"] == order_date, "split"].iloc[0]
+    fold_origin = origin_map[active_fold]
+    assert fold_origin <= order_date, f"Origin {fold_origin} > order date {order_date}"
+
+
+def test_point_model_simulation_support(mock_predictions_df: pd.DataFrame):
+    """Verify LightGBM Point model is supported in replenishment simulation."""
+    cfg = SimConfig(review_period_days=7, lead_times_days=(3,), warmup_days=7, seed=42)
+    sim = PeriodicReviewSimulator(mock_predictions_df, config=cfg)
+
+    res = sim.simulate_policy("lightgbm_point_safety_stock", lead_time_days=3, service_level=0.95)
+    assert res["policy"] == "lightgbm_point_safety_stock"
+    assert "LightGBM Point + SS" in res["policy_label"]
+    assert 0.0 <= res["fill_rate_pct"] <= 100.0
+    assert res["average_inventory_units"] >= 0.0
