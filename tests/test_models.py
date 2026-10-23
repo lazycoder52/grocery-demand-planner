@@ -142,3 +142,111 @@ def test_run_rolling_origin_cv_end_to_end(tiny_favorita_files: dict[str, Path]):
     assert "lightgbm" in cv_results["mean_metrics"]
     assert "seasonal_naive_7d" in cv_results["mean_metrics"]
     assert cv_results["mean_metrics"]["lightgbm"]["mean_wape"] > 0.0
+
+
+def test_lightgbm_quantile_training_and_monotonicity():
+    """Verify LightGBM quantile regression fits P10, P50, P90 and enforces P10 <= P50 <= P90."""
+    from demand_planner.models.quantile import (
+        evaluate_quantiles,
+        predict_lightgbm_quantiles,
+        train_lightgbm_quantiles,
+    )
+
+    rng = np.random.default_rng(42)
+    n = 100
+    X_train = pd.DataFrame(
+        {
+            "store_nbr": pd.Categorical([1] * n),
+            "family": pd.Categorical(["GROCERY I"] * n),
+            "store_type": pd.Categorical(["D"] * n),
+            "cluster": pd.Categorical([13] * n),
+            "dayofweek": rng.integers(0, 7, size=n),
+            "day": rng.integers(1, 29, size=n),
+            "month": [5] * n,
+            "is_weekend": [0] * n,
+            "is_payday": [0] * n,
+            "is_holiday": [0] * n,
+            "onpromotion": rng.integers(0, 5, size=n),
+            "has_promotion": [0] * n,
+            "lag_16": rng.uniform(10, 50, size=n),
+            "lag_21": rng.uniform(10, 50, size=n),
+            "lag_28": rng.uniform(10, 50, size=n),
+            "rolling_mean_7_lag16": rng.uniform(10, 50, size=n),
+            "rolling_mean_28_lag16": rng.uniform(10, 50, size=n),
+        }
+    )
+    y_train = np.log1p(rng.uniform(10, 50, size=n))
+
+    models = train_lightgbm_quantiles(
+        X_train,
+        y_train,
+        alphas=(0.1, 0.5, 0.9),
+        params={"n_estimators": 10, "min_child_samples": 2},
+    )
+    assert set(models.keys()) == {0.1, 0.5, 0.9}
+
+    preds = predict_lightgbm_quantiles(models, X_train, enforce_monotonicity=True)
+    assert "p10" in preds and "p50" in preds and "p90" in preds
+    assert len(preds["p10"]) == n
+
+    # Monotonicity check
+    assert (preds["p10"] <= preds["p50"]).all()
+    assert (preds["p50"] <= preds["p90"]).all()
+    assert (preds["p10"] >= 0.0).all()
+
+    # Evaluation check
+    y_actual = np.expm1(y_train)
+    eval_res = evaluate_quantiles(y_actual, preds)
+    assert "pinball_loss_p10" in eval_res
+    assert "pinball_loss_p50" in eval_res
+    assert "pinball_loss_p90" in eval_res
+    assert "coverage_p10_p90_pct" in eval_res
+    assert 0.0 <= eval_res["coverage_p10_p90_pct"] <= 100.0
+
+
+def test_quantile_cv_and_holdout_end_to_end(tiny_favorita_files: dict[str, Path]):
+    """Verify quantile CV and holdout pipelines run against tiny Favorita fixture."""
+    from demand_planner.models.quantile import evaluate_quantile_holdout, run_quantile_cv
+
+    train_df = pd.read_csv(tiny_favorita_files["train"])
+    stores_df = pd.read_csv(tiny_favorita_files["stores"])
+    holidays_df = pd.read_csv(tiny_favorita_files["holidays"])
+
+    train_df["date"] = pd.to_datetime(train_df["date"])
+    max_d = train_df["date"].max()
+    holdout_origin = max_d - pd.Timedelta(days=16)
+
+    # 1. Quantile Holdout
+    h_metrics, h_preds = evaluate_quantile_holdout(
+        train_df,
+        holdout_origin=holdout_origin,
+        stores_df=stores_df,
+        holidays_df=holidays_df,
+        start_train_date="2016-01-01",
+        params={"n_estimators": 10, "min_child_samples": 5},
+    )
+    assert "coverage_p10_p90_pct" in h_metrics
+    assert "mean_pinball_loss" in h_metrics
+    assert "pred_p10" in h_preds.columns
+    assert "pred_p50" in h_preds.columns
+    assert "pred_p90" in h_preds.columns
+    assert (h_preds["pred_p10"] <= h_preds["pred_p50"]).all()
+    assert (h_preds["pred_p50"] <= h_preds["pred_p90"]).all()
+
+    # 2. Quantile CV (3 folds)
+    cv_res = run_quantile_cv(
+        train_df,
+        stores_df=stores_df,
+        holidays_df=holidays_df,
+        n_folds=3,
+        horizon_days=16,
+        fold_step_days=16,
+        holdout_days=16,
+        start_train_date="2016-01-01",
+        params={"n_estimators": 10, "min_child_samples": 5},
+    )
+    assert cv_res["n_folds"] == 3
+    assert len(cv_res["folds"]) == 3
+    assert "mean_metrics" in cv_res
+    assert cv_res["mean_metrics"]["mean_coverage_p10_p90_pct"] > 0.0
+    assert cv_res["mean_metrics"]["mean_pinball_loss"] > 0.0

@@ -1,0 +1,342 @@
+"""Quantile regression modeling using LightGBM for grocery demand uncertainty estimation.
+
+Trains models for specified quantiles (default P10, P50, P90) using the same strictly
+causal feature pipeline as the point forecasting model. Evaluates pinball loss
+and empirical interval coverage across rolling-origin backtest folds and holdout.
+"""
+
+from __future__ import annotations
+
+import logging
+from typing import Any
+
+import lightgbm as lgb
+import numpy as np
+import pandas as pd
+
+from demand_planner.evaluation.metrics import calc_empirical_coverage, calc_pinball_loss
+from demand_planner.features.build import build_features
+
+log = logging.getLogger("demand_planner.models.quantile")
+
+DEFAULT_QUANTILE_PARAMS: dict[str, Any] = {
+    "n_estimators": 100,
+    "learning_rate": 0.1,
+    "num_leaves": 31,
+    "min_child_samples": 20,
+    "subsample": 0.8,
+    "colsample_bytree": 0.8,
+    "random_state": 42,
+    "n_jobs": -1,
+    "verbose": -1,
+}
+
+
+def train_lightgbm_quantiles(
+    X_train: pd.DataFrame,
+    y_train: pd.Series | np.ndarray,
+    alphas: tuple[float, ...] = (0.1, 0.5, 0.9),
+    params: dict[str, Any] | None = None,
+) -> dict[float, lgb.LGBMRegressor]:
+    """Train separate LightGBM models for each specified quantile alpha.
+
+    Parameters
+    ----------
+    X_train : pd.DataFrame
+        Training feature matrix.
+    y_train : pd.Series | np.ndarray
+        Log-transformed target sales (log1p).
+    alphas : tuple[float, ...]
+        Quantiles to fit, e.g. (0.1, 0.5, 0.9).
+    params : dict[str, Any] | None
+        Optional hyperparameters overriding defaults.
+
+    Returns
+    -------
+    dict[float, lgb.LGBMRegressor]
+        Mapping from alpha to fitted LightGBM regressor.
+    """
+    cfg = dict(DEFAULT_QUANTILE_PARAMS)
+    if params:
+        cfg.update(params)
+
+    models: dict[float, lgb.LGBMRegressor] = {}
+    for alpha in alphas:
+        log.debug("Fitting LightGBM quantile alpha=%.2f...", alpha)
+        model = lgb.LGBMRegressor(
+            objective="quantile",
+            alpha=alpha,
+            **cfg,
+        )
+        model.fit(X_train, y_train)
+        models[alpha] = model
+
+    return models
+
+
+def predict_lightgbm_quantiles(
+    models: dict[float, lgb.LGBMRegressor],
+    X_test: pd.DataFrame,
+    enforce_monotonicity: bool = True,
+) -> dict[str, np.ndarray]:
+    """Generate inverted, non-negative quantile predictions.
+
+    Parameters
+    ----------
+    models : dict[float, lgb.LGBMRegressor]
+        Fitted quantile models.
+    X_test : pd.DataFrame
+        Test features.
+    enforce_monotonicity : bool
+        If True and standard alphas (0.1, 0.5, 0.9) are present, clips predictions
+        so that P10 <= P50 <= P90.
+
+    Returns
+    -------
+    dict[str, np.ndarray]
+        Dictionary with keys 'p10', 'p50', 'p90' (or 'p{int(alpha*100)}').
+    """
+    raw_preds: dict[float, np.ndarray] = {}
+    for alpha, model in models.items():
+        log_pred = model.predict(X_test)
+        raw_preds[alpha] = np.expm1(log_pred).clip(min=0.0)
+
+    if enforce_monotonicity and set(models.keys()) >= {0.1, 0.5, 0.9}:
+        p10 = raw_preds[0.1]
+        p50 = np.maximum(p10, raw_preds[0.5])
+        p90 = np.maximum(p50, raw_preds[0.9])
+        return {"p10": p10, "p50": p50, "p90": p90}
+
+    return {f"p{int(round(a * 100))}": arr for a, arr in raw_preds.items()}
+
+
+def evaluate_quantiles(
+    y_true: np.ndarray | pd.Series,
+    preds: dict[str, np.ndarray],
+) -> dict[str, Any]:
+    """Compute pinball losses and empirical coverage for quantile predictions.
+
+    Parameters
+    ----------
+    y_true : np.ndarray | pd.Series
+        Ground truth actual sales.
+    preds : dict[str, np.ndarray]
+        Predicted quantiles with keys 'p10', 'p50', 'p90'.
+
+    Returns
+    -------
+    dict[str, Any]
+        Dictionary of pinball losses, empirical coverage %, and boundary stats.
+    """
+    y = np.asarray(y_true, dtype=np.float64)
+    p10 = np.asarray(preds["p10"], dtype=np.float64)
+    p50 = np.asarray(preds["p50"], dtype=np.float64)
+    p90 = np.asarray(preds["p90"], dtype=np.float64)
+
+    pb10 = calc_pinball_loss(y, p10, 0.1)
+    pb50 = calc_pinball_loss(y, p50, 0.5)
+    pb90 = calc_pinball_loss(y, p90, 0.9)
+    mean_pb = float(round(float((pb10 + pb50 + pb90) / 3.0), 4))
+
+    coverage = calc_empirical_coverage(y, p10, p90)
+    below_p10 = float(round(float(np.mean(y < p10) * 100.0), 4))
+    above_p90 = float(round(float(np.mean(y > p90) * 100.0), 4))
+
+    return {
+        "pinball_loss_p10": pb10,
+        "pinball_loss_p50": pb50,
+        "pinball_loss_p90": pb90,
+        "mean_pinball_loss": mean_pb,
+        "coverage_p10_p90_pct": coverage,
+        "nominal_coverage_pct": 80.0,
+        "below_p10_pct": below_p10,
+        "above_p90_pct": above_p90,
+        "n_samples": int(len(y)),
+    }
+
+
+def run_quantile_cv(
+    sales_df: pd.DataFrame,
+    stores_df: pd.DataFrame | None = None,
+    holidays_df: pd.DataFrame | None = None,
+    n_folds: int = 5,
+    horizon_days: int = 16,
+    fold_step_days: int = 16,
+    holdout_days: int = 16,
+    start_train_date: str = "2015-01-01",
+    target_col: str = "sales",
+    params: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    """Execute expanding-window cross-validation for LightGBM quantile regression.
+
+    Parameters
+    ----------
+    sales_df : pd.DataFrame
+        Historical sales dataset.
+    stores_df : pd.DataFrame | None
+        Store metadata.
+    holidays_df : pd.DataFrame | None
+        Holidays table.
+    n_folds : int
+        Number of rolling-origin folds.
+    horizon_days : int
+        Forecast horizon in days.
+    fold_step_days : int
+        Days between consecutive origins.
+    holdout_days : int
+        Days reserved for final holdout.
+    start_train_date : str
+        Earliest training date to include.
+    target_col : str
+        Target column name.
+    params : dict[str, Any] | None
+        Optional model hyperparameters.
+
+    Returns
+    -------
+    dict[str, Any]
+        Per-fold and aggregated cross-validation quantile evaluation metrics.
+    """
+    from demand_planner.evaluation.backtest import generate_rolling_folds
+
+    df_raw = sales_df.copy()
+    df_raw["date"] = pd.to_datetime(df_raw["date"])
+
+    log.info("Building causal features for quantile CV backtest...")
+    df_feat, feature_names = build_features(
+        df_raw, stores_df=stores_df, holidays_df=holidays_df, target_col=target_col
+    )
+
+    cv_folds, _ = generate_rolling_folds(
+        df_raw,
+        n_folds=n_folds,
+        horizon_days=horizon_days,
+        fold_step_days=fold_step_days,
+        holdout_days=holdout_days,
+    )
+
+    start_date = pd.to_datetime(start_train_date)
+    fold_records: list[dict[str, Any]] = []
+
+    for f in cv_folds:
+        log.info(
+            "Running Quantile CV Fold %d/%d (Origin: %s)...",
+            f.fold_idx,
+            len(cv_folds),
+            f.origin_date.strftime("%Y-%m-%d"),
+        )
+        train_mask = (df_feat["date"] <= f.origin_date) & (df_feat["date"] >= start_date)
+        test_mask = (df_feat["date"] > f.origin_date) & (
+            df_feat["date"] <= f.origin_date + pd.Timedelta(days=horizon_days)
+        )
+
+        X_train = df_feat.loc[train_mask, feature_names]
+        y_train = np.log1p(df_feat.loc[train_mask, target_col])
+        X_test = df_feat.loc[test_mask, feature_names]
+        y_test = df_feat.loc[test_mask, target_col].to_numpy()
+
+        q_models = train_lightgbm_quantiles(X_train, y_train, alphas=(0.1, 0.5, 0.9), params=params)
+        q_preds = predict_lightgbm_quantiles(q_models, X_test)
+        q_eval = evaluate_quantiles(y_test, q_preds)
+
+        fold_records.append(
+            {
+                "fold_idx": f.fold_idx,
+                "origin_date": f.origin_date.strftime("%Y-%m-%d"),
+                "test_start_date": (f.origin_date + pd.Timedelta(days=1)).strftime("%Y-%m-%d"),
+                "test_end_date": (f.origin_date + pd.Timedelta(days=horizon_days)).strftime(
+                    "%Y-%m-%d"
+                ),
+                "metrics": q_eval,
+            }
+        )
+
+    # Aggregated CV metrics
+    pb10_vals = [rec["metrics"]["pinball_loss_p10"] for rec in fold_records]
+    pb50_vals = [rec["metrics"]["pinball_loss_p50"] for rec in fold_records]
+    pb90_vals = [rec["metrics"]["pinball_loss_p90"] for rec in fold_records]
+    mean_pb_vals = [rec["metrics"]["mean_pinball_loss"] for rec in fold_records]
+    cov_vals = [rec["metrics"]["coverage_p10_p90_pct"] for rec in fold_records]
+
+    return {
+        "n_folds": n_folds,
+        "horizon_days": horizon_days,
+        "fold_step_days": fold_step_days,
+        "folds": fold_records,
+        "mean_metrics": {
+            "mean_pinball_loss_p10": float(round(float(np.mean(pb10_vals)), 4)),
+            "mean_pinball_loss_p50": float(round(float(np.mean(pb50_vals)), 4)),
+            "mean_pinball_loss_p90": float(round(float(np.mean(pb90_vals)), 4)),
+            "mean_pinball_loss": float(round(float(np.mean(mean_pb_vals)), 4)),
+            "mean_coverage_p10_p90_pct": float(round(float(np.mean(cov_vals)), 4)),
+            "std_coverage_p10_p90_pct": float(round(float(np.std(cov_vals, ddof=1)), 4)),
+            "nominal_coverage_pct": 80.0,
+        },
+    }
+
+
+def evaluate_quantile_holdout(
+    sales_df: pd.DataFrame,
+    holdout_origin: pd.Timestamp | str,
+    stores_df: pd.DataFrame | None = None,
+    holidays_df: pd.DataFrame | None = None,
+    start_train_date: str = "2015-01-01",
+    target_col: str = "sales",
+    params: dict[str, Any] | None = None,
+) -> tuple[dict[str, Any], pd.DataFrame]:
+    """Train LightGBM quantiles and evaluate on the untouched holdout window.
+
+    Parameters
+    ----------
+    sales_df : pd.DataFrame
+        Complete historical store-family daily sales data.
+    holdout_origin : pd.Timestamp | str
+        Date representing t_0; test period is dates > holdout_origin.
+    stores_df : pd.DataFrame | None
+        Store metadata.
+    holidays_df : pd.DataFrame | None
+        Holidays table.
+    start_train_date : str
+        Earliest training date to include.
+    target_col : str
+        Target sales column.
+    params : dict[str, Any] | None
+        Optional hyperparameters.
+
+    Returns
+    -------
+    tuple[dict[str, Any], pd.DataFrame]
+        (Quantile holdout metrics, Test DataFrame with pred_p10, pred_p50, pred_p90)
+    """
+    origin = pd.to_datetime(holdout_origin)
+    df_raw = sales_df.copy()
+    df_raw["date"] = pd.to_datetime(df_raw["date"])
+
+    log.info("Building causal features for quantile holdout...")
+    df_feat, feature_names = build_features(
+        df_raw, stores_df=stores_df, holidays_df=holidays_df, target_col=target_col
+    )
+
+    train_mask = (df_feat["date"] <= origin) & (df_feat["date"] >= pd.to_datetime(start_train_date))
+    test_mask = df_feat["date"] > origin
+
+    X_train = df_feat.loc[train_mask, feature_names]
+    y_train = np.log1p(df_feat.loc[train_mask, target_col])
+    X_test = df_feat.loc[test_mask, feature_names]
+    y_test = df_feat.loc[test_mask, target_col].to_numpy()
+    test_df = df_feat.loc[test_mask].copy()
+
+    log.info("Training LightGBM quantiles (P10, P50, P90) on %d rows...", len(X_train))
+    models = train_lightgbm_quantiles(X_train, y_train, alphas=(0.1, 0.5, 0.9), params=params)
+    preds = predict_lightgbm_quantiles(models, X_test)
+
+    test_df["pred_p10"] = preds["p10"]
+    test_df["pred_p50"] = preds["p50"]
+    test_df["pred_p90"] = preds["p90"]
+
+    metrics = evaluate_quantiles(y_test, preds)
+    metrics["holdout_origin"] = origin.strftime("%Y-%m-%d")
+    metrics["test_start_date"] = test_df["date"].min().strftime("%Y-%m-%d")
+    metrics["test_end_date"] = test_df["date"].max().strftime("%Y-%m-%d")
+
+    return metrics, test_df
