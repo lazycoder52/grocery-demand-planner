@@ -15,7 +15,7 @@ Evaluated across **5 expanding-window folds** (16-day horizons; origins stepping
 
 | Model | Mean WAPE (%) | WAPE Std (%) | Mean Bias (%) | Mean MAE (Units) | Status |
 | :--- | :---: | :---: | :---: | :---: | :--- |
-| **LightGBM Global Regressor** | **13.49%** | **±0.98%** | **-0.81%** | **65.25** | **Selected model** |
+| **LightGBM Global Regressor** | **13.49%** | **±0.98%** | **-0.76%** | **65.21** | **Selected model** |
 | Seasonal Naive (7-Day Lag) | 16.33% | ±1.29% | -1.58% | 78.99 | Retail Benchmark |
 | 28-Day Moving Average | 23.65% | ±1.03% | -0.89% | 114.12 | Moving Average Baseline |
 | Last-Value Naive | 27.83% | ±2.67% | -10.42% | 134.20 | Heuristic Benchmark |
@@ -27,7 +27,7 @@ Evaluated once on the final unseen 16-day window (**28,512 store-family predicti
 
 | Model | WAPE (%) | Bias (%) | MAE (Units) | RMSLE | Status |
 | :--- | :---: | :---: | :---: | :---: | :--- |
-| **LightGBM Global Regressor** | **15.29%** | **+2.46%** | **71.42** | **0.4079** | **Selected model** |
+| **LightGBM Global Regressor** | **15.29%** | **+2.46%** | **71.42** | **0.4069** | **Selected model** |
 | Seasonal Naive (7-Day Lag) | 20.67% | +0.41% | 96.54 | 0.6170 | Retail Benchmark |
 | 28-Day Moving Average | 20.81% | +1.34% | 97.22 | 0.5216 | Moving Average Baseline |
 | Last-Value Naive | 44.42% | +34.99% | 207.51 | 0.6595 | Heuristic Benchmark |
@@ -36,7 +36,7 @@ Evaluated once on the final unseen 16-day window (**28,512 store-family predicti
 
 *Note on WAPE:* WAPE is volume-weighted ($\text{WAPE} = \frac{\sum |y - \hat{y}|}{\sum y}$), evaluating aggregate unit error across total chain volume rather than averaging percentage errors across SKUs, which naturally prioritizes revenue drivers and avoids the division-by-zero distortion that invalidates MAPE on intermittent grocery categories.
 
-*Note on Bias:* Forecast bias was +2.46% on the holdout and averaged -0.81% across the 5 backtest folds (ranging from -4.01% to +1.94%), confirming there is no systematic directional over- or under-forecasting bias.
+*Note on Bias:* Forecast bias was +2.46% on the holdout and averaged -0.76% across the 5 backtest folds (ranging from -4.01% to +1.94%), confirming there is no systematic directional over- or under-forecasting bias.
 
 ### Per-Fold Variation in Gain Over Seasonal-Naive
 
@@ -49,7 +49,7 @@ Across the 5 backtest folds, LightGBM outperformed seasonal-naive in every singl
 | **3** | 2017-06-12 | 2017-06-13 to 2017-06-28 | 13.07% | 16.93% | **+3.86 pts** | 22.80% | +1.86% | +6.22% |
 | **4** | 2017-06-28 | 2017-06-29 to 2017-07-14 | 12.26% | 16.26% | **+4.00 pts** | 24.60% | +1.94% | -9.11% |
 | **5** | 2017-07-14 | 2017-07-15 to 2017-07-30 | 13.25% | 13.97% | **+0.72 pts** | 5.15% | -1.92% | -0.59% |
-| **Mean** | — | — | **13.49%** | **16.33%** | **+2.84 pts** | **17.39%** | **-0.81%** | **-1.58%** |
+| **Mean** | — | — | **13.49%** | **16.33%** | **+2.84 pts** | **17.39%** | **-0.76%** | **-1.58%** |
 
 #### Hypotheses for Fold-Level Variation & Empirical Day-Type Breakdown
 
