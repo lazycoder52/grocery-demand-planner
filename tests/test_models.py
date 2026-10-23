@@ -250,3 +250,20 @@ def test_quantile_cv_and_holdout_end_to_end(tiny_favorita_files: dict[str, Path]
     assert "mean_metrics" in cv_res
     assert cv_res["mean_metrics"]["mean_coverage_p10_p90_pct"] > 0.0
     assert cv_res["mean_metrics"]["mean_pinball_loss"] > 0.0
+
+
+def test_get_store_opening_dates_and_preopening_exclusion():
+    """Verify store opening dates identify first positive sale and exclude pre-opening rows."""
+    from demand_planner.models.lightgbm import get_store_opening_dates
+
+    df = pd.DataFrame(
+        {
+            "date": pd.to_datetime(["2017-01-01", "2017-01-02", "2017-01-03", "2017-01-04"]),
+            "store_nbr": [1, 1, 2, 2],
+            "sales": [0.0, 50.0, 0.0, 100.0],
+        }
+    )
+
+    open_dates = get_store_opening_dates(df)
+    assert open_dates[1] == pd.Timestamp("2017-01-02")
+    assert open_dates[2] == pd.Timestamp("2017-01-04")

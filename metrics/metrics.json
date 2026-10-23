@@ -610,6 +610,10 @@
   },
   "models": {
     "model_status": "Selected model",
+    "preopening_rows_handling": {
+      "training": "Excluded pre-opening zero rows based on earliest positive sale date per store (55,308 rows dropped post-2015)",
+      "evaluation": "0 pre-opening rows in evaluation; all stores open prior to test origin (Store 52 opened 2017-04-20)"
+    },
     "cv_5_fold": {
       "n_folds": 5,
       "horizon_days": 16,
@@ -622,12 +626,12 @@
           "test_end_date": "2017-05-27",
           "n_samples": 28512,
           "lightgbm": {
-            "wape": 15.3201,
-            "bias": -1.9352,
-            "mae": 73.4159,
-            "rmsle": 0.4378,
+            "wape": 15.2275,
+            "bias": -1.8468,
+            "mae": 72.9721,
+            "rmsle": 0.4358,
             "total_actual_sales": 13663335.83,
-            "total_predicted_sales": 13398926.45,
+            "total_predicted_sales": 13410999.74,
             "n_samples": 28512
           },
           "seasonal_naive_7d": {
@@ -657,7 +661,45 @@
             "total_predicted_sales": 10378406.61,
             "n_samples": 28512
           },
-          "fva_wape_pts": 1.3401
+          "fva_wape_pts": 1.4327,
+          "daytype_breakdown": {
+            "by_payday_week": {
+              "other_regime": {
+                "n_samples": 16038,
+                "model_wape": 17.1743,
+                "model_bias": -0.2014,
+                "baseline_wape": 19.3783,
+                "baseline_bias": 2.9593,
+                "fva_wape_pts": 2.204
+              },
+              "payday_regime": {
+                "n_samples": 12474,
+                "model_wape": 12.8223,
+                "model_bias": -3.8796,
+                "baseline_wape": 13.3022,
+                "baseline_bias": -2.5793,
+                "fva_wape_pts": 0.4799
+              }
+            },
+            "by_exact_payday": {
+              "other_regime": {
+                "n_samples": 26730,
+                "model_wape": 15.4507,
+                "model_bias": -1.7424,
+                "baseline_wape": 16.8165,
+                "baseline_bias": 0.8765,
+                "fva_wape_pts": 1.3658
+              },
+              "payday_regime": {
+                "n_samples": 1782,
+                "model_wape": 11.7442,
+                "model_bias": -3.4752,
+                "baseline_wape": 14.2224,
+                "baseline_bias": -5.6775,
+                "fva_wape_pts": 2.4782
+              }
+            }
+          }
         },
         {
           "fold_idx": 2,
@@ -666,12 +708,12 @@
           "test_end_date": "2017-06-12",
           "n_samples": 28512,
           "lightgbm": {
-            "wape": 13.5783,
-            "bias": -4.0062,
-            "mae": 69.8929,
-            "rmsle": 0.4053,
+            "wape": 13.6394,
+            "bias": -3.9158,
+            "mae": 70.2075,
+            "rmsle": 0.4035,
             "total_actual_sales": 14676240.99,
-            "total_predicted_sales": 14088287.36,
+            "total_predicted_sales": 14101544.32,
             "n_samples": 28512
           },
           "seasonal_naive_7d": {
@@ -701,7 +743,45 @@
             "total_predicted_sales": 14915518.29,
             "n_samples": 28512
           },
-          "fva_wape_pts": 4.2489
+          "fva_wape_pts": 4.1878,
+          "daytype_breakdown": {
+            "by_payday_week": {
+              "other_regime": {
+                "n_samples": 14256,
+                "model_wape": 13.8583,
+                "model_bias": -4.6772,
+                "baseline_wape": 17.8245,
+                "baseline_bias": -1.4193,
+                "fva_wape_pts": 3.9662
+              },
+              "payday_regime": {
+                "n_samples": 14256,
+                "model_wape": 13.4232,
+                "model_bias": -3.1639,
+                "baseline_wape": 17.8298,
+                "baseline_bias": -8.3634,
+                "fva_wape_pts": 4.4066
+              }
+            },
+            "by_exact_payday": {
+              "other_regime": {
+                "n_samples": 26730,
+                "model_wape": 13.7469,
+                "model_bias": -3.9735,
+                "baseline_wape": 17.89,
+                "baseline_bias": -4.4092,
+                "fva_wape_pts": 4.1431
+              },
+              "payday_regime": {
+                "n_samples": 1782,
+                "model_wape": 11.9081,
+                "model_bias": -2.9867,
+                "baseline_wape": 16.8152,
+                "baseline_bias": -13.0245,
+                "fva_wape_pts": 4.9071
+              }
+            }
+          }
         },
         {
           "fold_idx": 3,
@@ -710,12 +790,12 @@
           "test_end_date": "2017-06-28",
           "n_samples": 28512,
           "lightgbm": {
-            "wape": 13.3115,
-            "bias": 1.8584,
-            "mae": 60.7527,
-            "rmsle": 0.3969,
+            "wape": 13.0725,
+            "bias": 1.8099,
+            "mae": 59.6618,
+            "rmsle": 0.3963,
             "total_actual_sales": 13012614.4,
-            "total_predicted_sales": 13254442.74,
+            "total_predicted_sales": 13248129.38,
             "n_samples": 28512
           },
           "seasonal_naive_7d": {
@@ -745,7 +825,45 @@
             "total_predicted_sales": 12293596.14,
             "n_samples": 28512
           },
-          "fva_wape_pts": 3.6149
+          "fva_wape_pts": 3.8539,
+          "daytype_breakdown": {
+            "by_payday_week": {
+              "other_regime": {
+                "n_samples": 12474,
+                "model_wape": 12.5369,
+                "model_bias": 2.2267,
+                "baseline_wape": 14.7194,
+                "baseline_bias": 5.4591,
+                "fva_wape_pts": 2.1825
+              },
+              "payday_regime": {
+                "n_samples": 16038,
+                "model_wape": 13.4995,
+                "model_bias": 1.4777,
+                "baseline_wape": 18.6854,
+                "baseline_bias": 6.8199,
+                "fva_wape_pts": 5.1859
+              }
+            },
+            "by_exact_payday": {
+              "other_regime": {
+                "n_samples": 26730,
+                "model_wape": 13.2091,
+                "model_bias": 1.9587,
+                "baseline_wape": 17.0414,
+                "baseline_bias": 6.4939,
+                "fva_wape_pts": 3.8323
+              },
+              "payday_regime": {
+                "n_samples": 1782,
+                "model_wape": 10.5182,
+                "model_bias": -0.9732,
+                "baseline_wape": 14.7758,
+                "baseline_bias": 1.0239,
+                "fva_wape_pts": 4.2576
+              }
+            }
+          }
         },
         {
           "fold_idx": 4,
@@ -754,12 +872,12 @@
           "test_end_date": "2017-07-14",
           "n_samples": 28512,
           "lightgbm": {
-            "wape": 12.3885,
-            "bias": 1.9364,
-            "mae": 60.0599,
-            "rmsle": 0.3873,
+            "wape": 12.2555,
+            "bias": 2.1881,
+            "mae": 59.4148,
+            "rmsle": 0.3835,
             "total_actual_sales": 13822677.82,
-            "total_predicted_sales": 14090336.45,
+            "total_predicted_sales": 14125138.57,
             "n_samples": 28512
           },
           "seasonal_naive_7d": {
@@ -789,7 +907,45 @@
             "total_predicted_sales": 11710351.76,
             "n_samples": 28512
           },
-          "fva_wape_pts": 3.8706
+          "fva_wape_pts": 4.0036,
+          "daytype_breakdown": {
+            "by_payday_week": {
+              "other_regime": {
+                "n_samples": 12474,
+                "model_wape": 11.7949,
+                "model_bias": 2.5364,
+                "baseline_wape": 16.4235,
+                "baseline_bias": -9.8399,
+                "fva_wape_pts": 4.6286
+              },
+              "payday_regime": {
+                "n_samples": 16038,
+                "model_wape": 12.6308,
+                "model_bias": 1.9043,
+                "baseline_wape": 16.1251,
+                "baseline_bias": -8.5145,
+                "fva_wape_pts": 3.4943
+              }
+            },
+            "by_exact_payday": {
+              "other_regime": {
+                "n_samples": 26730,
+                "model_wape": 12.2484,
+                "model_bias": 2.1528,
+                "baseline_wape": 16.4723,
+                "baseline_bias": -9.3543,
+                "fva_wape_pts": 4.2239
+              },
+              "payday_regime": {
+                "n_samples": 1782,
+                "model_wape": 12.3696,
+                "model_bias": 2.7625,
+                "baseline_wape": 12.7984,
+                "baseline_bias": -5.1383,
+                "fva_wape_pts": 0.4288
+              }
+            }
+          }
         },
         {
           "fold_idx": 5,
@@ -798,12 +954,12 @@
           "test_end_date": "2017-07-30",
           "n_samples": 28512,
           "lightgbm": {
-            "wape": 13.2029,
-            "bias": -1.9197,
-            "mae": 63.6068,
-            "rmsle": 0.399,
+            "wape": 13.2453,
+            "bias": -2.0449,
+            "mae": 63.8109,
+            "rmsle": 0.3977,
             "total_actual_sales": 13736027.85,
-            "total_predicted_sales": 13472332.73,
+            "total_predicted_sales": 13455136.19,
             "n_samples": 28512
           },
           "seasonal_naive_7d": {
@@ -833,15 +989,53 @@
             "total_predicted_sales": 12247833.88,
             "n_samples": 28512
           },
-          "fva_wape_pts": 0.7654
+          "fva_wape_pts": 0.723,
+          "daytype_breakdown": {
+            "by_payday_week": {
+              "other_regime": {
+                "n_samples": 24948,
+                "model_wape": 13.2848,
+                "model_bias": -2.1472,
+                "baseline_wape": 14.2519,
+                "baseline_bias": -0.9473,
+                "fva_wape_pts": 0.9671
+              },
+              "payday_regime": {
+                "n_samples": 3564,
+                "model_wape": 13.0228,
+                "model_bias": -1.4686,
+                "baseline_wape": 12.37,
+                "baseline_bias": 1.4155,
+                "fva_wape_pts": -0.6528
+              }
+            },
+            "by_exact_payday": {
+              "other_regime": {
+                "n_samples": 26730,
+                "model_wape": 13.2537,
+                "model_bias": -2.5592,
+                "baseline_wape": 14.0429,
+                "baseline_bias": -0.8654,
+                "fva_wape_pts": 0.7892
+              },
+              "payday_regime": {
+                "n_samples": 1782,
+                "model_wape": 13.134,
+                "model_bias": 4.7308,
+                "baseline_wape": 12.9858,
+                "baseline_bias": 3.0204,
+                "fva_wape_pts": -0.1482
+              }
+            }
+          }
         }
       ],
       "mean_metrics": {
         "lightgbm": {
-          "mean_wape": 13.5603,
-          "std_wape": 0.9654,
-          "mean_bias": -0.8133,
-          "mean_mae": 65.5456
+          "mean_wape": 13.488,
+          "std_wape": 0.9797,
+          "mean_bias": -0.7619,
+          "mean_mae": 65.2134
         },
         "seasonal_naive_7d": {
           "mean_wape": 16.3282,
@@ -858,8 +1052,8 @@
           "std_wape": 2.6697
         },
         "forecast_value_added_vs_seasonal_naive": {
-          "mean_wape_reduction_pts": 2.768,
-          "relative_error_reduction_pct": 16.95
+          "mean_wape_reduction_pts": 2.8402,
+          "relative_error_reduction_pct": 17.39
         }
       }
     },
@@ -870,12 +1064,12 @@
       "test_n_rows": 28512,
       "models": {
         "lightgbm": {
-          "wape": 15.1573,
-          "bias": 2.854,
-          "mae": 70.8061,
-          "rmsle": 0.4071,
+          "wape": 15.2888,
+          "bias": 2.4618,
+          "mae": 71.4203,
+          "rmsle": 0.4069,
           "total_actual_sales": 13319179.78,
-          "total_predicted_sales": 13699314.26,
+          "total_predicted_sales": 13647068.46,
           "n_samples": 28512
         },
         "seasonal_naive_7d": {
@@ -907,14 +1101,52 @@
         }
       },
       "forecast_value_added_vs_seasonal_naive": {
-        "wape_reduction_percentage_points": 5.5078,
-        "relative_error_reduction_pct": 26.65
+        "wape_reduction_percentage_points": 5.3763,
+        "relative_error_reduction_pct": 26.02
+      },
+      "daytype_breakdown": {
+        "by_payday_week": {
+          "other_regime": {
+            "n_samples": 12474,
+            "model_wape": 17.2277,
+            "model_bias": 5.1449,
+            "baseline_wape": 22.7669,
+            "baseline_bias": 9.9604,
+            "fva_wape_pts": 5.5392
+          },
+          "payday_regime": {
+            "n_samples": 16038,
+            "model_wape": 13.9726,
+            "model_bias": 0.6405,
+            "baseline_wape": 19.2384,
+            "baseline_bias": -6.073,
+            "fva_wape_pts": 5.2658
+          }
+        },
+        "by_exact_payday": {
+          "other_regime": {
+            "n_samples": 24948,
+            "model_wape": 15.5067,
+            "model_bias": 3.299,
+            "baseline_wape": 21.2083,
+            "baseline_bias": 1.482,
+            "fva_wape_pts": 5.7016
+          },
+          "payday_regime": {
+            "n_samples": 3564,
+            "model_wape": 13.7456,
+            "model_bias": -3.4657,
+            "baseline_wape": 16.8192,
+            "baseline_bias": -7.1806,
+            "fva_wape_pts": 3.0736
+          }
+        }
       },
       "by_family": {
         "AUTOMOTIVE": {
           "lightgbm": {
-            "wape": 39.394,
-            "bias": -15.1949,
+            "wape": 39.3944,
+            "bias": -14.9019,
             "mae": 2.9094,
             "total_actual": 6381.0,
             "n_samples": 864
@@ -926,13 +1158,13 @@
             "total_actual": 6381.0,
             "n_samples": 864
           },
-          "fva_wape_pts": 12.4944
+          "fva_wape_pts": 12.494
         },
         "BABY CARE": {
           "lightgbm": {
-            "wape": 135.4963,
-            "bias": -17.9766,
-            "mae": 0.2509,
+            "wape": 136.2129,
+            "bias": -21.302,
+            "mae": 0.2522,
             "total_actual": 160.0,
             "n_samples": 864
           },
@@ -943,13 +1175,13 @@
             "total_actual": 160.0,
             "n_samples": 864
           },
-          "fva_wape_pts": 12.0037
+          "fva_wape_pts": 11.2871
         },
         "BEAUTY": {
           "lightgbm": {
-            "wape": 36.1201,
-            "bias": -14.4465,
-            "mae": 2.4068,
+            "wape": 34.3879,
+            "bias": -11.429,
+            "mae": 2.2913,
             "total_actual": 5757.0,
             "n_samples": 864
           },
@@ -960,13 +1192,13 @@
             "total_actual": 5757.0,
             "n_samples": 864
           },
-          "fva_wape_pts": 13.4196
+          "fva_wape_pts": 15.1518
         },
         "BEVERAGES": {
           "lightgbm": {
-            "wape": 17.2374,
-            "bias": 3.9485,
-            "mae": 599.5983,
+            "wape": 16.9523,
+            "bias": 2.9412,
+            "mae": 589.684,
             "total_actual": 3005407.0,
             "n_samples": 864
           },
@@ -977,13 +1209,13 @@
             "total_actual": 3005407.0,
             "n_samples": 864
           },
-          "fva_wape_pts": 5.0279
+          "fva_wape_pts": 5.313
         },
         "BOOKS": {
           "lightgbm": {
-            "wape": 437.888,
-            "bias": 260.5224,
-            "mae": 0.0456,
+            "wape": 501.9729,
+            "bias": 326.6038,
+            "mae": 0.0523,
             "total_actual": 9.0,
             "n_samples": 864
           },
@@ -994,13 +1226,13 @@
             "total_actual": 9.0,
             "n_samples": 864
           },
-          "fva_wape_pts": -226.7769
+          "fva_wape_pts": -290.8618
         },
         "BREAD/BAKERY": {
           "lightgbm": {
-            "wape": 12.8225,
-            "bias": 2.9032,
-            "mae": 69.2764,
+            "wape": 12.7968,
+            "bias": 2.8549,
+            "mae": 69.1378,
             "total_actual": 466795.5,
             "n_samples": 864
           },
@@ -1011,13 +1243,13 @@
             "total_actual": 466795.5,
             "n_samples": 864
           },
-          "fva_wape_pts": 1.3313
+          "fva_wape_pts": 1.357
         },
         "CELEBRATION": {
           "lightgbm": {
-            "wape": 40.6171,
-            "bias": -5.8433,
-            "mae": 5.0621,
+            "wape": 40.6833,
+            "bias": -5.8182,
+            "mae": 5.0703,
             "total_actual": 10768.0,
             "n_samples": 864
           },
@@ -1028,13 +1260,13 @@
             "total_actual": 10768.0,
             "n_samples": 864
           },
-          "fva_wape_pts": 16.9981
+          "fva_wape_pts": 16.9319
         },
         "CLEANING": {
           "lightgbm": {
-            "wape": 21.3109,
-            "bias": 3.8109,
-            "mae": 262.7469,
+            "wape": 21.5533,
+            "bias": 3.615,
+            "mae": 265.7345,
             "total_actual": 1065243.0,
             "n_samples": 864
           },
@@ -1045,13 +1277,13 @@
             "total_actual": 1065243.0,
             "n_samples": 864
           },
-          "fva_wape_pts": 21.66
+          "fva_wape_pts": 21.4176
         },
         "DAIRY": {
           "lightgbm": {
-            "wape": 12.3444,
-            "bias": 7.8752,
-            "mae": 103.0174,
+            "wape": 12.4034,
+            "bias": 7.8134,
+            "mae": 103.5104,
             "total_actual": 721034.0,
             "n_samples": 864
           },
@@ -1062,13 +1294,13 @@
             "total_actual": 721034.0,
             "n_samples": 864
           },
-          "fva_wape_pts": 1.535
+          "fva_wape_pts": 1.476
         },
         "DELI": {
           "lightgbm": {
-            "wape": 14.704,
-            "bias": 8.4361,
-            "mae": 44.5719,
+            "wape": 14.6438,
+            "bias": 8.059,
+            "mae": 44.3896,
             "total_actual": 261902.89,
             "n_samples": 864
           },
@@ -1079,13 +1311,13 @@
             "total_actual": 261902.89,
             "n_samples": 864
           },
-          "fva_wape_pts": 2.8108
+          "fva_wape_pts": 2.871
         },
         "EGGS": {
           "lightgbm": {
-            "wape": 18.2524,
-            "bias": -1.6731,
-            "mae": 36.4475,
+            "wape": 18.4159,
+            "bias": -1.8825,
+            "mae": 36.7741,
             "total_actual": 172529.0,
             "n_samples": 864
           },
@@ -1096,13 +1328,13 @@
             "total_actual": 172529.0,
             "n_samples": 864
           },
-          "fva_wape_pts": 4.0157
+          "fva_wape_pts": 3.8522
         },
         "FROZEN FOODS": {
           "lightgbm": {
-            "wape": 19.8168,
-            "bias": -1.1102,
-            "mae": 25.233,
+            "wape": 19.5989,
+            "bias": -0.3909,
+            "mae": 24.9556,
             "total_actual": 110014.16,
             "n_samples": 864
           },
@@ -1113,13 +1345,13 @@
             "total_actual": 110014.16,
             "n_samples": 864
           },
-          "fva_wape_pts": 2.3554
+          "fva_wape_pts": 2.5733
         },
         "GROCERY I": {
           "lightgbm": {
-            "wape": 11.8424,
-            "bias": 0.237,
-            "mae": 545.5724,
+            "wape": 12.1792,
+            "bias": -0.368,
+            "mae": 561.0925,
             "total_actual": 3980412.48,
             "n_samples": 864
           },
@@ -1130,13 +1362,13 @@
             "total_actual": 3980412.48,
             "n_samples": 864
           },
-          "fva_wape_pts": 5.5138
+          "fva_wape_pts": 5.177
         },
         "GROCERY II": {
           "lightgbm": {
-            "wape": 37.3632,
-            "bias": 2.0788,
-            "mae": 10.8245,
+            "wape": 37.4935,
+            "bias": 1.9701,
+            "mae": 10.8623,
             "total_actual": 25031.0,
             "n_samples": 864
           },
@@ -1147,13 +1379,13 @@
             "total_actual": 25031.0,
             "n_samples": 864
           },
-          "fva_wape_pts": 26.7893
+          "fva_wape_pts": 26.659
         },
         "HARDWARE": {
           "lightgbm": {
-            "wape": 74.0783,
-            "bias": -24.1616,
-            "mae": 1.0734,
+            "wape": 73.7525,
+            "bias": -23.6401,
+            "mae": 1.0687,
             "total_actual": 1252.0,
             "n_samples": 864
           },
@@ -1164,13 +1396,13 @@
             "total_actual": 1252.0,
             "n_samples": 864
           },
-          "fva_wape_pts": 25.6821
+          "fva_wape_pts": 26.0079
         },
         "HOME AND KITCHEN I": {
           "lightgbm": {
-            "wape": 33.6962,
-            "bias": -12.5395,
-            "mae": 10.5379,
+            "wape": 33.7805,
+            "bias": -12.5668,
+            "mae": 10.5642,
             "total_actual": 27020.0,
             "n_samples": 864
           },
@@ -1181,13 +1413,13 @@
             "total_actual": 27020.0,
             "n_samples": 864
           },
-          "fva_wape_pts": 11.3186
+          "fva_wape_pts": 11.2343
         },
         "HOME AND KITCHEN II": {
           "lightgbm": {
-            "wape": 33.4689,
-            "bias": -11.1522,
-            "mae": 10.3773,
+            "wape": 33.3825,
+            "bias": -11.2794,
+            "mae": 10.3505,
             "total_actual": 26789.0,
             "n_samples": 864
           },
@@ -1198,13 +1430,13 @@
             "total_actual": 26789.0,
             "n_samples": 864
           },
-          "fva_wape_pts": 17.5782
+          "fva_wape_pts": 17.6646
         },
         "HOME APPLIANCES": {
           "lightgbm": {
-            "wape": 177.628,
-            "bias": 32.8417,
-            "mae": 0.3557,
+            "wape": 179.3268,
+            "bias": 34.7235,
+            "mae": 0.3591,
             "total_actual": 173.0,
             "n_samples": 864
           },
@@ -1215,13 +1447,13 @@
             "total_actual": 173.0,
             "n_samples": 864
           },
-          "fva_wape_pts": -0.1714
+          "fva_wape_pts": -1.8702
         },
         "HOME CARE": {
           "lightgbm": {
-            "wape": 22.725,
-            "bias": 15.5631,
-            "mae": 66.2532,
+            "wape": 22.2656,
+            "bias": 14.6094,
+            "mae": 64.9138,
             "total_actual": 251893.0,
             "n_samples": 864
           },
@@ -1232,13 +1464,13 @@
             "total_actual": 251893.0,
             "n_samples": 864
           },
-          "fva_wape_pts": 6.3655
+          "fva_wape_pts": 6.8249
         },
         "LADIESWEAR": {
           "lightgbm": {
-            "wape": 39.5354,
-            "bias": 11.5537,
-            "mae": 3.986,
+            "wape": 38.3337,
+            "bias": 10.5041,
+            "mae": 3.8649,
             "total_actual": 8711.0,
             "n_samples": 864
           },
@@ -1249,13 +1481,13 @@
             "total_actual": 8711.0,
             "n_samples": 864
           },
-          "fva_wape_pts": 11.9742
+          "fva_wape_pts": 13.1759
         },
         "LAWN AND GARDEN": {
           "lightgbm": {
-            "wape": 30.7752,
-            "bias": -3.5237,
-            "mae": 4.5978,
+            "wape": 31.108,
+            "bias": -2.5549,
+            "mae": 4.6475,
             "total_actual": 12908.0,
             "n_samples": 864
           },
@@ -1266,13 +1498,13 @@
             "total_actual": 12908.0,
             "n_samples": 864
           },
-          "fva_wape_pts": 7.6738
+          "fva_wape_pts": 7.341
         },
         "LINGERIE": {
           "lightgbm": {
-            "wape": 49.4658,
-            "bias": -20.1207,
-            "mae": 3.8451,
+            "wape": 48.8466,
+            "bias": -19.2133,
+            "mae": 3.7969,
             "total_actual": 6716.0,
             "n_samples": 864
           },
@@ -1283,13 +1515,13 @@
             "total_actual": 6716.0,
             "n_samples": 864
           },
-          "fva_wape_pts": 17.315
+          "fva_wape_pts": 17.9342
         },
         "LIQUOR,WINE,BEER": {
           "lightgbm": {
-            "wape": 29.4261,
-            "bias": -2.7945,
-            "mae": 28.6397,
+            "wape": 29.2041,
+            "bias": -3.8289,
+            "mae": 28.4237,
             "total_actual": 84091.0,
             "n_samples": 864
           },
@@ -1300,13 +1532,13 @@
             "total_actual": 84091.0,
             "n_samples": 864
           },
-          "fva_wape_pts": 5.6787
+          "fva_wape_pts": 5.9007
         },
         "MAGAZINES": {
           "lightgbm": {
-            "wape": 40.8805,
-            "bias": -25.8785,
-            "mae": 2.908,
+            "wape": 40.7101,
+            "bias": -26.0299,
+            "mae": 2.8959,
             "total_actual": 6146.0,
             "n_samples": 864
           },
@@ -1317,13 +1549,13 @@
             "total_actual": 6146.0,
             "n_samples": 864
           },
-          "fva_wape_pts": 9.3473
+          "fva_wape_pts": 9.5177
         },
         "MEATS": {
           "lightgbm": {
-            "wape": 14.0427,
-            "bias": -0.6357,
-            "mae": 52.1841,
+            "wape": 14.3126,
+            "bias": -0.5296,
+            "mae": 53.1868,
             "total_actual": 321070.53,
             "n_samples": 864
           },
@@ -1334,13 +1566,13 @@
             "total_actual": 321070.53,
             "n_samples": 864
           },
-          "fva_wape_pts": 2.9483
+          "fva_wape_pts": 2.6784
         },
         "PERSONAL CARE": {
           "lightgbm": {
-            "wape": 15.1789,
-            "bias": -2.0801,
-            "mae": 48.7747,
+            "wape": 15.5759,
+            "bias": -1.5966,
+            "mae": 50.0503,
             "total_actual": 277631.0,
             "n_samples": 864
           },
@@ -1351,13 +1583,13 @@
             "total_actual": 277631.0,
             "n_samples": 864
           },
-          "fva_wape_pts": 10.4515
+          "fva_wape_pts": 10.0545
         },
         "PET SUPPLIES": {
           "lightgbm": {
-            "wape": 32.0264,
-            "bias": -8.1578,
-            "mae": 2.6996,
+            "wape": 32.0184,
+            "bias": -8.9822,
+            "mae": 2.699,
             "total_actual": 7283.0,
             "n_samples": 864
           },
@@ -1368,13 +1600,13 @@
             "total_actual": 7283.0,
             "n_samples": 864
           },
-          "fva_wape_pts": 11.733
+          "fva_wape_pts": 11.741
         },
         "PLAYERS AND ELECTRONICS": {
           "lightgbm": {
-            "wape": 30.6151,
-            "bias": -9.6269,
-            "mae": 3.5732,
+            "wape": 30.3795,
+            "bias": -9.4912,
+            "mae": 3.5457,
             "total_actual": 10084.0,
             "n_samples": 864
           },
@@ -1385,13 +1617,13 @@
             "total_actual": 10084.0,
             "n_samples": 864
           },
-          "fva_wape_pts": 9.2996
+          "fva_wape_pts": 9.5352
         },
         "POULTRY": {
           "lightgbm": {
-            "wape": 13.3369,
-            "bias": 3.4278,
-            "mae": 49.9454,
+            "wape": 13.7647,
+            "bias": 3.9086,
+            "mae": 51.5477,
             "total_actual": 323560.27,
             "n_samples": 864
           },
@@ -1402,13 +1634,13 @@
             "total_actual": 323560.27,
             "n_samples": 864
           },
-          "fva_wape_pts": 4.012
+          "fva_wape_pts": 3.5842
         },
         "PREPARED FOODS": {
           "lightgbm": {
-            "wape": 17.8435,
-            "bias": -1.1854,
-            "mae": 15.6692,
+            "wape": 17.9405,
+            "bias": -1.0261,
+            "mae": 15.7543,
             "total_actual": 75871.65,
             "n_samples": 864
           },
@@ -1419,13 +1651,13 @@
             "total_actual": 75871.65,
             "n_samples": 864
           },
-          "fva_wape_pts": 3.5727
+          "fva_wape_pts": 3.4757
         },
         "PRODUCE": {
           "lightgbm": {
-            "wape": 12.0428,
-            "bias": 6.751,
-            "mae": 275.6305,
+            "wape": 12.3932,
+            "bias": 7.0665,
+            "mae": 283.65,
             "total_actual": 1977480.38,
             "n_samples": 864
           },
@@ -1436,13 +1668,13 @@
             "total_actual": 1977480.38,
             "n_samples": 864
           },
-          "fva_wape_pts": -0.4696
+          "fva_wape_pts": -0.82
         },
         "SCHOOL AND OFFICE SUPPLIES": {
           "lightgbm": {
-            "wape": 72.0783,
-            "bias": -70.085,
-            "mae": 43.2095,
+            "wape": 73.9324,
+            "bias": -71.9073,
+            "mae": 44.321,
             "total_actual": 51795.0,
             "n_samples": 864
           },
@@ -1453,13 +1685,13 @@
             "total_actual": 51795.0,
             "n_samples": 864
           },
-          "fva_wape_pts": 13.9126
+          "fva_wape_pts": 12.0585
         },
         "SEAFOOD": {
           "lightgbm": {
-            "wape": 21.9192,
-            "bias": -4.7495,
-            "mae": 4.379,
+            "wape": 22.5989,
+            "bias": -5.5354,
+            "mae": 4.5148,
             "total_actual": 17260.92,
             "n_samples": 864
           },
@@ -1470,7 +1702,7 @@
             "total_actual": 17260.92,
             "n_samples": 864
           },
-          "fva_wape_pts": 8.4206
+          "fva_wape_pts": 7.7409
         }
       }
     },
@@ -1487,14 +1719,25 @@
             "test_start_date": "2017-05-12",
             "test_end_date": "2017-05-27",
             "metrics": {
-              "pinball_loss_p10": 23.9709,
-              "pinball_loss_p50": 38.7186,
-              "pinball_loss_p90": 22.5712,
-              "mean_pinball_loss": 28.4202,
-              "coverage_p10_p90_pct": 79.7278,
+              "pinball_loss_p10": 24.1712,
+              "pinball_loss_p50": 39.0088,
+              "pinball_loss_p90": 22.1462,
+              "mean_pinball_loss": 28.4421,
+              "coverage_p10_p90_pct": 79.1561,
               "nominal_coverage_pct": 80.0,
-              "below_p10_pct": 9.5293,
-              "above_p90_pct": 10.7428,
+              "below_p10_pct": 9.8274,
+              "above_p90_pct": 11.0164,
+              "n_samples": 28512
+            },
+            "baseline_seasonal_naive_empirical": {
+              "pinball_loss_p10": 25.4485,
+              "pinball_loss_p50": 39.9932,
+              "pinball_loss_p90": 23.7354,
+              "mean_pinball_loss": 29.7257,
+              "coverage_p10_p90_pct": 83.1089,
+              "nominal_coverage_pct": 80.0,
+              "below_p10_pct": 8.8699,
+              "above_p90_pct": 8.0212,
               "n_samples": 28512
             }
           },
@@ -1504,14 +1747,25 @@
             "test_start_date": "2017-05-28",
             "test_end_date": "2017-06-12",
             "metrics": {
-              "pinball_loss_p10": 27.2969,
-              "pinball_loss_p50": 37.6511,
-              "pinball_loss_p90": 19.4978,
-              "mean_pinball_loss": 28.1486,
-              "coverage_p10_p90_pct": 83.6034,
+              "pinball_loss_p10": 27.6027,
+              "pinball_loss_p50": 37.9941,
+              "pinball_loss_p90": 19.1516,
+              "mean_pinball_loss": 28.2495,
+              "coverage_p10_p90_pct": 83.6244,
               "nominal_coverage_pct": 80.0,
-              "below_p10_pct": 8.5262,
-              "above_p90_pct": 7.8704,
+              "below_p10_pct": 8.649,
+              "above_p90_pct": 7.7266,
+              "n_samples": 28512
+            },
+            "baseline_seasonal_naive_empirical": {
+              "pinball_loss_p10": 26.1415,
+              "pinball_loss_p50": 45.9698,
+              "pinball_loss_p90": 28.174,
+              "mean_pinball_loss": 33.4284,
+              "coverage_p10_p90_pct": 84.1611,
+              "nominal_coverage_pct": 80.0,
+              "below_p10_pct": 7.9545,
+              "above_p90_pct": 7.8844,
               "n_samples": 28512
             }
           },
@@ -1521,14 +1775,25 @@
             "test_start_date": "2017-06-13",
             "test_end_date": "2017-06-28",
             "metrics": {
-              "pinball_loss_p10": 22.2048,
-              "pinball_loss_p50": 31.4495,
-              "pinball_loss_p90": 17.7357,
-              "mean_pinball_loss": 23.7967,
-              "coverage_p10_p90_pct": 82.5582,
+              "pinball_loss_p10": 22.5068,
+              "pinball_loss_p50": 31.1111,
+              "pinball_loss_p90": 17.8466,
+              "mean_pinball_loss": 23.8215,
+              "coverage_p10_p90_pct": 82.5056,
               "nominal_coverage_pct": 80.0,
-              "below_p10_pct": 9.3996,
-              "above_p90_pct": 8.0422,
+              "below_p10_pct": 9.3119,
+              "above_p90_pct": 8.1825,
+              "n_samples": 28512
+            },
+            "baseline_seasonal_naive_empirical": {
+              "pinball_loss_p10": 24.2748,
+              "pinball_loss_p50": 39.0053,
+              "pinball_loss_p90": 22.4894,
+              "mean_pinball_loss": 28.5898,
+              "coverage_p10_p90_pct": 84.3049,
+              "nominal_coverage_pct": 80.0,
+              "below_p10_pct": 8.649,
+              "above_p90_pct": 7.0462,
               "n_samples": 28512
             }
           },
@@ -1538,14 +1803,25 @@
             "test_start_date": "2017-06-29",
             "test_end_date": "2017-07-14",
             "metrics": {
-              "pinball_loss_p10": 23.6596,
-              "pinball_loss_p50": 30.7643,
-              "pinball_loss_p90": 18.4904,
-              "mean_pinball_loss": 24.3048,
-              "coverage_p10_p90_pct": 85.8972,
+              "pinball_loss_p10": 23.7958,
+              "pinball_loss_p50": 31.2035,
+              "pinball_loss_p90": 18.3907,
+              "mean_pinball_loss": 24.4633,
+              "coverage_p10_p90_pct": 85.6587,
               "nominal_coverage_pct": 80.0,
-              "below_p10_pct": 6.6533,
-              "above_p90_pct": 7.4495,
+              "below_p10_pct": 6.8848,
+              "above_p90_pct": 7.4565,
+              "n_samples": 28512
+            },
+            "baseline_seasonal_naive_empirical": {
+              "pinball_loss_p10": 21.7496,
+              "pinball_loss_p50": 41.7313,
+              "pinball_loss_p90": 25.9712,
+              "mean_pinball_loss": 29.8174,
+              "coverage_p10_p90_pct": 83.3263,
+              "nominal_coverage_pct": 80.0,
+              "below_p10_pct": 4.9663,
+              "above_p90_pct": 11.7074,
               "n_samples": 28512
             }
           },
@@ -1555,48 +1831,242 @@
             "test_start_date": "2017-07-15",
             "test_end_date": "2017-07-30",
             "metrics": {
-              "pinball_loss_p10": 23.6706,
-              "pinball_loss_p50": 33.395,
-              "pinball_loss_p90": 20.2943,
-              "mean_pinball_loss": 25.7866,
-              "coverage_p10_p90_pct": 83.3859,
+              "pinball_loss_p10": 23.5105,
+              "pinball_loss_p50": 33.229,
+              "pinball_loss_p90": 20.2315,
+              "mean_pinball_loss": 25.657,
+              "coverage_p10_p90_pct": 83.414,
               "nominal_coverage_pct": 80.0,
-              "below_p10_pct": 7.439,
-              "above_p90_pct": 9.1751,
+              "below_p10_pct": 7.197,
+              "above_p90_pct": 9.389,
+              "n_samples": 28512
+            },
+            "baseline_seasonal_naive_empirical": {
+              "pinball_loss_p10": 20.6444,
+              "pinball_loss_p50": 34.0421,
+              "pinball_loss_p90": 19.8528,
+              "mean_pinball_loss": 24.8464,
+              "coverage_p10_p90_pct": 84.8976,
+              "nominal_coverage_pct": 80.0,
+              "below_p10_pct": 7.5477,
+              "above_p90_pct": 7.5547,
               "n_samples": 28512
             }
           }
         ],
         "mean_metrics": {
-          "mean_pinball_loss_p10": 24.1606,
-          "mean_pinball_loss_p50": 34.3957,
-          "mean_pinball_loss_p90": 19.7179,
-          "mean_pinball_loss": 26.0914,
-          "mean_coverage_p10_p90_pct": 83.0345,
-          "std_coverage_p10_p90_pct": 2.225,
-          "nominal_coverage_pct": 80.0
+          "mean_pinball_loss_p10": 24.3174,
+          "mean_pinball_loss_p50": 34.5093,
+          "mean_pinball_loss_p90": 19.5533,
+          "mean_pinball_loss": 26.1267,
+          "mean_coverage_p10_p90_pct": 82.8718,
+          "std_coverage_p10_p90_pct": 2.3753,
+          "nominal_coverage_pct": 80.0,
+          "baseline_mean_pinball_loss": 29.2815,
+          "baseline_mean_coverage_pct": 83.9598,
+          "pinball_loss_reduction_pts": 3.1549
         }
       },
       "holdout_confirmation": {
-        "pinball_loss_p10": 23.2126,
-        "pinball_loss_p50": 36.8516,
-        "pinball_loss_p90": 21.787,
-        "mean_pinball_loss": 27.2837,
-        "coverage_p10_p90_pct": 82.8914,
+        "pinball_loss_p10": 23.339,
+        "pinball_loss_p50": 37.3617,
+        "pinball_loss_p90": 21.6715,
+        "mean_pinball_loss": 27.4574,
+        "coverage_p10_p90_pct": 83.2877,
         "nominal_coverage_pct": 80.0,
-        "below_p10_pct": 8.6385,
-        "above_p90_pct": 8.4701,
+        "below_p10_pct": 8.179,
+        "above_p90_pct": 8.5332,
         "n_samples": 28512,
         "holdout_origin": "2017-07-30",
         "test_start_date": "2017-07-31",
-        "test_end_date": "2017-08-15"
+        "test_end_date": "2017-08-15",
+        "baseline_seasonal_naive_empirical": {
+          "pinball_loss_p10": 29.1812,
+          "pinball_loss_p50": 48.3728,
+          "pinball_loss_p90": 28.2545,
+          "mean_pinball_loss": 35.2695,
+          "coverage_p10_p90_pct": 77.9146,
+          "nominal_coverage_pct": 80.0,
+          "below_p10_pct": 9.7327,
+          "above_p90_pct": 12.3527,
+          "n_samples": 28512
+        },
+        "pinball_loss_reduction_pts": 7.8121,
+        "wape_p50": 15.9958,
+        "by_family": {
+          "AUTOMOTIVE": {
+            "coverage_p10_p90_pct": 80.787,
+            "wape_p50": 39.0558,
+            "n_samples": 864
+          },
+          "BABY CARE": {
+            "coverage_p10_p90_pct": 93.8657,
+            "wape_p50": 105.7509,
+            "n_samples": 864
+          },
+          "BEAUTY": {
+            "coverage_p10_p90_pct": 79.6296,
+            "wape_p50": 38.1439,
+            "n_samples": 864
+          },
+          "BEVERAGES": {
+            "coverage_p10_p90_pct": 83.3333,
+            "wape_p50": 17.7233,
+            "n_samples": 864
+          },
+          "BOOKS": {
+            "coverage_p10_p90_pct": 99.537,
+            "wape_p50": 106.4241,
+            "n_samples": 864
+          },
+          "BREAD/BAKERY": {
+            "coverage_p10_p90_pct": 81.1343,
+            "wape_p50": 12.9394,
+            "n_samples": 864
+          },
+          "CELEBRATION": {
+            "coverage_p10_p90_pct": 82.7546,
+            "wape_p50": 41.3475,
+            "n_samples": 864
+          },
+          "CLEANING": {
+            "coverage_p10_p90_pct": 70.6019,
+            "wape_p50": 22.1197,
+            "n_samples": 864
+          },
+          "DAIRY": {
+            "coverage_p10_p90_pct": 87.7315,
+            "wape_p50": 12.7782,
+            "n_samples": 864
+          },
+          "DELI": {
+            "coverage_p10_p90_pct": 79.0509,
+            "wape_p50": 15.1139,
+            "n_samples": 864
+          },
+          "EGGS": {
+            "coverage_p10_p90_pct": 82.2917,
+            "wape_p50": 20.2095,
+            "n_samples": 864
+          },
+          "FROZEN FOODS": {
+            "coverage_p10_p90_pct": 80.6713,
+            "wape_p50": 20.783,
+            "n_samples": 864
+          },
+          "GROCERY I": {
+            "coverage_p10_p90_pct": 88.0787,
+            "wape_p50": 13.1554,
+            "n_samples": 864
+          },
+          "GROCERY II": {
+            "coverage_p10_p90_pct": 77.3148,
+            "wape_p50": 38.9347,
+            "n_samples": 864
+          },
+          "HARDWARE": {
+            "coverage_p10_p90_pct": 86.3426,
+            "wape_p50": 73.1188,
+            "n_samples": 864
+          },
+          "HOME AND KITCHEN I": {
+            "coverage_p10_p90_pct": 82.7546,
+            "wape_p50": 35.7681,
+            "n_samples": 864
+          },
+          "HOME AND KITCHEN II": {
+            "coverage_p10_p90_pct": 81.713,
+            "wape_p50": 34.3979,
+            "n_samples": 864
+          },
+          "HOME APPLIANCES": {
+            "coverage_p10_p90_pct": 93.4028,
+            "wape_p50": 122.1046,
+            "n_samples": 864
+          },
+          "HOME CARE": {
+            "coverage_p10_p90_pct": 69.7917,
+            "wape_p50": 24.3451,
+            "n_samples": 864
+          },
+          "LADIESWEAR": {
+            "coverage_p10_p90_pct": 84.4907,
+            "wape_p50": 37.8377,
+            "n_samples": 864
+          },
+          "LAWN AND GARDEN": {
+            "coverage_p10_p90_pct": 88.4259,
+            "wape_p50": 30.8794,
+            "n_samples": 864
+          },
+          "LINGERIE": {
+            "coverage_p10_p90_pct": 80.5556,
+            "wape_p50": 50.8985,
+            "n_samples": 864
+          },
+          "LIQUOR,WINE,BEER": {
+            "coverage_p10_p90_pct": 86.3426,
+            "wape_p50": 30.9623,
+            "n_samples": 864
+          },
+          "MAGAZINES": {
+            "coverage_p10_p90_pct": 82.5231,
+            "wape_p50": 39.933,
+            "n_samples": 864
+          },
+          "MEATS": {
+            "coverage_p10_p90_pct": 83.912,
+            "wape_p50": 15.6119,
+            "n_samples": 864
+          },
+          "PERSONAL CARE": {
+            "coverage_p10_p90_pct": 82.0602,
+            "wape_p50": 17.3212,
+            "n_samples": 864
+          },
+          "PET SUPPLIES": {
+            "coverage_p10_p90_pct": 82.1759,
+            "wape_p50": 31.9466,
+            "n_samples": 864
+          },
+          "PLAYERS AND ELECTRONICS": {
+            "coverage_p10_p90_pct": 83.912,
+            "wape_p50": 30.6468,
+            "n_samples": 864
+          },
+          "POULTRY": {
+            "coverage_p10_p90_pct": 85.6481,
+            "wape_p50": 14.8137,
+            "n_samples": 864
+          },
+          "PREPARED FOODS": {
+            "coverage_p10_p90_pct": 81.5972,
+            "wape_p50": 20.3615,
+            "n_samples": 864
+          },
+          "PRODUCE": {
+            "coverage_p10_p90_pct": 86.4583,
+            "wape_p50": 11.5978,
+            "n_samples": 864
+          },
+          "SCHOOL AND OFFICE SUPPLIES": {
+            "coverage_p10_p90_pct": 76.7361,
+            "wape_p50": 94.2206,
+            "n_samples": 864
+          },
+          "SEAFOOD": {
+            "coverage_p10_p90_pct": 82.8704,
+            "wape_p50": 23.1664,
+            "n_samples": 864
+          }
+        }
       }
     },
     "by_family": {
       "AUTOMOTIVE": {
         "lightgbm": {
-          "wape": 39.394,
-          "bias": -15.1949,
+          "wape": 39.3944,
+          "bias": -14.9019,
           "mae": 2.9094,
           "total_actual": 6381.0,
           "n_samples": 864
@@ -1608,13 +2078,13 @@
           "total_actual": 6381.0,
           "n_samples": 864
         },
-        "fva_wape_pts": 12.4944
+        "fva_wape_pts": 12.494
       },
       "BABY CARE": {
         "lightgbm": {
-          "wape": 135.4963,
-          "bias": -17.9766,
-          "mae": 0.2509,
+          "wape": 136.2129,
+          "bias": -21.302,
+          "mae": 0.2522,
           "total_actual": 160.0,
           "n_samples": 864
         },
@@ -1625,13 +2095,13 @@
           "total_actual": 160.0,
           "n_samples": 864
         },
-        "fva_wape_pts": 12.0037
+        "fva_wape_pts": 11.2871
       },
       "BEAUTY": {
         "lightgbm": {
-          "wape": 36.1201,
-          "bias": -14.4465,
-          "mae": 2.4068,
+          "wape": 34.3879,
+          "bias": -11.429,
+          "mae": 2.2913,
           "total_actual": 5757.0,
           "n_samples": 864
         },
@@ -1642,13 +2112,13 @@
           "total_actual": 5757.0,
           "n_samples": 864
         },
-        "fva_wape_pts": 13.4196
+        "fva_wape_pts": 15.1518
       },
       "BEVERAGES": {
         "lightgbm": {
-          "wape": 17.2374,
-          "bias": 3.9485,
-          "mae": 599.5983,
+          "wape": 16.9523,
+          "bias": 2.9412,
+          "mae": 589.684,
           "total_actual": 3005407.0,
           "n_samples": 864
         },
@@ -1659,13 +2129,13 @@
           "total_actual": 3005407.0,
           "n_samples": 864
         },
-        "fva_wape_pts": 5.0279
+        "fva_wape_pts": 5.313
       },
       "BOOKS": {
         "lightgbm": {
-          "wape": 437.888,
-          "bias": 260.5224,
-          "mae": 0.0456,
+          "wape": 501.9729,
+          "bias": 326.6038,
+          "mae": 0.0523,
           "total_actual": 9.0,
           "n_samples": 864
         },
@@ -1676,13 +2146,13 @@
           "total_actual": 9.0,
           "n_samples": 864
         },
-        "fva_wape_pts": -226.7769
+        "fva_wape_pts": -290.8618
       },
       "BREAD/BAKERY": {
         "lightgbm": {
-          "wape": 12.8225,
-          "bias": 2.9032,
-          "mae": 69.2764,
+          "wape": 12.7968,
+          "bias": 2.8549,
+          "mae": 69.1378,
           "total_actual": 466795.5,
           "n_samples": 864
         },
@@ -1693,13 +2163,13 @@
           "total_actual": 466795.5,
           "n_samples": 864
         },
-        "fva_wape_pts": 1.3313
+        "fva_wape_pts": 1.357
       },
       "CELEBRATION": {
         "lightgbm": {
-          "wape": 40.6171,
-          "bias": -5.8433,
-          "mae": 5.0621,
+          "wape": 40.6833,
+          "bias": -5.8182,
+          "mae": 5.0703,
           "total_actual": 10768.0,
           "n_samples": 864
         },
@@ -1710,13 +2180,13 @@
           "total_actual": 10768.0,
           "n_samples": 864
         },
-        "fva_wape_pts": 16.9981
+        "fva_wape_pts": 16.9319
       },
       "CLEANING": {
         "lightgbm": {
-          "wape": 21.3109,
-          "bias": 3.8109,
-          "mae": 262.7469,
+          "wape": 21.5533,
+          "bias": 3.615,
+          "mae": 265.7345,
           "total_actual": 1065243.0,
           "n_samples": 864
         },
@@ -1727,13 +2197,13 @@
           "total_actual": 1065243.0,
           "n_samples": 864
         },
-        "fva_wape_pts": 21.66
+        "fva_wape_pts": 21.4176
       },
       "DAIRY": {
         "lightgbm": {
-          "wape": 12.3444,
-          "bias": 7.8752,
-          "mae": 103.0174,
+          "wape": 12.4034,
+          "bias": 7.8134,
+          "mae": 103.5104,
           "total_actual": 721034.0,
           "n_samples": 864
         },
@@ -1744,13 +2214,13 @@
           "total_actual": 721034.0,
           "n_samples": 864
         },
-        "fva_wape_pts": 1.535
+        "fva_wape_pts": 1.476
       },
       "DELI": {
         "lightgbm": {
-          "wape": 14.704,
-          "bias": 8.4361,
-          "mae": 44.5719,
+          "wape": 14.6438,
+          "bias": 8.059,
+          "mae": 44.3896,
           "total_actual": 261902.89,
           "n_samples": 864
         },
@@ -1761,13 +2231,13 @@
           "total_actual": 261902.89,
           "n_samples": 864
         },
-        "fva_wape_pts": 2.8108
+        "fva_wape_pts": 2.871
       },
       "EGGS": {
         "lightgbm": {
-          "wape": 18.2524,
-          "bias": -1.6731,
-          "mae": 36.4475,
+          "wape": 18.4159,
+          "bias": -1.8825,
+          "mae": 36.7741,
           "total_actual": 172529.0,
           "n_samples": 864
         },
@@ -1778,13 +2248,13 @@
           "total_actual": 172529.0,
           "n_samples": 864
         },
-        "fva_wape_pts": 4.0157
+        "fva_wape_pts": 3.8522
       },
       "FROZEN FOODS": {
         "lightgbm": {
-          "wape": 19.8168,
-          "bias": -1.1102,
-          "mae": 25.233,
+          "wape": 19.5989,
+          "bias": -0.3909,
+          "mae": 24.9556,
           "total_actual": 110014.16,
           "n_samples": 864
         },
@@ -1795,13 +2265,13 @@
           "total_actual": 110014.16,
           "n_samples": 864
         },
-        "fva_wape_pts": 2.3554
+        "fva_wape_pts": 2.5733
       },
       "GROCERY I": {
         "lightgbm": {
-          "wape": 11.8424,
-          "bias": 0.237,
-          "mae": 545.5724,
+          "wape": 12.1792,
+          "bias": -0.368,
+          "mae": 561.0925,
           "total_actual": 3980412.48,
           "n_samples": 864
         },
@@ -1812,13 +2282,13 @@
           "total_actual": 3980412.48,
           "n_samples": 864
         },
-        "fva_wape_pts": 5.5138
+        "fva_wape_pts": 5.177
       },
       "GROCERY II": {
         "lightgbm": {
-          "wape": 37.3632,
-          "bias": 2.0788,
-          "mae": 10.8245,
+          "wape": 37.4935,
+          "bias": 1.9701,
+          "mae": 10.8623,
           "total_actual": 25031.0,
           "n_samples": 864
         },
@@ -1829,13 +2299,13 @@
           "total_actual": 25031.0,
           "n_samples": 864
         },
-        "fva_wape_pts": 26.7893
+        "fva_wape_pts": 26.659
       },
       "HARDWARE": {
         "lightgbm": {
-          "wape": 74.0783,
-          "bias": -24.1616,
-          "mae": 1.0734,
+          "wape": 73.7525,
+          "bias": -23.6401,
+          "mae": 1.0687,
           "total_actual": 1252.0,
           "n_samples": 864
         },
@@ -1846,13 +2316,13 @@
           "total_actual": 1252.0,
           "n_samples": 864
         },
-        "fva_wape_pts": 25.6821
+        "fva_wape_pts": 26.0079
       },
       "HOME AND KITCHEN I": {
         "lightgbm": {
-          "wape": 33.6962,
-          "bias": -12.5395,
-          "mae": 10.5379,
+          "wape": 33.7805,
+          "bias": -12.5668,
+          "mae": 10.5642,
           "total_actual": 27020.0,
           "n_samples": 864
         },
@@ -1863,13 +2333,13 @@
           "total_actual": 27020.0,
           "n_samples": 864
         },
-        "fva_wape_pts": 11.3186
+        "fva_wape_pts": 11.2343
       },
       "HOME AND KITCHEN II": {
         "lightgbm": {
-          "wape": 33.4689,
-          "bias": -11.1522,
-          "mae": 10.3773,
+          "wape": 33.3825,
+          "bias": -11.2794,
+          "mae": 10.3505,
           "total_actual": 26789.0,
           "n_samples": 864
         },
@@ -1880,13 +2350,13 @@
           "total_actual": 26789.0,
           "n_samples": 864
         },
-        "fva_wape_pts": 17.5782
+        "fva_wape_pts": 17.6646
       },
       "HOME APPLIANCES": {
         "lightgbm": {
-          "wape": 177.628,
-          "bias": 32.8417,
-          "mae": 0.3557,
+          "wape": 179.3268,
+          "bias": 34.7235,
+          "mae": 0.3591,
           "total_actual": 173.0,
           "n_samples": 864
         },
@@ -1897,13 +2367,13 @@
           "total_actual": 173.0,
           "n_samples": 864
         },
-        "fva_wape_pts": -0.1714
+        "fva_wape_pts": -1.8702
       },
       "HOME CARE": {
         "lightgbm": {
-          "wape": 22.725,
-          "bias": 15.5631,
-          "mae": 66.2532,
+          "wape": 22.2656,
+          "bias": 14.6094,
+          "mae": 64.9138,
           "total_actual": 251893.0,
           "n_samples": 864
         },
@@ -1914,13 +2384,13 @@
           "total_actual": 251893.0,
           "n_samples": 864
         },
-        "fva_wape_pts": 6.3655
+        "fva_wape_pts": 6.8249
       },
       "LADIESWEAR": {
         "lightgbm": {
-          "wape": 39.5354,
-          "bias": 11.5537,
-          "mae": 3.986,
+          "wape": 38.3337,
+          "bias": 10.5041,
+          "mae": 3.8649,
           "total_actual": 8711.0,
           "n_samples": 864
         },
@@ -1931,13 +2401,13 @@
           "total_actual": 8711.0,
           "n_samples": 864
         },
-        "fva_wape_pts": 11.9742
+        "fva_wape_pts": 13.1759
       },
       "LAWN AND GARDEN": {
         "lightgbm": {
-          "wape": 30.7752,
-          "bias": -3.5237,
-          "mae": 4.5978,
+          "wape": 31.108,
+          "bias": -2.5549,
+          "mae": 4.6475,
           "total_actual": 12908.0,
           "n_samples": 864
         },
@@ -1948,13 +2418,13 @@
           "total_actual": 12908.0,
           "n_samples": 864
         },
-        "fva_wape_pts": 7.6738
+        "fva_wape_pts": 7.341
       },
       "LINGERIE": {
         "lightgbm": {
-          "wape": 49.4658,
-          "bias": -20.1207,
-          "mae": 3.8451,
+          "wape": 48.8466,
+          "bias": -19.2133,
+          "mae": 3.7969,
           "total_actual": 6716.0,
           "n_samples": 864
         },
@@ -1965,13 +2435,13 @@
           "total_actual": 6716.0,
           "n_samples": 864
         },
-        "fva_wape_pts": 17.315
+        "fva_wape_pts": 17.9342
       },
       "LIQUOR,WINE,BEER": {
         "lightgbm": {
-          "wape": 29.4261,
-          "bias": -2.7945,
-          "mae": 28.6397,
+          "wape": 29.2041,
+          "bias": -3.8289,
+          "mae": 28.4237,
           "total_actual": 84091.0,
           "n_samples": 864
         },
@@ -1982,13 +2452,13 @@
           "total_actual": 84091.0,
           "n_samples": 864
         },
-        "fva_wape_pts": 5.6787
+        "fva_wape_pts": 5.9007
       },
       "MAGAZINES": {
         "lightgbm": {
-          "wape": 40.8805,
-          "bias": -25.8785,
-          "mae": 2.908,
+          "wape": 40.7101,
+          "bias": -26.0299,
+          "mae": 2.8959,
           "total_actual": 6146.0,
           "n_samples": 864
         },
@@ -1999,13 +2469,13 @@
           "total_actual": 6146.0,
           "n_samples": 864
         },
-        "fva_wape_pts": 9.3473
+        "fva_wape_pts": 9.5177
       },
       "MEATS": {
         "lightgbm": {
-          "wape": 14.0427,
-          "bias": -0.6357,
-          "mae": 52.1841,
+          "wape": 14.3126,
+          "bias": -0.5296,
+          "mae": 53.1868,
           "total_actual": 321070.53,
           "n_samples": 864
         },
@@ -2016,13 +2486,13 @@
           "total_actual": 321070.53,
           "n_samples": 864
         },
-        "fva_wape_pts": 2.9483
+        "fva_wape_pts": 2.6784
       },
       "PERSONAL CARE": {
         "lightgbm": {
-          "wape": 15.1789,
-          "bias": -2.0801,
-          "mae": 48.7747,
+          "wape": 15.5759,
+          "bias": -1.5966,
+          "mae": 50.0503,
           "total_actual": 277631.0,
           "n_samples": 864
         },
@@ -2033,13 +2503,13 @@
           "total_actual": 277631.0,
           "n_samples": 864
         },
-        "fva_wape_pts": 10.4515
+        "fva_wape_pts": 10.0545
       },
       "PET SUPPLIES": {
         "lightgbm": {
-          "wape": 32.0264,
-          "bias": -8.1578,
-          "mae": 2.6996,
+          "wape": 32.0184,
+          "bias": -8.9822,
+          "mae": 2.699,
           "total_actual": 7283.0,
           "n_samples": 864
         },
@@ -2050,13 +2520,13 @@
           "total_actual": 7283.0,
           "n_samples": 864
         },
-        "fva_wape_pts": 11.733
+        "fva_wape_pts": 11.741
       },
       "PLAYERS AND ELECTRONICS": {
         "lightgbm": {
-          "wape": 30.6151,
-          "bias": -9.6269,
-          "mae": 3.5732,
+          "wape": 30.3795,
+          "bias": -9.4912,
+          "mae": 3.5457,
           "total_actual": 10084.0,
           "n_samples": 864
         },
@@ -2067,13 +2537,13 @@
           "total_actual": 10084.0,
           "n_samples": 864
         },
-        "fva_wape_pts": 9.2996
+        "fva_wape_pts": 9.5352
       },
       "POULTRY": {
         "lightgbm": {
-          "wape": 13.3369,
-          "bias": 3.4278,
-          "mae": 49.9454,
+          "wape": 13.7647,
+          "bias": 3.9086,
+          "mae": 51.5477,
           "total_actual": 323560.27,
           "n_samples": 864
         },
@@ -2084,13 +2554,13 @@
           "total_actual": 323560.27,
           "n_samples": 864
         },
-        "fva_wape_pts": 4.012
+        "fva_wape_pts": 3.5842
       },
       "PREPARED FOODS": {
         "lightgbm": {
-          "wape": 17.8435,
-          "bias": -1.1854,
-          "mae": 15.6692,
+          "wape": 17.9405,
+          "bias": -1.0261,
+          "mae": 15.7543,
           "total_actual": 75871.65,
           "n_samples": 864
         },
@@ -2101,13 +2571,13 @@
           "total_actual": 75871.65,
           "n_samples": 864
         },
-        "fva_wape_pts": 3.5727
+        "fva_wape_pts": 3.4757
       },
       "PRODUCE": {
         "lightgbm": {
-          "wape": 12.0428,
-          "bias": 6.751,
-          "mae": 275.6305,
+          "wape": 12.3932,
+          "bias": 7.0665,
+          "mae": 283.65,
           "total_actual": 1977480.38,
           "n_samples": 864
         },
@@ -2118,13 +2588,13 @@
           "total_actual": 1977480.38,
           "n_samples": 864
         },
-        "fva_wape_pts": -0.4696
+        "fva_wape_pts": -0.82
       },
       "SCHOOL AND OFFICE SUPPLIES": {
         "lightgbm": {
-          "wape": 72.0783,
-          "bias": -70.085,
-          "mae": 43.2095,
+          "wape": 73.9324,
+          "bias": -71.9073,
+          "mae": 44.321,
           "total_actual": 51795.0,
           "n_samples": 864
         },
@@ -2135,13 +2605,13 @@
           "total_actual": 51795.0,
           "n_samples": 864
         },
-        "fva_wape_pts": 13.9126
+        "fva_wape_pts": 12.0585
       },
       "SEAFOOD": {
         "lightgbm": {
-          "wape": 21.9192,
-          "bias": -4.7495,
-          "mae": 4.379,
+          "wape": 22.5989,
+          "bias": -5.5354,
+          "mae": 4.5148,
           "total_actual": 17260.92,
           "n_samples": 864
         },
@@ -2152,17 +2622,17 @@
           "total_actual": 17260.92,
           "n_samples": 864
         },
-        "fva_wape_pts": 8.4206
+        "fva_wape_pts": 7.7409
       }
     },
     "models": {
       "lightgbm": {
-        "wape": 15.1573,
-        "bias": 2.854,
-        "mae": 70.8061,
-        "rmsle": 0.4071,
+        "wape": 15.2888,
+        "bias": 2.4618,
+        "mae": 71.4203,
+        "rmsle": 0.4069,
         "total_actual_sales": 13319179.78,
-        "total_predicted_sales": 13699314.26,
+        "total_predicted_sales": 13647068.46,
         "n_samples": 28512
       },
       "seasonal_naive_7d": {
@@ -2194,8 +2664,46 @@
       }
     },
     "forecast_value_added_vs_seasonal_naive": {
-      "wape_reduction_percentage_points": 5.5078,
-      "relative_error_reduction_pct": 26.65
+      "wape_reduction_percentage_points": 5.3763,
+      "relative_error_reduction_pct": 26.02
+    },
+    "daytype_breakdown_holdout": {
+      "by_payday_week": {
+        "other_regime": {
+          "n_samples": 12474,
+          "model_wape": 17.2277,
+          "model_bias": 5.1449,
+          "baseline_wape": 22.7669,
+          "baseline_bias": 9.9604,
+          "fva_wape_pts": 5.5392
+        },
+        "payday_regime": {
+          "n_samples": 16038,
+          "model_wape": 13.9726,
+          "model_bias": 0.6405,
+          "baseline_wape": 19.2384,
+          "baseline_bias": -6.073,
+          "fva_wape_pts": 5.2658
+        }
+      },
+      "by_exact_payday": {
+        "other_regime": {
+          "n_samples": 24948,
+          "model_wape": 15.5067,
+          "model_bias": 3.299,
+          "baseline_wape": 21.2083,
+          "baseline_bias": 1.482,
+          "fva_wape_pts": 5.7016
+        },
+        "payday_regime": {
+          "n_samples": 3564,
+          "model_wape": 13.7456,
+          "model_bias": -3.4657,
+          "baseline_wape": 16.8192,
+          "baseline_bias": -7.1806,
+          "fva_wape_pts": 3.0736
+        }
+      }
     }
   }
 }

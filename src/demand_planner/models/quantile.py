@@ -166,6 +166,7 @@ def run_quantile_cv(
     start_train_date: str = "2015-01-01",
     target_col: str = "sales",
     params: dict[str, Any] | None = None,
+    exclude_preopening: bool = True,
 ) -> dict[str, Any]:
     """Execute expanding-window cross-validation for LightGBM quantile regression.
 
@@ -191,6 +192,8 @@ def run_quantile_cv(
         Target column name.
     params : dict[str, Any] | None
         Optional model hyperparameters.
+    exclude_preopening : bool
+        If True, excludes rows before store opening date from training.
 
     Returns
     -------
@@ -198,6 +201,8 @@ def run_quantile_cv(
         Per-fold and aggregated cross-validation quantile evaluation metrics.
     """
     from demand_planner.evaluation.backtest import generate_rolling_folds
+    from demand_planner.evaluation.baselines import predict_seasonal_naive_quantiles
+    from demand_planner.models.lightgbm import get_store_opening_dates
 
     df_raw = sales_df.copy()
     df_raw["date"] = pd.to_datetime(df_raw["date"])
@@ -226,6 +231,11 @@ def run_quantile_cv(
             f.origin_date.strftime("%Y-%m-%d"),
         )
         train_mask = (df_feat["date"] <= f.origin_date) & (df_feat["date"] >= start_date)
+        if exclude_preopening:
+            opening_dates = get_store_opening_dates(df_raw, target_col=target_col)
+            is_open = df_feat["store_nbr"].map(opening_dates)
+            train_mask = train_mask & (df_feat["date"] >= is_open)
+
         test_mask = (df_feat["date"] > f.origin_date) & (
             df_feat["date"] <= f.origin_date + pd.Timedelta(days=horizon_days)
         )
@@ -234,10 +244,18 @@ def run_quantile_cv(
         y_train = np.log1p(df_feat.loc[train_mask, target_col])
         X_test = df_feat.loc[test_mask, feature_names]
         y_test = df_feat.loc[test_mask, target_col].to_numpy()
+        test_df = df_feat.loc[test_mask].copy()
 
         q_models = train_lightgbm_quantiles(X_train, y_train, alphas=(0.1, 0.5, 0.9), params=params)
         q_preds = predict_lightgbm_quantiles(q_models, X_test)
         q_eval = evaluate_quantiles(y_test, q_preds)
+
+        # Baseline: seasonal naive with empirical residuals
+        hist_raw = df_raw[df_raw["date"] <= f.origin_date]
+        base_preds, _ = predict_seasonal_naive_quantiles(
+            hist_raw, test_df, target_col=target_col, alphas=(0.1, 0.5, 0.9)
+        )
+        base_eval = evaluate_quantiles(y_test, base_preds)
 
         fold_records.append(
             {
@@ -248,6 +266,7 @@ def run_quantile_cv(
                     "%Y-%m-%d"
                 ),
                 "metrics": q_eval,
+                "baseline_seasonal_naive_empirical": base_eval,
             }
         )
 
@@ -257,6 +276,13 @@ def run_quantile_cv(
     pb90_vals = [rec["metrics"]["pinball_loss_p90"] for rec in fold_records]
     mean_pb_vals = [rec["metrics"]["mean_pinball_loss"] for rec in fold_records]
     cov_vals = [rec["metrics"]["coverage_p10_p90_pct"] for rec in fold_records]
+
+    base_pb_vals = [
+        rec["baseline_seasonal_naive_empirical"]["mean_pinball_loss"] for rec in fold_records
+    ]
+    base_cov_vals = [
+        rec["baseline_seasonal_naive_empirical"]["coverage_p10_p90_pct"] for rec in fold_records
+    ]
 
     return {
         "n_folds": n_folds,
@@ -271,6 +297,11 @@ def run_quantile_cv(
             "mean_coverage_p10_p90_pct": float(round(float(np.mean(cov_vals)), 4)),
             "std_coverage_p10_p90_pct": float(round(float(np.std(cov_vals, ddof=1)), 4)),
             "nominal_coverage_pct": 80.0,
+            "baseline_mean_pinball_loss": float(round(float(np.mean(base_pb_vals)), 4)),
+            "baseline_mean_coverage_pct": float(round(float(np.mean(base_cov_vals)), 4)),
+            "pinball_loss_reduction_pts": float(
+                round(float(np.mean(base_pb_vals) - np.mean(mean_pb_vals)), 4)
+            ),
         },
     }
 
@@ -283,6 +314,7 @@ def evaluate_quantile_holdout(
     start_train_date: str = "2015-01-01",
     target_col: str = "sales",
     params: dict[str, Any] | None = None,
+    exclude_preopening: bool = True,
 ) -> tuple[dict[str, Any], pd.DataFrame]:
     """Train LightGBM quantiles and evaluate on the untouched holdout window.
 
@@ -302,12 +334,18 @@ def evaluate_quantile_holdout(
         Target sales column.
     params : dict[str, Any] | None
         Optional hyperparameters.
+    exclude_preopening : bool
+        If True, excludes rows before store opening date from training.
 
     Returns
     -------
     tuple[dict[str, Any], pd.DataFrame]
         (Quantile holdout metrics, Test DataFrame with pred_p10, pred_p50, pred_p90)
     """
+    from demand_planner.evaluation.baselines import predict_seasonal_naive_quantiles
+    from demand_planner.evaluation.metrics import calc_wape
+    from demand_planner.models.lightgbm import get_store_opening_dates
+
     origin = pd.to_datetime(holdout_origin)
     df_raw = sales_df.copy()
     df_raw["date"] = pd.to_datetime(df_raw["date"])
@@ -318,6 +356,11 @@ def evaluate_quantile_holdout(
     )
 
     train_mask = (df_feat["date"] <= origin) & (df_feat["date"] >= pd.to_datetime(start_train_date))
+    if exclude_preopening:
+        opening_dates = get_store_opening_dates(df_raw, target_col=target_col)
+        is_open = df_feat["store_nbr"].map(opening_dates)
+        train_mask = train_mask & (df_feat["date"] >= is_open)
+
     test_mask = df_feat["date"] > origin
 
     X_train = df_feat.loc[train_mask, feature_names]
@@ -338,5 +381,36 @@ def evaluate_quantile_holdout(
     metrics["holdout_origin"] = origin.strftime("%Y-%m-%d")
     metrics["test_start_date"] = test_df["date"].min().strftime("%Y-%m-%d")
     metrics["test_end_date"] = test_df["date"].max().strftime("%Y-%m-%d")
+
+    # Evaluate seasonal-naive empirical residual baseline
+    hist_raw = df_raw[df_raw["date"] <= origin]
+    base_preds, _ = predict_seasonal_naive_quantiles(
+        hist_raw, test_df, target_col=target_col, alphas=(0.1, 0.5, 0.9)
+    )
+    base_eval = evaluate_quantiles(y_test, base_preds)
+    metrics["baseline_seasonal_naive_empirical"] = base_eval
+    metrics["pinball_loss_reduction_pts"] = float(
+        round(base_eval["mean_pinball_loss"] - metrics["mean_pinball_loss"], 4)
+    )
+
+    # WAPE of P50
+    p50_wape = calc_wape(y_test, preds["p50"])
+    metrics["wape_p50"] = p50_wape
+
+    # Coverage by family
+    by_family: dict[str, Any] = {}
+    for fam, grp in test_df.groupby("family"):
+        fam_y = grp[target_col].to_numpy()
+        fam_p10 = grp["pred_p10"].to_numpy()
+        fam_p90 = grp["pred_p90"].to_numpy()
+        fam_p50 = grp["pred_p50"].to_numpy()
+        cov = calc_empirical_coverage(fam_y, fam_p10, fam_p90)
+        fam_p50_wape = calc_wape(fam_y, fam_p50)
+        by_family[str(fam)] = {
+            "coverage_p10_p90_pct": cov,
+            "wape_p50": fam_p50_wape,
+            "n_samples": int(len(grp)),
+        }
+    metrics["by_family"] = by_family
 
     return metrics, test_df
