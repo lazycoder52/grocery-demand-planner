@@ -64,7 +64,18 @@ def _register_models_stage() -> None:
         max_date = train_df["date"].max()
         holdout_origin = max_date - pd.Timedelta(days=16)
 
-        summary, test_preds = evaluate_model_vs_baselines(
+        log.info("Running 5-fold rolling-origin cross-validation...")
+        from demand_planner.models.lightgbm import run_rolling_origin_cv
+
+        cv_results = run_rolling_origin_cv(
+            train_df,
+            stores_df=stores_df,
+            holidays_df=holidays_df,
+            start_train_date="2015-01-01",
+        )
+
+        log.info("Evaluating final holdout confirmation...")
+        holdout_summary, test_preds = evaluate_model_vs_baselines(
             train_df,
             holdout_origin=holdout_origin,
             stores_df=stores_df,
@@ -72,7 +83,18 @@ def _register_models_stage() -> None:
             start_train_date="2015-01-01",
         )
 
-        update_metrics_json(summary, section="models")
+        models_data = {
+            "model_status": "Selected model",
+            "cv_5_fold": cv_results,
+            "holdout_confirmation": holdout_summary,
+            "by_family": holdout_summary["by_family"],
+            "models": holdout_summary["models"],
+            "forecast_value_added_vs_seasonal_naive": holdout_summary[
+                "forecast_value_added_vs_seasonal_naive"
+            ],
+        }
+
+        update_metrics_json(models_data, section="models")
 
         OUTPUTS.mkdir(parents=True, exist_ok=True)
         out_preds = OUTPUTS / "holdout_predictions.parquet"
