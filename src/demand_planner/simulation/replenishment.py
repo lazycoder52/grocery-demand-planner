@@ -260,6 +260,13 @@ class PeriodicReviewSimulator:
         series_inv_sum = np.zeros(self.n_series, dtype=np.float64)
         series_stockouts = np.zeros(self.n_series, dtype=np.int32)
 
+        # Weekly time-block arrays for time-block bootstrap
+        n_weeks = max(1, int(np.ceil(eval_days / 7.0)))
+        week_sales = np.zeros(n_weeks, dtype=np.float64)
+        week_demand = np.zeros(n_weeks, dtype=np.float64)
+        week_inv_sum = np.zeros(n_weeks, dtype=np.float64)
+        week_days = np.zeros(n_weeks, dtype=np.float64)
+
         for t in range(self.n_days):
             # 1. Receive incoming shipments placed at t - L
             if t in pipeline_orders:
@@ -280,11 +287,18 @@ class PeriodicReviewSimulator:
                 series_demand += d_t.astype(np.float64)
                 series_stockouts += (unmet > 1e-4).astype(np.int32)
 
+                w_idx = min((t - eval_start) // 7, n_weeks - 1)
+                week_sales[w_idx] += float(fulfilled.sum())
+                week_demand[w_idx] += float(d_t.sum())
+
             # Deduct sold inventory; on-hand is never negative
             on_hand -= fulfilled
             if t >= eval_start:
                 inventory_sum += float(on_hand.sum())
                 series_inv_sum += on_hand.astype(np.float64)
+                w_idx = min((t - eval_start) // 7, n_weeks - 1)
+                week_inv_sum[w_idx] += float(on_hand.sum())
+                week_days[w_idx] += 1.0
 
             # 3. Periodic review order placement on review days (t % R == 0)
             if t % R == 0:
@@ -364,6 +378,11 @@ class PeriodicReviewSimulator:
                 "inv_sum": series_inv_sum,
                 "stockouts": series_stockouts,
                 "eval_days": eval_days,
+                "week_sales": week_sales,
+                "week_demand": week_demand,
+                "week_inv_sum": week_inv_sum,
+                "week_days": week_days,
+                "n_weeks": n_weeks,
             }
 
         return out
@@ -379,7 +398,10 @@ class PeriodicReviewSimulator:
             # 2. LightGBM P50 point
             records.append(self.simulate_policy("lightgbm_p50", lead_time_days=L))
 
-            # 3. LightGBM P50 + Safety Stock
+            # 3. LightGBM Point model
+            records.append(self.simulate_policy("lightgbm_point", lead_time_days=L))
+
+            # 4. LightGBM P50 + Safety Stock
             for sl in self.config.service_levels:
                 records.append(
                     self.simulate_policy(
@@ -387,7 +409,15 @@ class PeriodicReviewSimulator:
                     )
                 )
 
-            # 4. Seasonal Naive + Safety Stock (matched service levels)
+            # 5. LightGBM Point + Safety Stock
+            for sl in self.config.service_levels:
+                records.append(
+                    self.simulate_policy(
+                        "lightgbm_point_safety_stock", lead_time_days=L, service_level=sl
+                    )
+                )
+
+            # 6. Seasonal Naive + Safety Stock (matched service levels)
             for sl in self.config.service_levels:
                 records.append(
                     self.simulate_policy(
@@ -395,7 +425,7 @@ class PeriodicReviewSimulator:
                     )
                 )
 
-            # 5. Summed daily P90
+            # 7. Summed daily P90
             records.append(self.simulate_policy("summed_p90", lead_time_days=L))
 
         return pd.DataFrame(records)
@@ -411,8 +441,14 @@ class PeriodicReviewSimulator:
 
         for L in lead_times:
             for z in grid:
-                res_lgbm = self.simulate_policy(
+                res_p50 = self.simulate_policy(
                     "lightgbm_p50_safety_stock",
+                    lead_time_days=L,
+                    z_value=z,
+                    return_series_metrics=True,
+                )
+                res_point = self.simulate_policy(
+                    "lightgbm_point_safety_stock",
                     lead_time_days=L,
                     z_value=z,
                     return_series_metrics=True,
@@ -423,7 +459,8 @@ class PeriodicReviewSimulator:
                     z_value=z,
                     return_series_metrics=True,
                 )
-                records.append(res_lgbm)
+                records.append(res_p50)
+                records.append(res_point)
                 records.append(res_snaive)
 
         return pd.DataFrame(records)
@@ -436,130 +473,212 @@ class PeriodicReviewSimulator:
         lead_times: tuple[int, ...] = (3, 7),
         seed: int = 42,
     ) -> list[dict[str, Any]]:
-        """Interpolate required inventory to reach target fill rates with bootstrap CIs."""
+        """Interpolate required inventory to reach target fill rates with dual bootstrap CIs.
+
+        Computes:
+        1. Series bootstrap 95% CIs (cross-sectional resampling of store-family series).
+        2. Time-block bootstrap 95% CIs (temporal resampling of weekly review periods).
+        Evaluates both LightGBM P50 + SS and LightGBM Point + SS against Seasonal Naive + SS.
+        """
         rng = np.random.default_rng(seed)
         results: list[dict[str, Any]] = []
 
         for L in lead_times:
             df_l = frontier_df[frontier_df["lead_time_days"] == L]
-            df_lgbm = df_l[df_l["policy"] == "lightgbm_p50_safety_stock"].sort_values(
-                "fill_rate_pct"
-            )
+
             df_snaive = df_l[df_l["policy"] == "seasonal_naive_safety_stock"].sort_values(
                 "fill_rate_pct"
             )
-
-            # Point interpolation on aggregate curves
-            fr_lgbm = df_lgbm["fill_rate_pct"].to_numpy()
-            inv_lgbm = df_lgbm["average_inventory_units"].to_numpy()
-
             fr_snaive = df_snaive["fill_rate_pct"].to_numpy()
             inv_snaive = df_snaive["average_inventory_units"].to_numpy()
-
-            interp_lgbm = interp1d(
-                fr_lgbm, inv_lgbm, bounds_error=False, fill_value=(inv_lgbm[0], inv_lgbm[-1])
-            )
-            interp_snaive = interp1d(
-                fr_snaive,
-                inv_snaive,
-                bounds_error=False,
-                fill_value=(inv_snaive[0], inv_snaive[-1]),
-            )
-
-            # Pre-extract series metrics for fast bootstrapping
-            series_data_lgbm = [row["series_metrics"] for _, row in df_lgbm.iterrows()]
             series_data_snaive = [row["series_metrics"] for _, row in df_snaive.iterrows()]
+            n_weeks = series_data_snaive[0]["n_weeks"]
 
-            for target_fr in target_fill_rates:
-                req_inv_lgbm = float(interp_lgbm(target_fr))
-                req_inv_snaive = float(interp_snaive(target_fr))
-                pct_diff = ((req_inv_lgbm - req_inv_snaive) / req_inv_snaive) * 100.0
+            models_to_compare = [
+                ("lightgbm_p50_safety_stock", "LightGBM P50"),
+                ("lightgbm_point_safety_stock", "LightGBM Point"),
+            ]
 
-                # Block bootstrap over series
-                boot_diffs: list[float] = []
-                boot_lgbm_invs: list[float] = []
-                boot_snaive_invs: list[float] = []
+            for model_policy, model_label in models_to_compare:
+                df_model = df_l[df_l["policy"] == model_policy].sort_values("fill_rate_pct")
+                fr_model = df_model["fill_rate_pct"].to_numpy()
+                inv_model = df_model["average_inventory_units"].to_numpy()
+                series_data_model = [row["series_metrics"] for _, row in df_model.iterrows()]
 
-                for _ in range(n_bootstrap):
-                    idx = rng.integers(0, self.n_series, size=self.n_series)
+                min_fr_model, max_fr_model = float(fr_model[0]), float(fr_model[-1])
+                min_fr_sn, max_fr_sn = float(fr_snaive[0]), float(fr_snaive[-1])
 
-                    b_fr_lgbm: list[float] = []
-                    b_inv_lgbm: list[float] = []
-                    for m in series_data_lgbm:
-                        s_tot = m["sales"][idx].sum()
-                        d_tot = m["demand"][idx].sum()
-                        fr = (s_tot / max(d_tot, 1e-6)) * 100.0
-                        inv = m["inv_sum"][idx].sum() / m["eval_days"]
-                        b_fr_lgbm.append(fr)
-                        b_inv_lgbm.append(inv)
+                for target_fr in target_fill_rates:
+                    is_reachable_model = min_fr_model <= target_fr <= max_fr_model
+                    is_reachable_sn = min_fr_sn <= target_fr <= max_fr_sn
+                    is_reachable = is_reachable_model and is_reachable_sn
 
-                    b_fr_snaive: list[float] = []
-                    b_inv_snaive: list[float] = []
-                    for m in series_data_snaive:
-                        s_tot = m["sales"][idx].sum()
-                        d_tot = m["demand"][idx].sum()
-                        fr = (s_tot / max(d_tot, 1e-6)) * 100.0
-                        inv = m["inv_sum"][idx].sum() / m["eval_days"]
-                        b_fr_snaive.append(fr)
-                        b_inv_snaive.append(inv)
+                    if not is_reachable:
+                        results.append(
+                            {
+                                "lead_time_days": L,
+                                "comparison": f"{model_label} vs Seasonal Naive",
+                                "forecaster": model_label,
+                                "target_fill_rate_pct": target_fr,
+                                "is_reachable": False,
+                                "required_inventory_lightgbm": None,
+                                "required_inventory_snaive": None,
+                                "pct_difference": None,
+                                "ci_95_series_pct_diff_low": None,
+                                "ci_95_series_pct_diff_high": None,
+                                "ci_95_time_block_pct_diff_low": None,
+                                "ci_95_time_block_pct_diff_high": None,
+                                "is_within_noise_series": None,
+                                "is_within_noise_time_block": None,
+                                "model_grid_range_pct": (
+                                    round(min_fr_model, 2),
+                                    round(max_fr_model, 2),
+                                ),
+                                "snaive_grid_range_pct": (round(min_fr_sn, 2), round(max_fr_sn, 2)),
+                                "interpretation": (
+                                    f"Target {target_fr}% unreachable on empirical grid "
+                                    f"({model_label} [{min_fr_model:.2f}%, {max_fr_model:.2f}%], "
+                                    f"S.Naive [{min_fr_sn:.2f}%, {max_fr_sn:.2f}%])"
+                                ),
+                            }
+                        )
+                        continue
 
-                    b_interp_l = interp1d(
-                        b_fr_lgbm,
-                        b_inv_lgbm,
-                        bounds_error=False,
-                        fill_value=(b_inv_lgbm[0], b_inv_lgbm[-1]),
+                    # Point interpolation along aggregate frontiers
+                    idx_m = np.argsort(fr_model)
+                    idx_s = np.argsort(fr_snaive)
+                    interp_m = interp1d(fr_model[idx_m], inv_model[idx_m])
+                    interp_s = interp1d(fr_snaive[idx_s], inv_snaive[idx_s])
+
+                    req_inv_m = float(interp_m(target_fr))
+                    req_inv_sn = float(interp_s(target_fr))
+                    pct_diff = ((req_inv_m - req_inv_sn) / max(req_inv_sn, 1e-6)) * 100.0
+
+                    # 1. Series Bootstrap (resample store-family series)
+                    boot_diffs_series: list[float] = []
+                    for _ in range(n_bootstrap):
+                        idx = rng.integers(0, self.n_series, size=self.n_series)
+
+                        b_fr_m, b_inv_m = [], []
+                        for m in series_data_model:
+                            s = m["sales"][idx].sum()
+                            d = m["demand"][idx].sum()
+                            b_fr_m.append((s / max(d, 1e-6)) * 100.0)
+                            b_inv_m.append(m["inv_sum"][idx].sum() / m["eval_days"])
+
+                        b_fr_s, b_inv_s = [], []
+                        for m in series_data_snaive:
+                            s = m["sales"][idx].sum()
+                            d = m["demand"][idx].sum()
+                            b_fr_s.append((s / max(d, 1e-6)) * 100.0)
+                            b_inv_s.append(m["inv_sum"][idx].sum() / m["eval_days"])
+
+                        if min(b_fr_m) <= target_fr <= max(b_fr_m) and min(
+                            b_fr_s
+                        ) <= target_fr <= max(b_fr_s):
+                            im = np.argsort(b_fr_m)
+                            is_ = np.argsort(b_fr_s)
+                            bf_m = interp1d(np.array(b_fr_m)[im], np.array(b_inv_m)[im])
+                            bf_s = interp1d(np.array(b_fr_s)[is_], np.array(b_inv_s)[is_])
+                            b_diff = (
+                                (float(bf_m(target_fr)) - float(bf_s(target_fr)))
+                                / max(float(bf_s(target_fr)), 1e-6)
+                            ) * 100.0
+                            boot_diffs_series.append(b_diff)
+
+                    if len(boot_diffs_series) >= 20:
+                        ci_ser_low = float(np.percentile(boot_diffs_series, 2.5))
+                        ci_ser_high = float(np.percentile(boot_diffs_series, 97.5))
+                        is_within_noise_ser = ci_ser_low <= 0.0 <= ci_ser_high
+                    else:
+                        ci_ser_low = ci_ser_high = 0.0
+                        is_within_noise_ser = True
+
+                    # 2. Time-Block Bootstrap (resample weekly review time blocks)
+                    boot_diffs_time: list[float] = []
+                    for _ in range(n_bootstrap):
+                        w_idx = rng.integers(0, n_weeks, size=n_weeks)
+
+                        b_fr_m, b_inv_m = [], []
+                        for m in series_data_model:
+                            s = m["week_sales"][w_idx].sum()
+                            d = m["week_demand"][w_idx].sum()
+                            b_fr_m.append((s / max(d, 1e-6)) * 100.0)
+                            w_days = max(m["week_days"][w_idx].sum(), 1.0)
+                            b_inv_m.append(m["week_inv_sum"][w_idx].sum() / w_days)
+
+                        b_fr_s, b_inv_s = [], []
+                        for m in series_data_snaive:
+                            s = m["week_sales"][w_idx].sum()
+                            d = m["week_demand"][w_idx].sum()
+                            b_fr_s.append((s / max(d, 1e-6)) * 100.0)
+                            w_days = max(m["week_days"][w_idx].sum(), 1.0)
+                            b_inv_s.append(m["week_inv_sum"][w_idx].sum() / w_days)
+
+                        if min(b_fr_m) <= target_fr <= max(b_fr_m) and min(
+                            b_fr_s
+                        ) <= target_fr <= max(b_fr_s):
+                            im = np.argsort(b_fr_m)
+                            is_ = np.argsort(b_fr_s)
+                            bf_m = interp1d(np.array(b_fr_m)[im], np.array(b_inv_m)[im])
+                            bf_s = interp1d(np.array(b_fr_s)[is_], np.array(b_inv_s)[is_])
+                            b_diff = (
+                                (float(bf_m(target_fr)) - float(bf_s(target_fr)))
+                                / max(float(bf_s(target_fr)), 1e-6)
+                            ) * 100.0
+                            boot_diffs_time.append(b_diff)
+
+                    if len(boot_diffs_time) >= 20:
+                        ci_time_low = float(np.percentile(boot_diffs_time, 2.5))
+                        ci_time_high = float(np.percentile(boot_diffs_time, 97.5))
+                        is_within_noise_time = ci_time_low <= 0.0 <= ci_time_high
+                    else:
+                        ci_time_low = ci_time_high = 0.0
+                        is_within_noise_time = True
+
+                    results.append(
+                        {
+                            "lead_time_days": L,
+                            "comparison": f"{model_label} vs Seasonal Naive",
+                            "forecaster": model_label,
+                            "target_fill_rate_pct": target_fr,
+                            "is_reachable": True,
+                            "required_inventory_lightgbm": float(round(req_inv_m, 2)),
+                            "required_inventory_snaive": float(round(req_inv_sn, 2)),
+                            "pct_difference": float(round(pct_diff, 2)),
+                            "ci_95_series_pct_diff_low": float(round(ci_ser_low, 2)),
+                            "ci_95_series_pct_diff_high": float(round(ci_ser_high, 2)),
+                            "ci_95_time_block_pct_diff_low": float(round(ci_time_low, 2)),
+                            "ci_95_time_block_pct_diff_high": float(round(ci_time_high, 2)),
+                            "is_within_noise_series": is_within_noise_ser,
+                            "is_within_noise_time_block": is_within_noise_time,
+                            "interpretation": (
+                                f"{model_label} vs S.Naive at {target_fr}% FR: "
+                                f"{pct_diff:+.2f}% inventory "
+                                f"(Series 95% CI: [{ci_ser_low:+.2f}%, {ci_ser_high:+.2f}%], "
+                                f"Time-Block 95% CI: [{ci_time_low:+.2f}%, {ci_time_high:+.2f}%])"
+                            ),
+                        }
                     )
-                    b_interp_s = interp1d(
-                        b_fr_snaive,
-                        b_inv_snaive,
-                        bounds_error=False,
-                        fill_value=(b_inv_snaive[0], b_inv_snaive[-1]),
-                    )
-
-                    b_req_l = float(b_interp_l(target_fr))
-                    b_req_s = float(b_interp_s(target_fr))
-                    b_diff = ((b_req_l - b_req_s) / max(b_req_s, 1e-6)) * 100.0
-
-                    boot_lgbm_invs.append(b_req_l)
-                    boot_snaive_invs.append(b_req_s)
-                    boot_diffs.append(b_diff)
-
-                ci_diff_low = float(np.percentile(boot_diffs, 2.5))
-                ci_diff_high = float(np.percentile(boot_diffs, 97.5))
-                is_within_noise = ci_diff_low <= 0.0 <= ci_diff_high
-
-                results.append(
-                    {
-                        "lead_time_days": L,
-                        "target_fill_rate_pct": target_fr,
-                        "required_inventory_lightgbm": req_inv_lgbm,
-                        "required_inventory_snaive": req_inv_snaive,
-                        "pct_difference": float(round(pct_diff, 2)),
-                        "ci_95_pct_diff_low": float(round(ci_diff_low, 2)),
-                        "ci_95_pct_diff_high": float(round(ci_diff_high, 2)),
-                        "is_within_noise": is_within_noise,
-                        "interpretation": (
-                            "Difference is within statistical noise (95% CI spans 0)"
-                            if is_within_noise
-                            else (
-                                f"LightGBM saves {abs(pct_diff):.2f}% inventory "
-                                f"(95% CI: [{ci_diff_low:.2f}%, {ci_diff_high:.2f}%])"
-                                if pct_diff < 0
-                                else f"Seasonal Naive uses {abs(pct_diff):.2f}% less inventory"
-                            )
-                        ),
-                    }
-                )
 
         return results
 
-    def simulate_by_family(
+    def simulate_by_family_matched_fill_rate(
         self,
-        lead_time_days: int = 3,
-        service_level: float = 0.95,
+        frontier_df: pd.DataFrame | None = None,
+        lead_times: tuple[int, ...] = (3, 7),
+        target_fill_rates: tuple[float, ...] = (98.5, 99.0, 99.5),
         families: list[str] | None = None,
+        n_bootstrap: int = 200,
+        seed: int = 42,
     ) -> list[dict[str, Any]]:
-        """Compute per-family replenishment metrics for LightGBM+SS vs Seasonal Naive+SS."""
+        """Compute per-family matched-fill-rate inventory comparison with bootstrap CIs.
+
+        For each family and lead time, traces the fill-rate vs average-inventory frontier,
+        interpolates required inventory at fixed fill rates, and computes 95% bootstrap CIs
+        across stores. Targets unreachable on the empirical grid are reported without extrapolation.
+        """
+        rng = np.random.default_rng(seed)
         target_fams = families or [
             "GROCERY I",
             "BEVERAGES",
@@ -576,69 +695,171 @@ class PeriodicReviewSimulator:
             "LAWN AND GARDEN",
         ]
 
-        res_lgbm = self.simulate_policy(
-            "lightgbm_p50_safety_stock",
-            lead_time_days=lead_time_days,
-            service_level=service_level,
-            return_series_metrics=True,
-        )
-        res_snaive = self.simulate_policy(
-            "seasonal_naive_safety_stock",
-            lead_time_days=lead_time_days,
-            service_level=service_level,
-            return_series_metrics=True,
-        )
-
-        m_l = res_lgbm["series_metrics"]
-        m_s = res_snaive["series_metrics"]
-        eval_days = m_l["eval_days"]
+        f_df = frontier_df if frontier_df is not None else self.run_frontier(lead_times=lead_times)
 
         family_series = self.series_keys["family"].to_numpy()
         results: list[dict[str, Any]] = []
 
         for fam in target_fams:
-            idx = np.where(family_series == fam)[0]
-            if len(idx) == 0:
+            fam_idx = np.where(family_series == fam)[0]
+            if len(fam_idx) == 0:
                 continue
+            n_stores = len(fam_idx)
 
-            # LightGBM metrics for family
-            dem_l = float(m_l["demand"][idx].sum())
-            sal_l = float(m_l["sales"][idx].sum())
-            inv_l = float(m_l["inv_sum"][idx].sum() / eval_days)
-            stk_l = int(m_l["stockouts"][idx].sum())
-            fr_l = (sal_l / max(dem_l, 1e-6)) * 100.0
-            stk_pct_l = (stk_l / (len(idx) * eval_days)) * 100.0
+            for L in lead_times:
+                df_l = f_df[f_df["lead_time_days"] == L]
 
-            # Seasonal Naive metrics for family
-            dem_s = float(m_s["demand"][idx].sum())
-            sal_s = float(m_s["sales"][idx].sum())
-            inv_s = float(m_s["inv_sum"][idx].sum() / eval_days)
-            stk_s = int(m_s["stockouts"][idx].sum())
-            fr_s = (sal_s / max(dem_s, 1e-6)) * 100.0
-            stk_pct_s = (stk_s / (len(idx) * eval_days)) * 100.0
+                curves: dict[str, dict[str, Any]] = {}
+                for pol in [
+                    "lightgbm_p50_safety_stock",
+                    "lightgbm_point_safety_stock",
+                    "seasonal_naive_safety_stock",
+                ]:
+                    fr_list, inv_list, series_list = [], [], []
+                    pol_rows = df_l[df_l["policy"] == pol]
 
-            inv_diff_pct = ((inv_l - inv_s) / max(inv_s, 1e-6)) * 100.0
+                    for _, r in pol_rows.iterrows():
+                        m = r["series_metrics"]
+                        dem = float(m["demand"][fam_idx].sum())
+                        sal = float(m["sales"][fam_idx].sum())
+                        inv = float(m["inv_sum"][fam_idx].sum() / m["eval_days"])
+                        fr = (sal / max(dem, 1e-6)) * 100.0
+                        fr_list.append(fr)
+                        inv_list.append(inv)
+                        series_list.append(
+                            {
+                                "demand": m["demand"][fam_idx],
+                                "sales": m["sales"][fam_idx],
+                                "inv_sum": m["inv_sum"][fam_idx],
+                                "eval_days": m["eval_days"],
+                            }
+                        )
 
-            results.append(
-                {
-                    "family": fam,
-                    "lead_time_days": lead_time_days,
-                    "service_level": service_level,
-                    "lightgbm": {
-                        "fill_rate_pct": float(round(fr_l, 2)),
-                        "average_inventory_units": float(round(inv_l, 2)),
-                        "stockout_day_share_pct": float(round(stk_pct_l, 2)),
-                    },
-                    "seasonal_naive": {
-                        "fill_rate_pct": float(round(fr_s, 2)),
-                        "average_inventory_units": float(round(inv_s, 2)),
-                        "stockout_day_share_pct": float(round(stk_pct_s, 2)),
-                    },
-                    "inventory_difference_pct": float(round(inv_diff_pct, 2)),
-                }
-            )
+                    curves[pol] = {
+                        "fr": np.array(fr_list),
+                        "inv": np.array(inv_list),
+                        "series": series_list,
+                        "min_fr": float(min(fr_list)) if fr_list else 0.0,
+                        "max_fr": float(max(fr_list)) if fr_list else 0.0,
+                    }
+
+                c_p50 = curves["lightgbm_p50_safety_stock"]
+                c_pt = curves["lightgbm_point_safety_stock"]
+                c_sn = curves["seasonal_naive_safety_stock"]
+
+                for target_fr in target_fill_rates:
+                    reach_p50 = c_p50["min_fr"] <= target_fr <= c_p50["max_fr"]
+                    reach_pt = c_pt["min_fr"] <= target_fr <= c_pt["max_fr"]
+                    reach_sn = c_sn["min_fr"] <= target_fr <= c_sn["max_fr"]
+
+                    entry: dict[str, Any] = {
+                        "family": fam,
+                        "lead_time_days": L,
+                        "target_fill_rate_pct": target_fr,
+                        "is_reachable_p50": reach_p50 and reach_sn,
+                        "is_reachable_point": reach_pt and reach_sn,
+                        "grid_fr_range_p50": (
+                            round(c_p50["min_fr"], 2),
+                            round(c_p50["max_fr"], 2),
+                        ),
+                        "grid_fr_range_point": (
+                            round(c_pt["min_fr"], 2),
+                            round(c_pt["max_fr"], 2),
+                        ),
+                        "grid_fr_range_snaive": (
+                            round(c_sn["min_fr"], 2),
+                            round(c_sn["max_fr"], 2),
+                        ),
+                    }
+
+                    if reach_p50 and reach_sn:
+                        ip_p50 = np.argsort(c_p50["fr"])
+                        ip_sn = np.argsort(c_sn["fr"])
+                        f_p50 = interp1d(c_p50["fr"][ip_p50], c_p50["inv"][ip_p50])
+                        f_sn = interp1d(c_sn["fr"][ip_sn], c_sn["inv"][ip_sn])
+
+                        req_p50 = float(f_p50(target_fr))
+                        req_sn = float(f_sn(target_fr))
+                        pct_diff_p50 = ((req_p50 - req_sn) / max(req_sn, 1e-6)) * 100.0
+
+                        # Bootstrap across stores
+                        b_diffs: list[float] = []
+                        for _ in range(n_bootstrap):
+                            b_idx = rng.integers(0, n_stores, size=n_stores)
+                            b_fr_p50, b_inv_p50 = [], []
+                            for m in c_p50["series"]:
+                                s = m["sales"][b_idx].sum()
+                                d = m["demand"][b_idx].sum()
+                                b_fr_p50.append((s / max(d, 1e-6)) * 100.0)
+                                b_inv_p50.append(m["inv_sum"][b_idx].sum() / m["eval_days"])
+
+                            b_fr_s, b_inv_s = [], []
+                            for m in c_sn["series"]:
+                                s = m["sales"][b_idx].sum()
+                                d = m["demand"][b_idx].sum()
+                                b_fr_s.append((s / max(d, 1e-6)) * 100.0)
+                                b_inv_s.append(m["inv_sum"][b_idx].sum() / m["eval_days"])
+
+                            if min(b_fr_p50) <= target_fr <= max(b_fr_p50) and min(
+                                b_fr_s
+                            ) <= target_fr <= max(b_fr_s):
+                                im = np.argsort(b_fr_p50)
+                                is_ = np.argsort(b_fr_s)
+                                bf_p = interp1d(np.array(b_fr_p50)[im], np.array(b_inv_p50)[im])
+                                bf_s = interp1d(np.array(b_fr_s)[is_], np.array(b_inv_s)[is_])
+                                diff = (
+                                    (float(bf_p(target_fr)) - float(bf_s(target_fr)))
+                                    / max(float(bf_s(target_fr)), 1e-6)
+                                ) * 100.0
+                                b_diffs.append(diff)
+
+                        if len(b_diffs) >= 20:
+                            ci_low = float(np.percentile(b_diffs, 2.5))
+                            ci_high = float(np.percentile(b_diffs, 97.5))
+                            excludes_0 = ci_low > 0 or ci_high < 0
+                        else:
+                            ci_low = ci_high = 0.0
+                            excludes_0 = False
+
+                        entry.update(
+                            {
+                                "required_inventory_lightgbm_p50": float(round(req_p50, 2)),
+                                "required_inventory_snaive": float(round(req_sn, 2)),
+                                "pct_diff_p50_vs_snaive": float(round(pct_diff_p50, 2)),
+                                "ci_95_p50_low": float(round(ci_low, 2)),
+                                "ci_95_p50_high": float(round(ci_high, 2)),
+                                "p50_ci_excludes_zero": excludes_0,
+                                "is_statistically_significant_win_p50": excludes_0
+                                and pct_diff_p50 < 0,
+                            }
+                        )
+                    else:
+                        entry.update(
+                            {
+                                "required_inventory_lightgbm_p50": None,
+                                "required_inventory_snaive": None,
+                                "pct_diff_p50_vs_snaive": None,
+                                "ci_95_p50_low": None,
+                                "ci_95_p50_high": None,
+                                "p50_ci_excludes_zero": False,
+                                "is_statistically_significant_win_p50": False,
+                            }
+                        )
+
+                    results.append(entry)
 
         return results
+
+    def simulate_by_family(
+        self,
+        lead_time_days: int = 3,
+        service_level: float = 0.95,
+        families: list[str] | None = None,
+    ) -> list[dict[str, Any]]:
+        """Backward-compatible alias for simulate_by_family_matched_fill_rate."""
+        return self.simulate_by_family_matched_fill_rate(
+            lead_times=(lead_time_days,), families=families
+        )
 
 
 def plot_replenishment_tradeoff(
@@ -677,6 +898,22 @@ def plot_replenishment_tradeoff(
                     zorder=2,
                 )
 
+            # LightGBM Point line
+            fl_point = df_fl[df_fl["policy"] == "lightgbm_point_safety_stock"].sort_values(
+                "average_inventory_units"
+            )
+            if len(fl_point) > 0:
+                ax.plot(
+                    fl_point["average_inventory_units"] / 1e6,
+                    fl_point["fill_rate_pct"],
+                    color="#2ca02c",
+                    linestyle=ls,
+                    linewidth=2.0,
+                    alpha=0.85,
+                    label=f"LightGBM Point + SS Frontier (L={L}d)",
+                    zorder=2,
+                )
+
             # Seasonal Naive line
             fl_snaive = df_fl[df_fl["policy"] == "seasonal_naive_safety_stock"].sort_values(
                 "average_inventory_units"
@@ -700,6 +937,8 @@ def plot_replenishment_tradeoff(
         "seasonal_naive_safety_stock": "#ff7f0e",
         "lightgbm_p50": "#17becf",
         "lightgbm_p50_safety_stock": "#1f77b4",
+        "lightgbm_point": "#2ca02c",
+        "lightgbm_point_safety_stock": "#2ca02c",
         "summed_p90": "#d62728",
     }
 
