@@ -87,6 +87,7 @@ def _register_models_stage() -> None:
         from demand_planner.models.quantile import (
             evaluate_quantile_holdout,
             generate_all_predictions,
+            generate_review_forecasts,
             run_quantile_cv,
         )
 
@@ -156,6 +157,18 @@ def _register_models_stage() -> None:
         oof_df.to_parquet(oof_path, index=False, compression="zstd", compression_level=9)
         log.info("Saved out-of-fold predictions to %s (%d rows)", oof_path, len(oof_df))
 
+        review_path = OUTPUTS / "review_forecasts.parquet"
+        log.info("Generating per-review-date forecasts matrix without extrapolation...")
+        review_df = generate_review_forecasts(
+            sales_df=train_df,
+            stores_df=stores_df,
+            holidays_df=holidays_df,
+            start_train_date="2015-01-01",
+            exclude_preopening=True,
+        )
+        review_df.to_parquet(review_path, index=False, compression="zstd", compression_level=9)
+        log.info("Saved review forecasts to %s (%d rows)", review_path, len(review_df))
+
     STAGES["models"] = stage_models
 
 
@@ -182,7 +195,15 @@ def _register_simulation_stage() -> None:
             return
 
         df_preds = pd.read_parquet(oof_path)
-        sim = PeriodicReviewSimulator(df_preds, config=cfg)
+        review_path = OUTPUTS / "review_forecasts.parquet"
+        review_df = pd.read_parquet(review_path) if review_path.exists() else None
+
+        sim = PeriodicReviewSimulator(
+            df_preds,
+            review_forecasts_df=review_df,
+            config=cfg,
+            stitching_rule="reforecast",
+        )
         sim_df = sim.run_all_simulations()
 
         log.info("Tracing fill-rate vs inventory frontiers across fine z grid...")
@@ -190,7 +211,7 @@ def _register_simulation_stage() -> None:
 
         log.info("Computing target fill rate trade-offs and bootstrap CIs...")
         tradeoffs = sim.compute_target_fill_rate_tradeoff(
-            frontier_df, target_fill_rates=(98.5, 99.0, 99.5), n_bootstrap=200, seed=cfg.seed
+            frontier_df, target_fill_rates=(98.5, 99.0, 99.5), n_bootstrap=1000, seed=cfg.seed
         )
 
         log.info("Computing per-family matched fill-rate frontiers across L in {3, 7}...")
@@ -221,9 +242,10 @@ def _register_simulation_stage() -> None:
                 "service_levels": list(cfg.service_levels),
                 "warmup_days": cfg.warmup_days,
                 "seed": cfg.seed,
-                "extrapolation_rule_l14": (
-                    "L=14 (R+L=21d) exceeds the 16-day model horizon; forecasts are "
-                    "extrapolated proportionally over the protection window."
+                "stitching_rule": sim.stitching_rule,
+                "extrapolation_handling": (
+                    "Using per-review-date re-forecasting (stitching_rule='reforecast') "
+                    "with 16-day horizon covering R+L=10d and 14d without proportional scaling."
                 ),
                 "data_limitations": (
                     "Favorita has no inventory data; sales are a demand proxy and are "
