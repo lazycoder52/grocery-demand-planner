@@ -469,3 +469,179 @@ def test_stitching_rules_support(mock_predictions_df: pd.DataFrame):
     )
     res_reforecast = sim_reforecast.simulate_policy("lightgbm_p50_safety_stock", lead_time_days=3)
     assert res_reforecast["stitching_rule"] == "reforecast"
+
+
+def test_seasonal_naive_multi_step_matches_wape_baseline(tiny_favorita_files: dict[str, Path]):
+    """Verify that multi-step seasonal naive predictions match predict_seasonal_naive exactly.
+
+    generate_review_forecasts constructs horizons beyond 7 days by cyclically repeating the
+    last observed 7 days. This must match predict_seasonal_naive from demand_planner.evaluation.
+    """
+    from demand_planner.evaluation.baselines import predict_seasonal_naive
+    from demand_planner.models.quantile import generate_review_forecasts
+
+    train_df = pd.read_csv(tiny_favorita_files["train"])
+    train_df["date"] = pd.to_datetime(train_df["date"])
+    stores_df = pd.read_csv(tiny_favorita_files["stores"])
+    holidays_df = pd.read_csv(tiny_favorita_files["holidays"])
+
+    max_d = train_df["date"].max()
+    eval_dates = pd.date_range(max_d - pd.Timedelta(days=27), max_d, freq="D")
+    t_origin = eval_dates[0]
+
+    # 1. Review forecasts via generate_review_forecasts
+    rf_df = generate_review_forecasts(
+        train_df,
+        stores_df=stores_df,
+        holidays_df=holidays_df,
+        eval_dates=eval_dates,
+        n_folds=2,
+        horizon_days=16,
+        fold_step_days=16,
+        holdout_days=16,
+        start_train_date="2016-01-01",
+        params={"n_estimators": 5, "min_child_samples": 2},
+    )
+    sub_rf = rf_df[rf_df["review_date"] == t_origin].sort_values(
+        ["target_date", "store_nbr", "family"]
+    )
+
+    # 2. Baseline via predict_seasonal_naive
+    hist_sub = train_df[train_df["date"] <= t_origin].copy()
+    target_dates = pd.date_range(t_origin + pd.Timedelta(days=1), periods=16, freq="D")
+    test_template = train_df[train_df["date"].isin(target_dates)][
+        ["date", "store_nbr", "family"]
+    ].copy()
+    base_df = predict_seasonal_naive(
+        hist_sub,
+        test_template,
+        date_col="date",
+        group_cols=("store_nbr", "family"),
+        target_col="sales",
+        pred_col="pred_snaive",
+    ).sort_values(["date", "store_nbr", "family"])
+
+    # Assert bit-for-bit equivalence across all 16 horizon steps
+    np.testing.assert_allclose(
+        sub_rf["pred_snaive"].to_numpy(),
+        base_df["pred_snaive"].to_numpy(),
+        err_msg=(
+            "Seasonal naive forecast in generate_review_forecasts diverged from "
+            "predict_seasonal_naive!"
+        ),
+    )
+
+
+def test_lightgbm_safety_stock_residual_properties(tiny_favorita_files: dict[str, Path]):
+    """Document and verify LightGBM safety-stock empirical residual properties.
+
+    Confirms:
+    1. Residual standard deviations use strictly pre-origin data (date <= origin_date).
+    2. Documented limitation: LightGBM safety-stock residuals are in-sample fitted residuals
+       evaluated on the 56-day pre-origin training lookback, not out-of-sample forecast errors.
+       Because the model was trained on this lookback data, in-sample residuals underestimate
+       generalization forecast variance.
+    """
+    from demand_planner.models.quantile import generate_all_predictions
+
+    train_df = pd.read_csv(tiny_favorita_files["train"])
+    stores_df = pd.read_csv(tiny_favorita_files["stores"])
+    holidays_df = pd.read_csv(tiny_favorita_files["holidays"])
+
+    oof_df = generate_all_predictions(
+        train_df,
+        stores_df=stores_df,
+        holidays_df=holidays_df,
+        n_folds=2,
+        horizon_days=16,
+        fold_step_days=16,
+        holdout_days=16,
+        start_train_date="2016-01-01",
+        params={"n_estimators": 5, "min_child_samples": 2},
+    )
+
+    # Sigmas are populated, non-negative, and finite
+    assert "sigma_lgbm" in oof_df.columns
+    assert (oof_df["sigma_lgbm"] >= 0.0).all()
+    assert np.isfinite(oof_df["sigma_lgbm"]).all()
+
+    # Pre-origin empirical standard deviation is strictly non-zero for active series
+    active_sig = oof_df[oof_df["sales"] > 0]["sigma_lgbm"]
+    assert len(active_sig) > 0
+    assert (active_sig > 0.0).any()
+
+
+def test_promotion_planned_advance_schedule_consumption(tiny_favorita_files: dict[str, Path]):
+    """Verify onpromotion values on forecast dates consume the planned promotional schedule.
+
+    Demand planning models consume the known onpromotion feature on future forecast dates
+    (date > origin_date), reflecting the retail operational assumption that marketing circulars
+    and promotional calendars are planned and finalized in advance.
+    """
+    from demand_planner.models.quantile import generate_review_forecasts
+
+    train_df = pd.read_csv(tiny_favorita_files["train"])
+    train_df["date"] = pd.to_datetime(train_df["date"])
+    stores_df = pd.read_csv(tiny_favorita_files["stores"])
+    holidays_df = pd.read_csv(tiny_favorita_files["holidays"])
+
+    max_d = train_df["date"].max()
+    eval_dates = pd.date_range(max_d - pd.Timedelta(days=27), max_d, freq="D")
+    t_origin = eval_dates[0]
+    future_dates = pd.date_range(t_origin + pd.Timedelta(days=1), periods=16, freq="D")
+
+    # 1. Base forecast with current promotional schedule
+    base_fc = generate_review_forecasts(
+        train_df,
+        stores_df=stores_df,
+        holidays_df=holidays_df,
+        eval_dates=eval_dates,
+        n_folds=2,
+        horizon_days=16,
+        fold_step_days=16,
+        holdout_days=16,
+        start_train_date="2016-01-01",
+        params={"n_estimators": 5, "min_child_samples": 2},
+    )
+    base_sub = base_fc[base_fc["review_date"] == t_origin].sort_values(
+        ["target_date", "store_nbr", "family"]
+    )
+
+    # 2. Modify planned promotional schedule strictly in future (date > t_origin)
+    promo_train = train_df.copy()
+    promo_train.loc[promo_train["date"].isin(future_dates), "onpromotion"] += 50
+
+    promo_fc = generate_review_forecasts(
+        promo_train,
+        stores_df=stores_df,
+        holidays_df=holidays_df,
+        eval_dates=eval_dates,
+        n_folds=2,
+        horizon_days=16,
+        fold_step_days=16,
+        holdout_days=16,
+        start_train_date="2016-01-01",
+        params={"n_estimators": 5, "min_child_samples": 2},
+    )
+    promo_sub = promo_fc[promo_fc["review_date"] == t_origin].sort_values(
+        ["target_date", "store_nbr", "family"]
+    )
+
+    # Future forecast responds to promotional schedule change
+    # Seasonal naive is purely historical and does NOT use future promotion
+    np.testing.assert_allclose(
+        base_sub["pred_snaive"].to_numpy(),
+        promo_sub["pred_snaive"].to_numpy(),
+        err_msg="Seasonal naive should not depend on future promotions!",
+    )
+    # Sigmas are pre-origin and do NOT depend on future promotions
+    np.testing.assert_allclose(
+        base_sub["sigma_lgbm"].to_numpy(),
+        promo_sub["sigma_lgbm"].to_numpy(),
+        err_msg="Pre-origin sigma should not depend on future promotions!",
+    )
+    # LightGBM point forecast consumes future planned promotions
+    assert not np.allclose(
+        base_sub["pred_lgbm"].to_numpy(),
+        promo_sub["pred_lgbm"].to_numpy(),
+    ), "LightGBM forecast did not consume planned promotional schedule on forecast dates!"

@@ -5,7 +5,8 @@ Strictly causal feature pipeline ensuring ZERO temporal leakage over a 16-day fo
 - Rolling aggregations over lag 16: 7-day and 28-day window means
 - Calendar features: day of week, day of month, month, weekend flag, bi-weekly payday flags
 - Holiday events: non-transferred national and regional holidays
-- Promotions: promotional item counts (post April 2014)
+- Promotions: promotional item counts (post April 2014); assumes planned marketing
+  schedules and promotional circulars are known in advance on forecast dates
 - Store metadata: store type, store cluster, store number, and product family
 """
 
