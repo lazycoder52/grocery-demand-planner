@@ -20,6 +20,26 @@ StageFn = Callable[[], None]
 STAGES: dict[str, StageFn] = {}
 
 
+def _register_data_stage() -> None:
+    from demand_planner.data import (
+        audit_dataset,
+        generate_data_card,
+        ingest_csvs,
+        update_metrics_json,
+    )
+
+    def stage_data() -> None:
+        con = ingest_csvs()
+        audit = audit_dataset(con)
+        update_metrics_json(audit)
+        generate_data_card(audit)
+
+    STAGES["data"] = stage_data
+
+
+_register_data_stage()
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="python -m demand_planner.pipeline",

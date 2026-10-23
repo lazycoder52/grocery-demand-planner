@@ -1,0 +1,611 @@
+{
+  "audit": {
+    "row_counts": {
+      "holidays_events": 350,
+      "oil": 1218,
+      "sample_submission": 28512,
+      "stores": 54,
+      "test": 28512,
+      "train": 3000888,
+      "transactions": 83488
+    },
+    "date_ranges": {
+      "train": {
+        "min_date": "2013-01-01",
+        "max_date": "2017-08-15"
+      },
+      "test": {
+        "min_date": "2017-08-16",
+        "max_date": "2017-08-31"
+      },
+      "oil": {
+        "min_date": "2013-01-01",
+        "max_date": "2017-08-31"
+      },
+      "transactions": {
+        "min_date": "2013-01-01",
+        "max_date": "2017-08-15"
+      },
+      "holidays_events": {
+        "min_date": "2012-03-02",
+        "max_date": "2017-12-26"
+      }
+    },
+    "missing_calendar_dates": [
+      "2013-12-25",
+      "2014-12-25",
+      "2015-12-25",
+      "2016-12-25"
+    ],
+    "missing_dates_count": 4,
+    "late_opening_stores": [
+      {
+        "store_nbr": 1,
+        "first_sale_date": "2013-01-02"
+      },
+      {
+        "store_nbr": 2,
+        "first_sale_date": "2013-01-02"
+      },
+      {
+        "store_nbr": 3,
+        "first_sale_date": "2013-01-02"
+      },
+      {
+        "store_nbr": 4,
+        "first_sale_date": "2013-01-02"
+      },
+      {
+        "store_nbr": 5,
+        "first_sale_date": "2013-01-02"
+      },
+      {
+        "store_nbr": 6,
+        "first_sale_date": "2013-01-02"
+      },
+      {
+        "store_nbr": 7,
+        "first_sale_date": "2013-01-02"
+      },
+      {
+        "store_nbr": 8,
+        "first_sale_date": "2013-01-02"
+      },
+      {
+        "store_nbr": 9,
+        "first_sale_date": "2013-01-02"
+      },
+      {
+        "store_nbr": 10,
+        "first_sale_date": "2013-01-02"
+      },
+      {
+        "store_nbr": 11,
+        "first_sale_date": "2013-01-02"
+      },
+      {
+        "store_nbr": 12,
+        "first_sale_date": "2013-01-02"
+      },
+      {
+        "store_nbr": 13,
+        "first_sale_date": "2013-01-02"
+      },
+      {
+        "store_nbr": 14,
+        "first_sale_date": "2013-01-02"
+      },
+      {
+        "store_nbr": 15,
+        "first_sale_date": "2013-01-02"
+      },
+      {
+        "store_nbr": 16,
+        "first_sale_date": "2013-01-02"
+      },
+      {
+        "store_nbr": 17,
+        "first_sale_date": "2013-01-02"
+      },
+      {
+        "store_nbr": 18,
+        "first_sale_date": "2013-01-02"
+      },
+      {
+        "store_nbr": 19,
+        "first_sale_date": "2013-01-02"
+      },
+      {
+        "store_nbr": 20,
+        "first_sale_date": "2015-02-13"
+      },
+      {
+        "store_nbr": 21,
+        "first_sale_date": "2015-07-24"
+      },
+      {
+        "store_nbr": 22,
+        "first_sale_date": "2015-10-09"
+      },
+      {
+        "store_nbr": 23,
+        "first_sale_date": "2013-01-02"
+      },
+      {
+        "store_nbr": 24,
+        "first_sale_date": "2013-01-02"
+      },
+      {
+        "store_nbr": 26,
+        "first_sale_date": "2013-01-02"
+      },
+      {
+        "store_nbr": 27,
+        "first_sale_date": "2013-01-02"
+      },
+      {
+        "store_nbr": 28,
+        "first_sale_date": "2013-01-02"
+      },
+      {
+        "store_nbr": 29,
+        "first_sale_date": "2015-03-20"
+      },
+      {
+        "store_nbr": 30,
+        "first_sale_date": "2013-01-02"
+      },
+      {
+        "store_nbr": 31,
+        "first_sale_date": "2013-01-02"
+      },
+      {
+        "store_nbr": 32,
+        "first_sale_date": "2013-01-02"
+      },
+      {
+        "store_nbr": 33,
+        "first_sale_date": "2013-01-02"
+      },
+      {
+        "store_nbr": 34,
+        "first_sale_date": "2013-01-02"
+      },
+      {
+        "store_nbr": 35,
+        "first_sale_date": "2013-01-02"
+      },
+      {
+        "store_nbr": 36,
+        "first_sale_date": "2013-05-09"
+      },
+      {
+        "store_nbr": 37,
+        "first_sale_date": "2013-01-02"
+      },
+      {
+        "store_nbr": 38,
+        "first_sale_date": "2013-01-02"
+      },
+      {
+        "store_nbr": 39,
+        "first_sale_date": "2013-01-02"
+      },
+      {
+        "store_nbr": 40,
+        "first_sale_date": "2013-01-02"
+      },
+      {
+        "store_nbr": 41,
+        "first_sale_date": "2013-01-02"
+      },
+      {
+        "store_nbr": 42,
+        "first_sale_date": "2015-08-21"
+      },
+      {
+        "store_nbr": 43,
+        "first_sale_date": "2013-01-02"
+      },
+      {
+        "store_nbr": 44,
+        "first_sale_date": "2013-01-02"
+      },
+      {
+        "store_nbr": 45,
+        "first_sale_date": "2013-01-02"
+      },
+      {
+        "store_nbr": 46,
+        "first_sale_date": "2013-01-02"
+      },
+      {
+        "store_nbr": 47,
+        "first_sale_date": "2013-01-02"
+      },
+      {
+        "store_nbr": 48,
+        "first_sale_date": "2013-01-02"
+      },
+      {
+        "store_nbr": 49,
+        "first_sale_date": "2013-01-02"
+      },
+      {
+        "store_nbr": 50,
+        "first_sale_date": "2013-01-02"
+      },
+      {
+        "store_nbr": 51,
+        "first_sale_date": "2013-01-02"
+      },
+      {
+        "store_nbr": 52,
+        "first_sale_date": "2017-04-20"
+      },
+      {
+        "store_nbr": 53,
+        "first_sale_date": "2014-05-29"
+      },
+      {
+        "store_nbr": 54,
+        "first_sale_date": "2013-01-02"
+      }
+    ],
+    "total_stores": 54,
+    "family_stats": {
+      "BOOKS": {
+        "zero_share_pct": 96.96,
+        "mean_sales": 0.07,
+        "median_sales": 0.0,
+        "max_sales": 51.0,
+        "is_intermittent": true
+      },
+      "BABY CARE": {
+        "zero_share_pct": 94.13,
+        "mean_sales": 0.11,
+        "median_sales": 0.0,
+        "max_sales": 116.0,
+        "is_intermittent": true
+      },
+      "SCHOOL AND OFFICE SUPPLIES": {
+        "zero_share_pct": 74.08,
+        "mean_sales": 2.96,
+        "median_sales": 0.0,
+        "max_sales": 1332.0,
+        "is_intermittent": true
+      },
+      "HOME APPLIANCES": {
+        "zero_share_pct": 73.52,
+        "mean_sales": 0.46,
+        "median_sales": 0.0,
+        "max_sales": 15.0,
+        "is_intermittent": true
+      },
+      "LADIESWEAR": {
+        "zero_share_pct": 59.85,
+        "mean_sales": 7.16,
+        "median_sales": 0.0,
+        "max_sales": 147.0,
+        "is_intermittent": true
+      },
+      "MAGAZINES": {
+        "zero_share_pct": 56.54,
+        "mean_sales": 2.93,
+        "median_sales": 0.0,
+        "max_sales": 79.0,
+        "is_intermittent": true
+      },
+      "PET SUPPLIES": {
+        "zero_share_pct": 54.62,
+        "mean_sales": 3.92,
+        "median_sales": 0.0,
+        "max_sales": 106.0,
+        "is_intermittent": true
+      },
+      "HARDWARE": {
+        "zero_share_pct": 47.86,
+        "mean_sales": 1.14,
+        "median_sales": 1.0,
+        "max_sales": 49.0,
+        "is_intermittent": false
+      },
+      "LAWN AND GARDEN": {
+        "zero_share_pct": 46.78,
+        "mean_sales": 6.04,
+        "median_sales": 1.0,
+        "max_sales": 712.0,
+        "is_intermittent": false
+      },
+      "PLAYERS AND ELECTRONICS": {
+        "zero_share_pct": 44.89,
+        "mean_sales": 6.19,
+        "median_sales": 2.0,
+        "max_sales": 269.0,
+        "is_intermittent": false
+      },
+      "CELEBRATION": {
+        "zero_share_pct": 43.63,
+        "mean_sales": 8.37,
+        "median_sales": 3.0,
+        "max_sales": 1783.0,
+        "is_intermittent": false
+      },
+      "HOME CARE": {
+        "zero_share_pct": 40.91,
+        "mean_sales": 176.2,
+        "median_sales": 143.0,
+        "max_sales": 2504.0,
+        "is_intermittent": false
+      },
+      "HOME AND KITCHEN II": {
+        "zero_share_pct": 34.71,
+        "mean_sales": 16.72,
+        "median_sales": 9.0,
+        "max_sales": 1568.0,
+        "is_intermittent": false
+      },
+      "HOME AND KITCHEN I": {
+        "zero_share_pct": 34.65,
+        "mean_sales": 20.47,
+        "median_sales": 12.0,
+        "max_sales": 1935.0,
+        "is_intermittent": false
+      },
+      "PRODUCE": {
+        "zero_share_pct": 28.36,
+        "mean_sales": 1349.35,
+        "median_sales": 398.29,
+        "max_sales": 17850.62,
+        "is_intermittent": false
+      },
+      "BEAUTY": {
+        "zero_share_pct": 26.28,
+        "mean_sales": 3.72,
+        "median_sales": 2.0,
+        "max_sales": 136.0,
+        "is_intermittent": false
+      },
+      "SEAFOOD": {
+        "zero_share_pct": 19.36,
+        "mean_sales": 22.16,
+        "median_sales": 8.0,
+        "max_sales": 274.44,
+        "is_intermittent": false
+      },
+      "LIQUOR,WINE,BEER": {
+        "zero_share_pct": 17.87,
+        "mean_sales": 85.19,
+        "median_sales": 47.0,
+        "max_sales": 4821.0,
+        "is_intermittent": false
+      },
+      "LINGERIE": {
+        "zero_share_pct": 16.05,
+        "mean_sales": 7.18,
+        "median_sales": 5.0,
+        "max_sales": 1059.0,
+        "is_intermittent": false
+      },
+      "AUTOMOTIVE": {
+        "zero_share_pct": 12.78,
+        "mean_sales": 6.1,
+        "median_sales": 5.0,
+        "max_sales": 255.0,
+        "is_intermittent": false
+      },
+      "GROCERY II": {
+        "zero_share_pct": 12.11,
+        "mean_sales": 21.58,
+        "median_sales": 12.0,
+        "max_sales": 2931.0,
+        "is_intermittent": false
+      },
+      "FROZEN FOODS": {
+        "zero_share_pct": 8.09,
+        "mean_sales": 154.77,
+        "median_sales": 83.0,
+        "max_sales": 14541.55,
+        "is_intermittent": false
+      },
+      "POULTRY": {
+        "zero_share_pct": 8.08,
+        "mean_sales": 350.53,
+        "median_sales": 205.74,
+        "max_sales": 12143.2,
+        "is_intermittent": false
+      },
+      "PREPARED FOODS": {
+        "zero_share_pct": 8.08,
+        "mean_sales": 96.77,
+        "median_sales": 63.96,
+        "max_sales": 912.57,
+        "is_intermittent": false
+      },
+      "PERSONAL CARE": {
+        "zero_share_pct": 8.07,
+        "mean_sales": 270.43,
+        "median_sales": 222.0,
+        "max_sales": 7504.0,
+        "is_intermittent": false
+      },
+      "BEVERAGES": {
+        "zero_share_pct": 8.06,
+        "mean_sales": 2385.79,
+        "median_sales": 1784.0,
+        "max_sales": 25413.0,
+        "is_intermittent": false
+      },
+      "BREAD/BAKERY": {
+        "zero_share_pct": 8.06,
+        "mean_sales": 463.34,
+        "median_sales": 401.0,
+        "max_sales": 4551.3,
+        "is_intermittent": false
+      },
+      "CLEANING": {
+        "zero_share_pct": 8.06,
+        "mean_sales": 1072.42,
+        "median_sales": 938.0,
+        "max_sales": 11377.0,
+        "is_intermittent": false
+      },
+      "DAIRY": {
+        "zero_share_pct": 8.06,
+        "mean_sales": 709.15,
+        "median_sales": 520.0,
+        "max_sales": 5636.0,
+        "is_intermittent": false
+      },
+      "DELI": {
+        "zero_share_pct": 8.06,
+        "mean_sales": 265.14,
+        "median_sales": 218.97,
+        "max_sales": 2118.32,
+        "is_intermittent": false
+      },
+      "EGGS": {
+        "zero_share_pct": 8.06,
+        "mean_sales": 171.42,
+        "median_sales": 131.0,
+        "max_sales": 3110.0,
+        "is_intermittent": false
+      },
+      "GROCERY I": {
+        "zero_share_pct": 8.06,
+        "mean_sales": 3776.97,
+        "median_sales": 3185.0,
+        "max_sales": 124717.0,
+        "is_intermittent": false
+      },
+      "MEATS": {
+        "zero_share_pct": 8.06,
+        "mean_sales": 341.85,
+        "median_sales": 224.94,
+        "max_sales": 89576.36,
+        "is_intermittent": false
+      }
+    },
+    "intermittent_families": [
+      "BOOKS",
+      "BABY CARE",
+      "SCHOOL AND OFFICE SUPPLIES",
+      "HOME APPLIANCES",
+      "LADIESWEAR",
+      "MAGAZINES",
+      "PET SUPPLIES"
+    ],
+    "total_families": 33,
+    "promo_by_year": {
+      "2013": {
+        "promo_rows": 0,
+        "promo_share_pct": 0.0,
+        "mean_onpromotion": 0.0,
+        "max_onpromotion": 0
+      },
+      "2014": {
+        "promo_rows": 64979,
+        "promo_share_pct": 10.02,
+        "mean_onpromotion": 0.71,
+        "max_onpromotion": 205
+      },
+      "2015": {
+        "promo_rows": 135302,
+        "promo_share_pct": 20.86,
+        "mean_onpromotion": 1.68,
+        "max_onpromotion": 235
+      },
+      "2016": {
+        "promo_rows": 227981,
+        "promo_share_pct": 35.05,
+        "mean_onpromotion": 5.4,
+        "max_onpromotion": 741
+      },
+      "2017": {
+        "promo_rows": 183067,
+        "promo_share_pct": 45.26,
+        "mean_onpromotion": 6.8,
+        "max_onpromotion": 697
+      }
+    },
+    "first_recorded_promotion_date": "2014-04-01",
+    "oil_summary": {
+      "total_rows": 1218,
+      "missing_prices": 43,
+      "missing_pct": 3.53
+    },
+    "holidays_summary": {
+      "total_holidays": 350,
+      "breakdown": [
+        {
+          "type": "Additional",
+          "locale": "Local",
+          "count": 11,
+          "transferred": 0
+        },
+        {
+          "type": "Additional",
+          "locale": "National",
+          "count": 40,
+          "transferred": 0
+        },
+        {
+          "type": "Bridge",
+          "locale": "National",
+          "count": 5,
+          "transferred": 0
+        },
+        {
+          "type": "Event",
+          "locale": "National",
+          "count": 56,
+          "transferred": 0
+        },
+        {
+          "type": "Holiday",
+          "locale": "Local",
+          "count": 137,
+          "transferred": 4
+        },
+        {
+          "type": "Holiday",
+          "locale": "National",
+          "count": 60,
+          "transferred": 8
+        },
+        {
+          "type": "Holiday",
+          "locale": "Regional",
+          "count": 24,
+          "transferred": 0
+        },
+        {
+          "type": "Transfer",
+          "locale": "Local",
+          "count": 4,
+          "transferred": 0
+        },
+        {
+          "type": "Transfer",
+          "locale": "National",
+          "count": 8,
+          "transferred": 0
+        },
+        {
+          "type": "Work Day",
+          "locale": "National",
+          "count": 5,
+          "transferred": 0
+        }
+      ],
+      "transferred_total": 12
+    },
+    "sales_distribution": {
+      "p50": 11.0,
+      "p90": 867.0,
+      "p99": 5507.0,
+      "p999": 12076.23,
+      "max_sales": 124717.0
+    }
+  }
+}
