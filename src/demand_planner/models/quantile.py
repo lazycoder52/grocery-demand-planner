@@ -4,16 +4,13 @@ Trains models for specified quantiles (default P10, P50, P90) using the same str
 causal feature pipeline as the point forecasting model. Evaluates pinball loss
 and empirical interval coverage across rolling-origin backtest folds and holdout.
 
-Empirical Coverage & Uncertainty Notes:
-- CLEANING (72.49%) and PERSONAL CARE (77.60%) exhibit notable under-coverage relative to
-  the nominal 80% target interval (P10-P90), reflecting high promotional volatility and
-  promotional variance not fully captured by linear interval expansion.
-- Nominal coverage for zero-heavy/intermittent families (e.g. BOOKS 98.15%, BABY CARE 94.00%)
-  is inflated due to zero point-mass at y=0 which automatically falls inside [0, P90].
-- The higher aggregate WAPE of the P50 model (14.27% CV vs 13.49% for point model) occurs
-  because P50 minimizes pinball loss (L1 conditional median), which does not sum to the
-  total volume evaluated by volume-weighted WAPE, whereas the point model minimizes squared error
-  (conditional expectation) with volume shrinkage.
+Empirical Coverage & Uncertainty Observations (Measured):
+- CLEANING achieves 72.49% empirical coverage and PERSONAL CARE achieves 77.60%
+  across the 5 folds + holdout relative to the nominal 80% target interval (P10-P90).
+- Families with high zero rates show higher empirical coverage: BOOKS (55.4% zero rate)
+  achieves 98.15% coverage, and BABY CARE (66.8% zero rate) achieves 94.00% coverage.
+- Across 5-fold backtest evaluation, the LightGBM point model achieves 13.49% mean WAPE,
+  while the LightGBM P50 quantile model achieves 14.27% mean WAPE (+0.78% higher).
 """
 
 from __future__ import annotations
