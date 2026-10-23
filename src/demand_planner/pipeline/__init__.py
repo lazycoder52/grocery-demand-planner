@@ -86,6 +86,7 @@ def _register_models_stage() -> None:
         log.info("Running 5-fold rolling-origin cross-validation for LightGBM quantiles...")
         from demand_planner.models.quantile import (
             evaluate_quantile_holdout,
+            generate_all_predictions,
             run_quantile_cv,
         )
 
@@ -143,6 +144,18 @@ def _register_models_stage() -> None:
         test_preds.to_parquet(out_preds, index=False)
         log.info("Saved holdout predictions to %s (%d rows)", out_preds, len(test_preds))
 
+        oof_path = OUTPUTS / "oof_and_holdout_predictions.parquet"
+        log.info("Generating out-of-fold and holdout predictions matrix with pre-origin sigmas...")
+        oof_df = generate_all_predictions(
+            sales_df=train_df,
+            stores_df=stores_df,
+            holidays_df=holidays_df,
+            start_train_date="2015-01-01",
+            exclude_preopening=True,
+        )
+        oof_df.to_parquet(oof_path, index=False, compression="zstd", compression_level=9)
+        log.info("Saved out-of-fold predictions to %s (%d rows)", oof_path, len(oof_df))
+
     STAGES["models"] = stage_models
 
 
@@ -172,21 +185,39 @@ def _register_simulation_stage() -> None:
         sim = PeriodicReviewSimulator(df_preds, config=cfg)
         sim_df = sim.run_all_simulations()
 
-        tradeoff_chart = plot_replenishment_tradeoff(sim_df)
+        log.info("Tracing fill-rate vs inventory frontiers across fine z grid...")
+        frontier_df = sim.run_frontier(lead_times=(3, 7))
+
+        log.info("Computing target fill rate trade-offs and bootstrap CIs...")
+        tradeoffs = sim.compute_target_fill_rate_tradeoff(
+            frontier_df, target_fill_rates=(98.5, 99.0, 99.5), n_bootstrap=200, seed=cfg.seed
+        )
+
+        log.info("Computing per-family replenishment metrics at matched SL=0.95 (L=3d)...")
+        family_results = sim.simulate_by_family(lead_time_days=3, service_level=0.95)
+
+        tradeoff_chart = plot_replenishment_tradeoff(sim_df, frontier_df=frontier_df)
         log.info("Saved replenishment trade-off chart to %s", tradeoff_chart)
 
-        records = sim_df.to_dict(orient="records")
+        # Save small summary parquet (< 10 KB) for tracking
+        summary_path = OUTPUTS / "sim_policy_summary.parquet"
+        sim_df.to_parquet(summary_path, index=False)
+        log.info("Saved tracked policy summary to %s (%d rows)", summary_path, len(sim_df))
+
         sim_data = {
             "simulation_window": {
                 "start_date": sim.dates[0].strftime("%Y-%m-%d"),
                 "end_date": sim.dates[-1].strftime("%Y-%m-%d"),
                 "total_days": sim.n_days,
+                "warmup_days_excluded": cfg.warmup_days,
+                "evaluated_days": sim.n_days - cfg.warmup_days,
                 "n_store_families": sim.n_series,
             },
             "parameters": {
                 "review_period_days": cfg.review_period_days,
                 "lead_times_days": list(cfg.lead_times_days),
                 "service_levels": list(cfg.service_levels),
+                "warmup_days": cfg.warmup_days,
                 "seed": cfg.seed,
                 "extrapolation_rule_l14": (
                     "L=14 (R+L=21d) exceeds the 16-day model horizon; forecasts are "
@@ -198,11 +229,13 @@ def _register_simulation_stage() -> None:
                     "results are assumption-driven."
                 ),
             },
-            "policies": records,
+            "policies": sim_df.to_dict(orient="records"),
+            "target_fill_rate_tradeoffs": tradeoffs,
+            "per_family_matched_sl95_l3d": family_results,
         }
 
         update_metrics_json(sim_data, section="replenishment_simulation")
-        log.info("Recorded %d replenishment policy simulations to metrics.json", len(records))
+        log.info("Recorded replenishment simulation, frontiers, and bootstrap CIs to metrics.json")
 
     STAGES["simulation"] = stage_simulation
 
