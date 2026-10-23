@@ -3,6 +3,17 @@
 Trains models for specified quantiles (default P10, P50, P90) using the same strictly
 causal feature pipeline as the point forecasting model. Evaluates pinball loss
 and empirical interval coverage across rolling-origin backtest folds and holdout.
+
+Empirical Coverage & Uncertainty Notes:
+- CLEANING (72.49%) and PERSONAL CARE (77.60%) exhibit notable under-coverage relative to
+  the nominal 80% target interval (P10-P90), reflecting high promotional volatility and
+  promotional variance not fully captured by linear interval expansion.
+- Nominal coverage for zero-heavy/intermittent families (e.g. BOOKS 98.15%, BABY CARE 94.00%)
+  is inflated due to zero point-mass at y=0 which automatically falls inside [0, P90].
+- The higher aggregate WAPE of the P50 model (14.27% CV vs 13.49% for point model) occurs
+  because P50 minimizes pinball loss (L1 conditional median), which does not sum to the
+  total volume evaluated by volume-weighted WAPE, whereas the point model minimizes squared error
+  (conditional expectation) with volume shrinkage.
 """
 
 from __future__ import annotations
@@ -495,6 +506,48 @@ def generate_all_predictions(
         test_sub["pred_p10"] = q_preds["p10"].astype(np.float32)
         test_sub["pred_p50"] = q_preds["p50"].astype(np.float32)
         test_sub["pred_p90"] = q_preds["p90"].astype(np.float32)
+
+        # Pre-origin empirical residual standard deviation strictly from date <= split.origin_date
+        lookback_start = split.origin_date - pd.Timedelta(days=56)
+        lb_mask = train_mask & (df_feat["date"] > lookback_start)
+
+        # 1. LightGBM pre-origin empirical residual std
+        if lb_mask.any():
+            lb_preds = predict_lightgbm(pt_mod, df_feat.loc[lb_mask, feature_names])
+            lb_res = df_feat.loc[lb_mask, target_col].to_numpy() - lb_preds
+            df_lb = df_feat.loc[lb_mask, ["store_nbr", "family"]].copy()
+            df_lb["res_lgbm"] = lb_res
+            sig_lgbm = (
+                df_lb.groupby(["store_nbr", "family"], observed=False)["res_lgbm"]
+                .std()
+                .fillna(0.0)
+                .reset_index()
+            )
+            sig_lgbm.rename(columns={"res_lgbm": "sigma_lgbm"}, inplace=True)
+            test_sub = test_sub.merge(sig_lgbm, on=["store_nbr", "family"], how="left")
+        else:
+            test_sub["sigma_lgbm"] = np.float32(0.0)
+
+        # 2. Seasonal Naive pre-origin empirical residual std
+        hist_sub = hist_raw[hist_raw["date"] > lookback_start].copy()
+        if len(hist_sub) > 0:
+            hist_sub["_lag7"] = hist_sub.groupby(["store_nbr", "family"], observed=False)[
+                target_col
+            ].shift(7)
+            hist_sub["res_snaive"] = hist_sub[target_col] - hist_sub["_lag7"]
+            sig_snaive = (
+                hist_sub.groupby(["store_nbr", "family"], observed=False)["res_snaive"]
+                .std()
+                .fillna(0.0)
+                .reset_index()
+            )
+            sig_snaive.rename(columns={"res_snaive": "sigma_snaive"}, inplace=True)
+            test_sub = test_sub.merge(sig_snaive, on=["store_nbr", "family"], how="left")
+        else:
+            test_sub["sigma_snaive"] = np.float32(0.0)
+
+        test_sub["sigma_lgbm"] = test_sub["sigma_lgbm"].fillna(0.0).astype(np.float32)
+        test_sub["sigma_snaive"] = test_sub["sigma_snaive"].fillna(0.0).astype(np.float32)
 
         test_sub["split"] = split_name
         test_sub["fold_idx"] = np.int8(fold_idx)

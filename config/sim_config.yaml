@@ -6,3 +6,4 @@ seed: 42
 review_period_days: 7
 lead_times_days: [3, 7, 14]
 service_levels: [0.90, 0.95, 0.98]
+warmup_days: 14
