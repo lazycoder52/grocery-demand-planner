@@ -26,6 +26,7 @@ from demand_planner.evaluation.metrics import (
     calc_pinball_loss,
     calc_rmsle,
     calc_wape,
+    compute_promotion_terciles_residual_sigma,
     evaluate_predictions,
 )
 from demand_planner.features.build import build_features
@@ -342,3 +343,76 @@ def test_compute_daytype_metrics():
     assert "by_exact_payday" in daytypes
     assert "payday_regime" in daytypes["by_payday_week"]
     assert "other_regime" in daytypes["by_payday_week"]
+
+
+def test_compute_promotion_terciles_residual_sigma():
+    """Verify promotion terciles partitions observations and computes residual standard dev."""
+    # Create 30 observations with 3 clear tiers of promotions:
+    # 0..5 (low), 10..15 (mid), 25..30 (high)
+    data = []
+    for i in range(10):
+        # Low promo: onpromotion 0..5
+        data.append(
+            {
+                "store_nbr": 1,
+                "family": "CLEANING",
+                "onpromotion": float(i % 5),
+                "sales": 100.0 + (i % 2) * 10.0,
+                "pred_lgbm": 100.0,  # residuals: 0 or 10, std > 0
+                "pred_snaive": 90.0,  # residuals: 10 or 20, std > 0
+            }
+        )
+    for i in range(10):
+        # Mid promo: onpromotion 10..15
+        data.append(
+            {
+                "store_nbr": 1,
+                "family": "CLEANING",
+                "onpromotion": 10.0 + float(i % 5),
+                "sales": 200.0 + (i % 3) * 15.0,
+                "pred_lgbm": 200.0,
+                "pred_snaive": 180.0,
+            }
+        )
+    for i in range(10):
+        # High promo: onpromotion 25..30
+        data.append(
+            {
+                "store_nbr": 1,
+                "family": "CLEANING",
+                "onpromotion": 25.0 + float(i % 5),
+                "sales": 300.0 + (i % 4) * 20.0,
+                "pred_lgbm": 300.0,
+                "pred_snaive": 250.0,
+            }
+        )
+    # Add a different family to ensure family filtering works
+    data.append(
+        {
+            "store_nbr": 1,
+            "family": "BEVERAGES",
+            "onpromotion": 50.0,
+            "sales": 500.0,
+            "pred_lgbm": 500.0,
+            "pred_snaive": 400.0,
+        }
+    )
+
+    df = pd.DataFrame(data)
+    terciles = compute_promotion_terciles_residual_sigma(df, family="CLEANING")
+
+    assert len(terciles) == 3
+    assert terciles[0]["tercile"] == "Tercile 1 (Low)"
+    assert terciles[1]["tercile"] == "Tercile 2 (Mid)"
+    assert terciles[2]["tercile"] == "Tercile 3 (High)"
+
+    # Verify counts and boundaries
+    assert terciles[0]["promo_min"] <= terciles[0]["promo_max"]
+    assert terciles[0]["promo_max"] <= terciles[1]["promo_min"]
+    assert terciles[1]["promo_max"] <= terciles[2]["promo_min"]
+
+    for t in terciles:
+        assert t["n_obs"] > 0
+        assert t["sigma_lgbm"] >= 0.0
+        assert t["sigma_snaive"] >= 0.0
+        assert isinstance(t["pct_diff"], float)

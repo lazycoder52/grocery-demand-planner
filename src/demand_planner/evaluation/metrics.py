@@ -141,3 +141,69 @@ def evaluate_predictions(
         results[f"by_{group_name}"] = by_group
 
     return results
+
+
+def compute_promotion_terciles_residual_sigma(
+    df: pd.DataFrame,
+    family: str | None = "CLEANING",
+    pred_lgbm_col: str = "pred_lgbm",
+    pred_snaive_col: str = "pred_snaive",
+    sales_col: str = "sales",
+    promo_col: str = "onpromotion",
+) -> list[dict[str, Any]]:
+    """Compare residual sigma for LightGBM vs seasonal naive across terciles of onpromotion count.
+
+    Partitions store-family-day observations by promotional activity terciles (low, mid, high)
+    and computes the sample standard deviation (ddof=1) of forecast residuals for both models.
+    """
+    data = df.copy()
+    if family is not None and "family" in data.columns:
+        data = data[data["family"] == family].copy()
+
+    if len(data) == 0:
+        return []
+
+    y = data[sales_col].to_numpy(dtype=np.float64)
+    data["_res_lgbm"] = y - data[pred_lgbm_col].to_numpy(dtype=np.float64)
+    data["_res_snaive"] = y - data[pred_snaive_col].to_numpy(dtype=np.float64)
+
+    promos = data[promo_col].to_numpy(dtype=np.float64)
+    q33 = float(np.percentile(promos, 100.0 / 3.0))
+    q66 = float(np.percentile(promos, 200.0 / 3.0))
+
+    t1_mask = promos <= q33
+    t2_mask = (promos > q33) & (promos <= q66)
+    t3_mask = promos > q66
+
+    tercile_specs = [
+        ("Tercile 1 (Low)", t1_mask),
+        ("Tercile 2 (Mid)", t2_mask),
+        ("Tercile 3 (High)", t3_mask),
+    ]
+
+    results = []
+    for label, mask in tercile_specs:
+        sub = data[mask]
+        n_obs = len(sub)
+        if n_obs < 2:
+            continue
+        p_min = float(sub[promo_col].min())
+        p_max = float(sub[promo_col].max())
+        s_lgbm = float(round(float(np.std(sub["_res_lgbm"].to_numpy(), ddof=1)), 4))
+        s_snaive = float(round(float(np.std(sub["_res_snaive"].to_numpy(), ddof=1)), 4))
+        pct_diff = (
+            float(round((s_lgbm - s_snaive) / s_snaive * 100.0, 2)) if s_snaive > 0.0 else 0.0
+        )
+        results.append(
+            {
+                "tercile": label,
+                "promo_min": p_min,
+                "promo_max": p_max,
+                "n_obs": n_obs,
+                "sigma_lgbm": s_lgbm,
+                "sigma_snaive": s_snaive,
+                "pct_diff": pct_diff,
+            }
+        )
+
+    return results
