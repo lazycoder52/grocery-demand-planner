@@ -20,11 +20,12 @@ data/processed/
 *.duckdb
 *.duckdb.wal
 
-# Parquet: gitignore cannot filter by size, so all parquet is ignored except the
-# small app aggregates in outputs/. The 5 MB limit is enforced by pre-commit
-# (check-added-large-files) and by the CI large-file check.
+# Parquet: gitignore large model prediction matrices (>1MB) to prevent repo bloat;
+# only small summary/tradeoff aggregates (*_summary.parquet) are tracked.
+# Large predictions are regenerated via: python -m demand_planner.pipeline --stages models
 *.parquet
-!outputs/*.parquet
+!outputs/*_summary.parquet
+!outputs/summary_*.parquet
 
 # --- Legacy local code (never published) ---
 _legacy_local/
