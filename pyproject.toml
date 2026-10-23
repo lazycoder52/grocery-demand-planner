@@ -42,6 +42,7 @@ known-first-party = ["demand_planner"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+pythonpath = [".", "src"]
 addopts = "-ra"
 markers = [
     "data: requires the raw Kaggle files in data/raw (skipped when absent)",
