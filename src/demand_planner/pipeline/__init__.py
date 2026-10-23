@@ -176,6 +176,8 @@ _register_models_stage()
 
 
 def _register_simulation_stage() -> None:
+    from pathlib import Path
+
     import pandas as pd
 
     from demand_planner.config import OUTPUTS
@@ -183,10 +185,15 @@ def _register_simulation_stage() -> None:
     from demand_planner.simulation import (
         PeriodicReviewSimulator,
         SimConfig,
+        compute_rule3_inside_fold_sensitivity,
         plot_replenishment_tradeoff,
     )
 
     def stage_simulation() -> None:
+        import hashlib
+        import subprocess
+        from datetime import UTC, datetime
+
         log.info("Starting replenishment simulation stage...")
         cfg = SimConfig.from_yaml("config/sim_config.yaml")
         oof_path = OUTPUTS / "oof_and_holdout_predictions.parquet"
@@ -198,6 +205,31 @@ def _register_simulation_stage() -> None:
         review_path = OUTPUTS / "review_forecasts.parquet"
         review_df = pd.read_parquet(review_path) if review_path.exists() else None
 
+        # Collect run metadata
+        try:
+            git_hash = (
+                subprocess.check_output(["git", "rev-parse", "HEAD"], stderr=subprocess.DEVNULL)
+                .decode()
+                .strip()
+            )
+        except Exception:
+            git_hash = "unknown"
+
+        config_path = Path("config/sim_config.yaml")
+        config_hash = (
+            hashlib.sha256(config_path.read_bytes()).hexdigest()
+            if config_path.exists()
+            else "unknown"
+        )
+
+        run_metadata = {
+            "git_commit": git_hash,
+            "config_hash_sha256": config_hash,
+            "seed": cfg.seed,
+            "timestamp_utc": datetime.now(UTC).isoformat(),
+        }
+
+        # Rule 2: Default per-review-date re-forecasting without scaling
         sim = PeriodicReviewSimulator(
             df_preds,
             review_forecasts_df=review_df,
@@ -227,7 +259,31 @@ def _register_simulation_stage() -> None:
         sim_df.to_parquet(summary_path, index=False)
         log.info("Saved tracked policy summary to %s (%d rows)", summary_path, len(sim_df))
 
+        # Compute Sensitivities: Rule 1 (clamped_scaled) and Rule 3 (inside_fold_only)
+        log.info("Computing Rule 1 sensitivity ('known stitching artifact')...")
+        sim_r1 = PeriodicReviewSimulator(
+            df_preds,
+            review_forecasts_df=review_df,
+            config=cfg,
+            stitching_rule="clamped_scaled",
+        )
+        f_r1 = sim_r1.run_frontier(lead_times=(3, 7))
+        tradeoffs_r1 = sim_r1.compute_target_fill_rate_tradeoff(
+            f_r1, target_fill_rates=(98.5, 99.0, 99.5), n_bootstrap=1000, seed=cfg.seed
+        )
+
+        log.info("Computing Rule 3 sensitivity ('Sensitivity: Inside-Fold Orders')...")
+        rule3_sensitivity = compute_rule3_inside_fold_sensitivity(
+            df_preds,
+            lead_times=(3, 7),
+            target_fill_rates=(98.5, 99.0, 99.5),
+            n_bootstrap=1000,
+            seed=cfg.seed,
+        )
+
         sim_data = {
+            "run_metadata": run_metadata,
+            "stitching_rule": sim.stitching_rule,
             "simulation_window": {
                 "start_date": sim.dates[0].strftime("%Y-%m-%d"),
                 "end_date": sim.dates[-1].strftime("%Y-%m-%d"),
@@ -256,10 +312,23 @@ def _register_simulation_stage() -> None:
             "policies": sim_df.to_dict(orient="records"),
             "target_fill_rate_tradeoffs": tradeoffs,
             "per_family_matched_fill_rate": family_results,
+            "sensitivities": {
+                "rule_1_clamped_scaled_artifact": {
+                    "label": "known stitching artifact",
+                    "stitching_rule": "clamped_scaled",
+                    "description": (
+                        "Boundary-clamped and proportionally scaled run-rates across "
+                        "fold transitions; known stitching artifact causing rightward "
+                        "distortion in base stocks."
+                    ),
+                    "target_fill_rate_tradeoffs": tradeoffs_r1,
+                },
+                "rule_3_inside_fold_orders": rule3_sensitivity,
+            },
         }
 
         update_metrics_json(sim_data, section="replenishment_simulation")
-        log.info("Recorded replenishment simulation, frontiers, and bootstrap CIs to metrics.json")
+        log.info("Saved simulation results, frontiers, metadata, and sensitivities to metrics.json")
 
     STAGES["simulation"] = stage_simulation
 
