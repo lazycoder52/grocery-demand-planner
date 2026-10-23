@@ -24,7 +24,7 @@ dependencies = [
 
 [project.optional-dependencies]
 app = ["streamlit>=1.35", "plotly>=5.20"]
-dev = ["ruff>=0.6", "pytest>=8.0", "pre-commit>=3.7"]
+dev = ["ruff>=0.6", "pytest>=8.0", "pre-commit>=3.7", "matplotlib>=3.8"]
 
 [tool.setuptools.packages.find]
 where = ["src"]
