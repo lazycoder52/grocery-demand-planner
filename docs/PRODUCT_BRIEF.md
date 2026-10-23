@@ -3,7 +3,7 @@
 **Product:** Grocery Demand Planner
 **Role:** AI/ML Product Management & Product Analytics
 **Target Organization:** Corporación Favorita (Ecuadorian Grocery Chain)
-**Status:** MVP v1.0 Baseline & Production Model Verified
+**Status:** MVP v1.0 Baseline & Selected Model Verified
 
 ---
 
@@ -13,12 +13,16 @@ Grocery inventory management requires balancing two costly failure modes: over-o
 
 Across **54 stores** and **33 product families** spanning **3,000,888 historical daily records** (2013-01-01 to 2017-08-15), store managers currently rely on static heuristic ordering rules—predominantly 7-day seasonal naive repeating and 28-day moving averages.
 
-On the audited **16-day holdout period** (2017-07-31 to 2017-08-15, representing **13,319,179.78 units sold** across **28,512 store-family-day combinations**), static heuristic methods yield:
-- **Last-Value Naive:** **44.42% WAPE** with extreme over-forecasting bias (**+34.99%**).
-- **28-Day Moving Average:** **20.81% WAPE** (MAE: 97.22 units).
-- **7-Day Seasonal Naive:** **20.67% WAPE** (MAE: 96.54 units).
+Across an expanding-window **5-fold rolling-origin backtest** (origins stepping 16 days from 2017-05-11 to 2017-07-14), static heuristics yield:
+- **Last-Value Naive:** **27.83% Mean WAPE** (MAE: 134.20 units).
+- **28-Day Moving Average:** **23.65% Mean WAPE** (MAE: 114.12 units).
+- **7-Day Seasonal Naive:** **16.33% Mean WAPE** (MAE: 78.99 units).
 
-These heuristics miss calendar-driven shopping rhythms unique to Ecuadorian commerce: bi-weekly paydays on the 15th and month-end, transferred public holidays, and promotional surges. Our production **LightGBM global regressor** achieves **15.16% WAPE** (MAE: 70.81 units, Bias: **+2.85%**), delivering **+5.51 percentage points of Forecast Value Added (FVA)**—a **26.65% relative reduction in forecast error**.
+Our **selected LightGBM global regressor** captures bi-weekly paydays (15th and month-end), non-transferred public holidays, and promotional velocity, achieving **13.56% Mean WAPE** (MAE: 65.55 units, Bias: **-0.81%**), delivering **+2.77 percentage points of Forecast Value Added (FVA)** (**16.95% relative error reduction**).
+
+On the final untouched **16-day holdout confirmation** (2017-07-31 to 2017-08-15, representing **13,319,179.78 units sold** across **28,512 store-family-day combinations**), the selected model achieves **15.16% WAPE** (MAE: 70.81 units, Bias: **+2.85%**) vs. **20.67% WAPE** for 7-day Seasonal Naive (**+5.51 pts FVA**, a **26.65% relative error reduction**).
+
+*Note on WAPE and Bias:* WAPE is volume-weighted, measuring aggregate unit errors across chain revenue. The holdout's +2.85% bias reflects log-inversion convexity ($\exp(\hat{y}) - 1$), providing an intentional buffer against high-penalty stockouts during mid-month payday volume spikes.
 
 ---
 

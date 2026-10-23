@@ -12,6 +12,7 @@ from demand_planner.features.build import CATEGORICAL_COLUMNS, build_features
 from demand_planner.models.lightgbm import (
     evaluate_model_vs_baselines,
     predict_lightgbm,
+    run_rolling_origin_cv,
     train_lightgbm,
 )
 
@@ -115,3 +116,29 @@ def test_evaluate_model_vs_baselines_end_to_end(tiny_favorita_files: dict[str, P
     # Verify zero leakage
     train_split = train_df[train_df["date"] <= holdout_origin]
     assert_no_temporal_leakage(train_split, test_preds, holdout_origin)
+
+
+def test_run_rolling_origin_cv_end_to_end(tiny_favorita_files: dict[str, Path]):
+    """Verify rolling-origin CV runs across folds against tiny Favorita fixture."""
+    train_df = pd.read_csv(tiny_favorita_files["train"])
+    stores_df = pd.read_csv(tiny_favorita_files["stores"])
+    holidays_df = pd.read_csv(tiny_favorita_files["holidays"])
+
+    cv_results = run_rolling_origin_cv(
+        train_df,
+        stores_df=stores_df,
+        holidays_df=holidays_df,
+        n_folds=3,
+        horizon_days=16,
+        fold_step_days=16,
+        holdout_days=16,
+        start_train_date="2016-01-01",
+        params={"n_estimators": 10, "min_child_samples": 5},
+    )
+
+    assert cv_results["n_folds"] == 3
+    assert len(cv_results["folds"]) == 3
+    assert "mean_metrics" in cv_results
+    assert "lightgbm" in cv_results["mean_metrics"]
+    assert "seasonal_naive_7d" in cv_results["mean_metrics"]
+    assert cv_results["mean_metrics"]["lightgbm"]["mean_wape"] > 0.0

@@ -179,3 +179,179 @@ def evaluate_model_vs_baselines(
     )
 
     return summary, test_df
+
+
+def run_rolling_origin_cv(
+    sales_df: pd.DataFrame,
+    stores_df: pd.DataFrame | None = None,
+    holidays_df: pd.DataFrame | None = None,
+    n_folds: int = 5,
+    horizon_days: int = 16,
+    fold_step_days: int = 16,
+    holdout_days: int = 16,
+    start_train_date: str = "2015-01-01",
+    target_col: str = "sales",
+    params: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    """Execute rolling-origin cross-validation backtest across N expanding-window folds.
+
+    Parameters
+    ----------
+    sales_df : pd.DataFrame
+        Complete historical store-family daily sales data.
+    stores_df : pd.DataFrame | None
+        Store metadata.
+    holidays_df : pd.DataFrame | None
+        Holidays table.
+    n_folds : int
+        Number of rolling-origin folds.
+    horizon_days : int
+        Forecast horizon per fold.
+    fold_step_days : int
+        Days between consecutive origins.
+    holdout_days : int
+        Days reserved for final untouched holdout period.
+    start_train_date : str
+        Earliest training date to include.
+    target_col : str
+        Target sales column.
+    params : dict[str, Any] | None
+        Optional LightGBM hyperparameters.
+
+    Returns
+    -------
+    dict[str, Any]
+        Fold-level and aggregated cross-validation metrics across all models.
+    """
+    from demand_planner.evaluation.backtest import (
+        assert_no_temporal_leakage,
+        generate_rolling_folds,
+    )
+
+    df_raw = sales_df.copy()
+    df_raw["date"] = pd.to_datetime(df_raw["date"])
+
+    log.info("Building causal features for rolling-origin CV...")
+    df_feat, feature_names = build_features(
+        df_raw, stores_df=stores_df, holidays_df=holidays_df, target_col=target_col
+    )
+
+    cv_folds, _ = generate_rolling_folds(
+        df_raw,
+        n_folds=n_folds,
+        horizon_days=horizon_days,
+        fold_step_days=fold_step_days,
+        holdout_days=holdout_days,
+    )
+
+    start_date = pd.to_datetime(start_train_date)
+    fold_records: list[dict[str, Any]] = []
+
+    for f in cv_folds:
+        log.info(
+            "Running CV Fold %d/%d (Origin: %s)...",
+            f.fold_idx,
+            len(cv_folds),
+            f.origin_date.strftime("%Y-%m-%d"),
+        )
+        train_mask = (df_feat["date"] <= f.origin_date) & (df_feat["date"] >= start_date)
+        test_mask = (df_feat["date"] > f.origin_date) & (
+            df_feat["date"] <= f.origin_date + pd.Timedelta(days=horizon_days)
+        )
+
+        X_train = df_feat.loc[train_mask, feature_names]
+        y_train = np.log1p(df_feat.loc[train_mask, target_col])
+
+        X_test = df_feat.loc[test_mask, feature_names]
+        test_df = df_feat.loc[test_mask].copy()
+
+        assert_no_temporal_leakage(df_feat.loc[train_mask], test_df, f.origin_date)
+
+        # Train model
+        model = train_lightgbm(X_train, y_train, params=params)
+        test_df["pred_lgbm"] = predict_lightgbm(model, X_test)
+
+        # Baselines on raw history
+        hist_raw = df_raw[df_raw["date"] <= f.origin_date]
+        test_df = predict_naive(hist_raw, test_df, target_col=target_col, pred_col="pred_naive")
+        test_df = predict_seasonal_naive(
+            hist_raw, test_df, target_col=target_col, pred_col="pred_snaive"
+        )
+        test_df = predict_moving_average(
+            hist_raw, test_df, window_days=28, target_col=target_col, pred_col="pred_ma28"
+        )
+
+        lgbm_eval = evaluate_predictions(test_df, true_col=target_col, pred_col="pred_lgbm")
+        snaive_eval = evaluate_predictions(test_df, true_col=target_col, pred_col="pred_snaive")
+        ma28_eval = evaluate_predictions(test_df, true_col=target_col, pred_col="pred_ma28")
+        naive_eval = evaluate_predictions(test_df, true_col=target_col, pred_col="pred_naive")
+
+        fva_pts = float(round(snaive_eval["overall"]["wape"] - lgbm_eval["overall"]["wape"], 4))
+
+        fold_records.append(
+            {
+                "fold_idx": f.fold_idx,
+                "origin_date": f.origin_date.strftime("%Y-%m-%d"),
+                "test_start_date": test_df["date"].min().strftime("%Y-%m-%d"),
+                "test_end_date": test_df["date"].max().strftime("%Y-%m-%d"),
+                "n_samples": int(len(test_df)),
+                "lightgbm": lgbm_eval["overall"],
+                "seasonal_naive_7d": snaive_eval["overall"],
+                "moving_average_28d": ma28_eval["overall"],
+                "naive": naive_eval["overall"],
+                "fva_wape_pts": fva_pts,
+            }
+        )
+
+    # Summary statistics
+    lgbm_wapes = [r["lightgbm"]["wape"] for r in fold_records]
+    snaive_wapes = [r["seasonal_naive_7d"]["wape"] for r in fold_records]
+    ma28_wapes = [r["moving_average_28d"]["wape"] for r in fold_records]
+    naive_wapes = [r["naive"]["wape"] for r in fold_records]
+    fva_wapes = [r["fva_wape_pts"] for r in fold_records]
+
+    lgbm_biases = [r["lightgbm"]["bias"] for r in fold_records]
+    lgbm_maes = [r["lightgbm"]["mae"] for r in fold_records]
+
+    mean_lgbm_wape = float(round(float(np.mean(lgbm_wapes)), 4))
+    mean_snaive_wape = float(round(float(np.mean(snaive_wapes)), 4))
+    mean_fva_pts = float(round(float(np.mean(fva_wapes)), 4))
+
+    return {
+        "n_folds": len(cv_folds),
+        "horizon_days": horizon_days,
+        "fold_step_days": fold_step_days,
+        "folds": fold_records,
+        "mean_metrics": {
+            "lightgbm": {
+                "mean_wape": mean_lgbm_wape,
+                "std_wape": float(round(float(np.std(lgbm_wapes)), 4)),
+                "mean_bias": float(round(float(np.mean(lgbm_biases)), 4)),
+                "mean_mae": float(round(float(np.mean(lgbm_maes)), 4)),
+            },
+            "seasonal_naive_7d": {
+                "mean_wape": mean_snaive_wape,
+                "std_wape": float(round(float(np.std(snaive_wapes)), 4)),
+                "mean_bias": float(
+                    round(float(np.mean([r["seasonal_naive_7d"]["bias"] for r in fold_records])), 4)
+                ),
+                "mean_mae": float(
+                    round(float(np.mean([r["seasonal_naive_7d"]["mae"] for r in fold_records])), 4)
+                ),
+            },
+            "moving_average_28d": {
+                "mean_wape": float(round(float(np.mean(ma28_wapes)), 4)),
+                "std_wape": float(round(float(np.std(ma28_wapes)), 4)),
+            },
+            "naive": {
+                "mean_wape": float(round(float(np.mean(naive_wapes)), 4)),
+                "std_wape": float(round(float(np.std(naive_wapes)), 4)),
+            },
+            "forecast_value_added_vs_seasonal_naive": {
+                "mean_wape_reduction_pts": mean_fva_pts,
+                "relative_error_reduction_pct": float(
+                    round((mean_fva_pts / mean_snaive_wape) * 100.0, 2)
+                ),
+            },
+        },
+    }
