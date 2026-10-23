@@ -225,10 +225,11 @@ def audit_dataset(con: duckdb.DuckDBPyConnection) -> dict[str, Any]:
 
 
 def update_metrics_json(
-    audit_results: dict[str, Any],
+    metrics_data: dict[str, Any],
     metrics_path: Path | str = METRICS_FILE,
+    section: str = "audit",
 ) -> None:
-    """Save or update the 'audit' section of metrics.json."""
+    """Save or update a specific section of metrics.json."""
     path = Path(metrics_path)
     path.parent.mkdir(parents=True, exist_ok=True)
     existing: dict[str, Any] = {}
@@ -239,11 +240,11 @@ def update_metrics_json(
         except Exception:
             existing = {}
 
-    existing["audit"] = audit_results
+    existing[section] = metrics_data
     with path.open("w", encoding="utf-8") as fh:
         json.dump(existing, fh, indent=2)
         fh.write("\n")
-    log.info("Saved audit metrics to %s", path)
+    log.info("Saved %s metrics to %s", section, path)
 
 
 def generate_data_card(
