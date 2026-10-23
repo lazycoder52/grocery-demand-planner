@@ -607,5 +607,616 @@
       "p999": 12076.23,
       "max_sales": 124717.0
     }
+  },
+  "models": {
+    "holdout_origin": "2017-07-30",
+    "test_start_date": "2017-07-31",
+    "test_end_date": "2017-08-15",
+    "test_n_rows": 28512,
+    "models": {
+      "lightgbm": {
+        "wape": 15.1573,
+        "bias": 2.854,
+        "mae": 70.8061,
+        "rmsle": 0.4071,
+        "total_actual_sales": 13319179.78,
+        "total_predicted_sales": 13699314.26,
+        "n_samples": 28512
+      },
+      "seasonal_naive_7d": {
+        "wape": 20.6651,
+        "bias": 0.4099,
+        "mae": 96.5354,
+        "rmsle": 0.617,
+        "total_actual_sales": 13319179.78,
+        "total_predicted_sales": 13373769.67,
+        "n_samples": 28512
+      },
+      "moving_average_28d": {
+        "wape": 20.8123,
+        "bias": 1.3435,
+        "mae": 97.2231,
+        "rmsle": 0.5216,
+        "total_actual_sales": 13319179.78,
+        "total_predicted_sales": 13498120.91,
+        "n_samples": 28512
+      },
+      "naive": {
+        "wape": 44.4202,
+        "bias": 34.9936,
+        "mae": 207.5058,
+        "rmsle": 0.6595,
+        "total_actual_sales": 13319179.78,
+        "total_predicted_sales": 17980039.65,
+        "n_samples": 28512
+      }
+    },
+    "forecast_value_added_vs_seasonal_naive": {
+      "wape_reduction_percentage_points": 5.5078,
+      "relative_error_reduction_pct": 26.65
+    },
+    "by_family": {
+      "AUTOMOTIVE": {
+        "lightgbm": {
+          "wape": 39.394,
+          "bias": -15.1949,
+          "mae": 2.9094,
+          "total_actual": 6381.0,
+          "n_samples": 864
+        },
+        "seasonal_naive_7d": {
+          "wape": 51.8884,
+          "bias": -4.4664,
+          "mae": 3.8322,
+          "total_actual": 6381.0,
+          "n_samples": 864
+        },
+        "fva_wape_pts": 12.4944
+      },
+      "BABY CARE": {
+        "lightgbm": {
+          "wape": 135.4963,
+          "bias": -17.9766,
+          "mae": 0.2509,
+          "total_actual": 160.0,
+          "n_samples": 864
+        },
+        "seasonal_naive_7d": {
+          "wape": 147.5,
+          "bias": 7.5,
+          "mae": 0.2731,
+          "total_actual": 160.0,
+          "n_samples": 864
+        },
+        "fva_wape_pts": 12.0037
+      },
+      "BEAUTY": {
+        "lightgbm": {
+          "wape": 36.1201,
+          "bias": -14.4465,
+          "mae": 2.4068,
+          "total_actual": 5757.0,
+          "n_samples": 864
+        },
+        "seasonal_naive_7d": {
+          "wape": 49.5397,
+          "bias": -18.725,
+          "mae": 3.3009,
+          "total_actual": 5757.0,
+          "n_samples": 864
+        },
+        "fva_wape_pts": 13.4196
+      },
+      "BEVERAGES": {
+        "lightgbm": {
+          "wape": 17.2374,
+          "bias": 3.9485,
+          "mae": 599.5983,
+          "total_actual": 3005407.0,
+          "n_samples": 864
+        },
+        "seasonal_naive_7d": {
+          "wape": 22.2653,
+          "bias": 2.1904,
+          "mae": 774.4942,
+          "total_actual": 3005407.0,
+          "n_samples": 864
+        },
+        "fva_wape_pts": 5.0279
+      },
+      "BOOKS": {
+        "lightgbm": {
+          "wape": 437.888,
+          "bias": 260.5224,
+          "mae": 0.0456,
+          "total_actual": 9.0,
+          "n_samples": 864
+        },
+        "seasonal_naive_7d": {
+          "wape": 211.1111,
+          "bias": 33.3333,
+          "mae": 0.022,
+          "total_actual": 9.0,
+          "n_samples": 864
+        },
+        "fva_wape_pts": -226.7769
+      },
+      "BREAD/BAKERY": {
+        "lightgbm": {
+          "wape": 12.8225,
+          "bias": 2.9032,
+          "mae": 69.2764,
+          "total_actual": 466795.5,
+          "n_samples": 864
+        },
+        "seasonal_naive_7d": {
+          "wape": 14.1538,
+          "bias": -2.7915,
+          "mae": 76.4688,
+          "total_actual": 466795.5,
+          "n_samples": 864
+        },
+        "fva_wape_pts": 1.3313
+      },
+      "CELEBRATION": {
+        "lightgbm": {
+          "wape": 40.6171,
+          "bias": -5.8433,
+          "mae": 5.0621,
+          "total_actual": 10768.0,
+          "n_samples": 864
+        },
+        "seasonal_naive_7d": {
+          "wape": 57.6152,
+          "bias": 8.9153,
+          "mae": 7.1806,
+          "total_actual": 10768.0,
+          "n_samples": 864
+        },
+        "fva_wape_pts": 16.9981
+      },
+      "CLEANING": {
+        "lightgbm": {
+          "wape": 21.3109,
+          "bias": 3.8109,
+          "mae": 262.7469,
+          "total_actual": 1065243.0,
+          "n_samples": 864
+        },
+        "seasonal_naive_7d": {
+          "wape": 42.9709,
+          "bias": 14.5331,
+          "mae": 529.7975,
+          "total_actual": 1065243.0,
+          "n_samples": 864
+        },
+        "fva_wape_pts": 21.66
+      },
+      "DAIRY": {
+        "lightgbm": {
+          "wape": 12.3444,
+          "bias": 7.8752,
+          "mae": 103.0174,
+          "total_actual": 721034.0,
+          "n_samples": 864
+        },
+        "seasonal_naive_7d": {
+          "wape": 13.8794,
+          "bias": 0.4728,
+          "mae": 115.8275,
+          "total_actual": 721034.0,
+          "n_samples": 864
+        },
+        "fva_wape_pts": 1.535
+      },
+      "DELI": {
+        "lightgbm": {
+          "wape": 14.704,
+          "bias": 8.4361,
+          "mae": 44.5719,
+          "total_actual": 261902.89,
+          "n_samples": 864
+        },
+        "seasonal_naive_7d": {
+          "wape": 17.5148,
+          "bias": -1.8777,
+          "mae": 53.0925,
+          "total_actual": 261902.89,
+          "n_samples": 864
+        },
+        "fva_wape_pts": 2.8108
+      },
+      "EGGS": {
+        "lightgbm": {
+          "wape": 18.2524,
+          "bias": -1.6731,
+          "mae": 36.4475,
+          "total_actual": 172529.0,
+          "n_samples": 864
+        },
+        "seasonal_naive_7d": {
+          "wape": 22.2681,
+          "bias": -0.8897,
+          "mae": 44.4664,
+          "total_actual": 172529.0,
+          "n_samples": 864
+        },
+        "fva_wape_pts": 4.0157
+      },
+      "FROZEN FOODS": {
+        "lightgbm": {
+          "wape": 19.8168,
+          "bias": -1.1102,
+          "mae": 25.233,
+          "total_actual": 110014.16,
+          "n_samples": 864
+        },
+        "seasonal_naive_7d": {
+          "wape": 22.1722,
+          "bias": -1.099,
+          "mae": 28.2321,
+          "total_actual": 110014.16,
+          "n_samples": 864
+        },
+        "fva_wape_pts": 2.3554
+      },
+      "GROCERY I": {
+        "lightgbm": {
+          "wape": 11.8424,
+          "bias": 0.237,
+          "mae": 545.5724,
+          "total_actual": 3980412.48,
+          "n_samples": 864
+        },
+        "seasonal_naive_7d": {
+          "wape": 17.3562,
+          "bias": -2.2607,
+          "mae": 799.5934,
+          "total_actual": 3980412.48,
+          "n_samples": 864
+        },
+        "fva_wape_pts": 5.5138
+      },
+      "GROCERY II": {
+        "lightgbm": {
+          "wape": 37.3632,
+          "bias": 2.0788,
+          "mae": 10.8245,
+          "total_actual": 25031.0,
+          "n_samples": 864
+        },
+        "seasonal_naive_7d": {
+          "wape": 64.1525,
+          "bias": 35.6678,
+          "mae": 18.5856,
+          "total_actual": 25031.0,
+          "n_samples": 864
+        },
+        "fva_wape_pts": 26.7893
+      },
+      "HARDWARE": {
+        "lightgbm": {
+          "wape": 74.0783,
+          "bias": -24.1616,
+          "mae": 1.0734,
+          "total_actual": 1252.0,
+          "n_samples": 864
+        },
+        "seasonal_naive_7d": {
+          "wape": 99.7604,
+          "bias": 6.4696,
+          "mae": 1.4456,
+          "total_actual": 1252.0,
+          "n_samples": 864
+        },
+        "fva_wape_pts": 25.6821
+      },
+      "HOME AND KITCHEN I": {
+        "lightgbm": {
+          "wape": 33.6962,
+          "bias": -12.5395,
+          "mae": 10.5379,
+          "total_actual": 27020.0,
+          "n_samples": 864
+        },
+        "seasonal_naive_7d": {
+          "wape": 45.0148,
+          "bias": -6.5544,
+          "mae": 14.0775,
+          "total_actual": 27020.0,
+          "n_samples": 864
+        },
+        "fva_wape_pts": 11.3186
+      },
+      "HOME AND KITCHEN II": {
+        "lightgbm": {
+          "wape": 33.4689,
+          "bias": -11.1522,
+          "mae": 10.3773,
+          "total_actual": 26789.0,
+          "n_samples": 864
+        },
+        "seasonal_naive_7d": {
+          "wape": 51.0471,
+          "bias": 0.6309,
+          "mae": 15.8275,
+          "total_actual": 26789.0,
+          "n_samples": 864
+        },
+        "fva_wape_pts": 17.5782
+      },
+      "HOME APPLIANCES": {
+        "lightgbm": {
+          "wape": 177.628,
+          "bias": 32.8417,
+          "mae": 0.3557,
+          "total_actual": 173.0,
+          "n_samples": 864
+        },
+        "seasonal_naive_7d": {
+          "wape": 177.4566,
+          "bias": 23.6994,
+          "mae": 0.3553,
+          "total_actual": 173.0,
+          "n_samples": 864
+        },
+        "fva_wape_pts": -0.1714
+      },
+      "HOME CARE": {
+        "lightgbm": {
+          "wape": 22.725,
+          "bias": 15.5631,
+          "mae": 66.2532,
+          "total_actual": 251893.0,
+          "n_samples": 864
+        },
+        "seasonal_naive_7d": {
+          "wape": 29.0905,
+          "bias": 10.7224,
+          "mae": 84.8113,
+          "total_actual": 251893.0,
+          "n_samples": 864
+        },
+        "fva_wape_pts": 6.3655
+      },
+      "LADIESWEAR": {
+        "lightgbm": {
+          "wape": 39.5354,
+          "bias": 11.5537,
+          "mae": 3.986,
+          "total_actual": 8711.0,
+          "n_samples": 864
+        },
+        "seasonal_naive_7d": {
+          "wape": 51.5096,
+          "bias": 12.203,
+          "mae": 5.1933,
+          "total_actual": 8711.0,
+          "n_samples": 864
+        },
+        "fva_wape_pts": 11.9742
+      },
+      "LAWN AND GARDEN": {
+        "lightgbm": {
+          "wape": 30.7752,
+          "bias": -3.5237,
+          "mae": 4.5978,
+          "total_actual": 12908.0,
+          "n_samples": 864
+        },
+        "seasonal_naive_7d": {
+          "wape": 38.449,
+          "bias": 4.5631,
+          "mae": 5.7442,
+          "total_actual": 12908.0,
+          "n_samples": 864
+        },
+        "fva_wape_pts": 7.6738
+      },
+      "LINGERIE": {
+        "lightgbm": {
+          "wape": 49.4658,
+          "bias": -20.1207,
+          "mae": 3.8451,
+          "total_actual": 6716.0,
+          "n_samples": 864
+        },
+        "seasonal_naive_7d": {
+          "wape": 66.7808,
+          "bias": -24.1364,
+          "mae": 5.191,
+          "total_actual": 6716.0,
+          "n_samples": 864
+        },
+        "fva_wape_pts": 17.315
+      },
+      "LIQUOR,WINE,BEER": {
+        "lightgbm": {
+          "wape": 29.4261,
+          "bias": -2.7945,
+          "mae": 28.6397,
+          "total_actual": 84091.0,
+          "n_samples": 864
+        },
+        "seasonal_naive_7d": {
+          "wape": 35.1048,
+          "bias": -6.1315,
+          "mae": 34.1667,
+          "total_actual": 84091.0,
+          "n_samples": 864
+        },
+        "fva_wape_pts": 5.6787
+      },
+      "MAGAZINES": {
+        "lightgbm": {
+          "wape": 40.8805,
+          "bias": -25.8785,
+          "mae": 2.908,
+          "total_actual": 6146.0,
+          "n_samples": 864
+        },
+        "seasonal_naive_7d": {
+          "wape": 50.2278,
+          "bias": -17.3283,
+          "mae": 3.5729,
+          "total_actual": 6146.0,
+          "n_samples": 864
+        },
+        "fva_wape_pts": 9.3473
+      },
+      "MEATS": {
+        "lightgbm": {
+          "wape": 14.0427,
+          "bias": -0.6357,
+          "mae": 52.1841,
+          "total_actual": 321070.53,
+          "n_samples": 864
+        },
+        "seasonal_naive_7d": {
+          "wape": 16.991,
+          "bias": -1.3915,
+          "mae": 63.14,
+          "total_actual": 321070.53,
+          "n_samples": 864
+        },
+        "fva_wape_pts": 2.9483
+      },
+      "PERSONAL CARE": {
+        "lightgbm": {
+          "wape": 15.1789,
+          "bias": -2.0801,
+          "mae": 48.7747,
+          "total_actual": 277631.0,
+          "n_samples": 864
+        },
+        "seasonal_naive_7d": {
+          "wape": 25.6304,
+          "bias": -3.8663,
+          "mae": 82.3588,
+          "total_actual": 277631.0,
+          "n_samples": 864
+        },
+        "fva_wape_pts": 10.4515
+      },
+      "PET SUPPLIES": {
+        "lightgbm": {
+          "wape": 32.0264,
+          "bias": -8.1578,
+          "mae": 2.6996,
+          "total_actual": 7283.0,
+          "n_samples": 864
+        },
+        "seasonal_naive_7d": {
+          "wape": 43.7594,
+          "bias": -1.2769,
+          "mae": 3.6887,
+          "total_actual": 7283.0,
+          "n_samples": 864
+        },
+        "fva_wape_pts": 11.733
+      },
+      "PLAYERS AND ELECTRONICS": {
+        "lightgbm": {
+          "wape": 30.6151,
+          "bias": -9.6269,
+          "mae": 3.5732,
+          "total_actual": 10084.0,
+          "n_samples": 864
+        },
+        "seasonal_naive_7d": {
+          "wape": 39.9147,
+          "bias": -6.1186,
+          "mae": 4.6586,
+          "total_actual": 10084.0,
+          "n_samples": 864
+        },
+        "fva_wape_pts": 9.2996
+      },
+      "POULTRY": {
+        "lightgbm": {
+          "wape": 13.3369,
+          "bias": 3.4278,
+          "mae": 49.9454,
+          "total_actual": 323560.27,
+          "n_samples": 864
+        },
+        "seasonal_naive_7d": {
+          "wape": 17.3489,
+          "bias": -0.1484,
+          "mae": 64.9701,
+          "total_actual": 323560.27,
+          "n_samples": 864
+        },
+        "fva_wape_pts": 4.012
+      },
+      "PREPARED FOODS": {
+        "lightgbm": {
+          "wape": 17.8435,
+          "bias": -1.1854,
+          "mae": 15.6692,
+          "total_actual": 75871.65,
+          "n_samples": 864
+        },
+        "seasonal_naive_7d": {
+          "wape": 21.4162,
+          "bias": -0.6407,
+          "mae": 18.8065,
+          "total_actual": 75871.65,
+          "n_samples": 864
+        },
+        "fva_wape_pts": 3.5727
+      },
+      "PRODUCE": {
+        "lightgbm": {
+          "wape": 12.0428,
+          "bias": 6.751,
+          "mae": 275.6305,
+          "total_actual": 1977480.38,
+          "n_samples": 864
+        },
+        "seasonal_naive_7d": {
+          "wape": 11.5732,
+          "bias": -1.3649,
+          "mae": 264.8819,
+          "total_actual": 1977480.38,
+          "n_samples": 864
+        },
+        "fva_wape_pts": -0.4696
+      },
+      "SCHOOL AND OFFICE SUPPLIES": {
+        "lightgbm": {
+          "wape": 72.0783,
+          "bias": -70.085,
+          "mae": 43.2095,
+          "total_actual": 51795.0,
+          "n_samples": 864
+        },
+        "seasonal_naive_7d": {
+          "wape": 85.9909,
+          "bias": -81.087,
+          "mae": 51.5498,
+          "total_actual": 51795.0,
+          "n_samples": 864
+        },
+        "fva_wape_pts": 13.9126
+      },
+      "SEAFOOD": {
+        "lightgbm": {
+          "wape": 21.9192,
+          "bias": -4.7495,
+          "mae": 4.379,
+          "total_actual": 17260.92,
+          "n_samples": 864
+        },
+        "seasonal_naive_7d": {
+          "wape": 30.3398,
+          "bias": -4.6061,
+          "mae": 6.0613,
+          "total_actual": 17260.92,
+          "n_samples": 864
+        },
+        "fva_wape_pts": 8.4206
+      }
+    }
   }
 }

@@ -31,13 +31,58 @@ def _register_data_stage() -> None:
     def stage_data() -> None:
         con = ingest_csvs()
         audit = audit_dataset(con)
-        update_metrics_json(audit)
+        update_metrics_json(audit, section="audit")
         generate_data_card(audit)
 
     STAGES["data"] = stage_data
 
 
 _register_data_stage()
+
+
+def _register_models_stage() -> None:
+    import pandas as pd
+
+    from demand_planner.config import DATA_RAW, OUTPUTS
+    from demand_planner.data.audit import update_metrics_json
+    from demand_planner.models.lightgbm import evaluate_model_vs_baselines
+
+    def stage_models() -> None:
+        raw_train = DATA_RAW / "train.csv"
+        if not raw_train.exists():
+            log.warning("Raw train.csv not found at %s, skipping models stage", raw_train)
+            return
+
+        stores_file = DATA_RAW / "stores.csv"
+        holidays_file = DATA_RAW / "holidays_events.csv"
+        stores_df = pd.read_csv(stores_file) if stores_file.exists() else None
+        holidays_df = pd.read_csv(holidays_file) if holidays_file.exists() else None
+
+        log.info("Loading train data from %s...", raw_train)
+        train_df = pd.read_csv(raw_train)
+        train_df["date"] = pd.to_datetime(train_df["date"])
+        max_date = train_df["date"].max()
+        holdout_origin = max_date - pd.Timedelta(days=16)
+
+        summary, test_preds = evaluate_model_vs_baselines(
+            train_df,
+            holdout_origin=holdout_origin,
+            stores_df=stores_df,
+            holidays_df=holidays_df,
+            start_train_date="2015-01-01",
+        )
+
+        update_metrics_json(summary, section="models")
+
+        OUTPUTS.mkdir(parents=True, exist_ok=True)
+        out_preds = OUTPUTS / "holdout_predictions.parquet"
+        test_preds.to_parquet(out_preds, index=False)
+        log.info("Saved holdout predictions to %s (%d rows)", out_preds, len(test_preds))
+
+    STAGES["models"] = stage_models
+
+
+_register_models_stage()
 
 
 def build_parser() -> argparse.ArgumentParser:
