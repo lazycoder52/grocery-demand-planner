@@ -1,0 +1,53 @@
+# --- Python / environments ---
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+
+# --- Secrets ---
+.env
+.env.*
+.kaggle/
+kaggle.json
+
+# --- Data (raw Kaggle files are never committed) ---
+data/raw/
+data/interim/
+data/processed/
+*.duckdb
+*.duckdb.wal
+
+# Parquet: gitignore cannot filter by size, so all parquet is ignored except the
+# small app aggregates in outputs/. The 5 MB limit is enforced by pre-commit
+# (check-added-large-files) and by the CI large-file check.
+*.parquet
+!outputs/*.parquet
+
+# --- Legacy local code (never published) ---
+_legacy_local/
+
+# --- Tooling caches ---
+node_modules/
+.ipynb_checkpoints/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+.coverage.*
+htmlcov/
+scratch/
+catboost_info/
+mlruns/
+
+# --- Editors ---
+.vscode/
+.idea/
+
+# --- OS files ---
+.DS_Store
+Thumbs.db
+desktop.ini
+ehthumbs.db
