@@ -1,0 +1,11 @@
+# Pipeline, modelling and development tooling. Includes the app runtime.
+-r requirements.txt
+duckdb==2.0.0
+scikit-learn==1.9.0
+scipy==1.18.0
+lightgbm==4.7.0
+optuna==5.0.0
+statsmodels==0.15.0
+ruff==0.17.2
+pytest==9.1.1
+pre-commit==4.7.0

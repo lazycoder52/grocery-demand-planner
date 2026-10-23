@@ -1,0 +1,8 @@
+# Replenishment simulation assumptions (order-up-to, periodic review).
+# Sales are used as a proxy for demand; stockouts in the source data censor
+# true demand, so simulated fill rates are optimistic. See docs/DATA_CARD.md.
+
+seed: 42
+review_period_days: 7
+lead_times_days: [3, 7, 14]
+service_levels: [0.90, 0.95, 0.98]
