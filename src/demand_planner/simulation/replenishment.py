@@ -130,6 +130,24 @@ class PeriodicReviewSimulator:
             index=["store_nbr", "family"], columns="day_idx", values="pred_p90"
         ).to_numpy(dtype=np.float32)
 
+        # LightGBM point model predictions (L2 conditional mean)
+        if "pred_lgbm" in df.columns:
+            self.pred_point = df.pivot(
+                index=["store_nbr", "family"], columns="day_idx", values="pred_lgbm"
+            ).to_numpy(dtype=np.float32)
+        else:
+            self.pred_point = self.pred_p50.copy()
+
+        # Map each day to the end of its active fold to prevent future-fold model leakage
+        if "split" in df.columns:
+            split_max_day = df.groupby("split", observed=False)["day_idx"].max().to_dict()
+            day_split = df.groupby("day_idx")["split"].first().to_dict()
+            self.active_fold_end_idx = np.array(
+                [split_max_day[day_split[i]] for i in range(self.n_days)], dtype=int
+            )
+        else:
+            self.active_fold_end_idx = np.full(self.n_days, self.n_days - 1, dtype=int)
+
         # Pre-origin empirical residual standard deviations (strictly date <= split.origin_date)
         if "sigma_lgbm" in df.columns:
             self.sigma_lgbm = df.pivot(
@@ -162,12 +180,21 @@ class PeriodicReviewSimulator:
         t: int,
         protection_days: int,
     ) -> np.ndarray:
-        """Sum forecasted demand over protection interval [t, t + protection_days]."""
-        end = min(t + protection_days, self.n_days)
+        """Sum forecasted demand over protection interval [t, t + protection_days].
+
+        Strictly clamps the forecast slice to the end of the active fold containing day t
+        so that no future-fold models (whose origin date > order date) can be accessed.
+        If the protection window exceeds the remaining days of the active fold, the available
+        causal forecast is scaled proportionally over the full protection window.
+        """
+        fold_end = self.active_fold_end_idx[t]
+        end = min(t + protection_days, fold_end + 1, self.n_days)
         obs_days = max(end - t, 1)
 
         if "seasonal_naive" in policy_name:
             fc = self.pred_snaive[:, t:end]
+        elif "point" in policy_name or "pred_lgbm" in policy_name:
+            fc = self.pred_point[:, t:end]
         elif policy_name == "summed_p90":
             fc = self.pred_p90[:, t:end]
         else:  # lightgbm_p50 or lightgbm_p50_safety_stock
@@ -203,7 +230,7 @@ class PeriodicReviewSimulator:
                 z = float(norm.ppf(0.95))
 
         # Select pre-origin calibrated residual standard deviation matrix
-        if "lightgbm" in policy and "safety_stock" in policy:
+        if ("lightgbm" in policy or "point" in policy) and "safety_stock" in policy:
             sig_mat = self.sigma_lgbm
         elif "seasonal_naive" in policy and "safety_stock" in policy:
             sig_mat = self.sigma_snaive
@@ -287,7 +314,12 @@ class PeriodicReviewSimulator:
         is_sensitivity = L == 14
         policy_label = policy
         if "safety_stock" in policy:
-            label_prefix = "LightGBM P50 + SS" if "lightgbm" in policy else "Seasonal Naive + SS"
+            if "point" in policy:
+                label_prefix = "LightGBM Point + SS"
+            elif "lightgbm" in policy:
+                label_prefix = "LightGBM P50 + SS"
+            else:
+                label_prefix = "Seasonal Naive + SS"
             if service_level is not None:
                 sl_pct = int(round(service_level * 100))
                 policy_label = f"{label_prefix} ({sl_pct}%)"
@@ -297,6 +329,8 @@ class PeriodicReviewSimulator:
             policy_label = "Summed Daily P90 (Conservative Upper Bound)"
         elif policy == "lightgbm_p50":
             policy_label = "LightGBM P50"
+        elif policy in ("lightgbm_point", "point"):
+            policy_label = "LightGBM Point"
         elif policy == "seasonal_naive":
             policy_label = "Seasonal Naive (7-Day)"
 
