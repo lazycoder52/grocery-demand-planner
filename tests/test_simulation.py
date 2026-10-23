@@ -361,4 +361,111 @@ def test_family_matched_fill_rate_frontier(mock_predictions_df: pd.DataFrame):
         assert "family" in r
         assert "is_reachable_p50" in r
         assert "grid_fr_range_p50" in r
-        assert "p50_ci_excludes_zero" in r
+        assert "max_fill_rate_p50" in r
+        assert "max_fill_rate_snaive" in r
+
+
+def test_review_forecast_poisoning_invariance(tiny_favorita_files: dict[str, Path]):
+    """Verify forecasts and sigmas at origin t are strictly invariant to sales mutations after t."""
+    from demand_planner.models.quantile import generate_review_forecasts
+
+    clean_train = pd.read_csv(tiny_favorita_files["train"])
+    stores_df = pd.read_csv(tiny_favorita_files["stores"])
+    holidays_df = pd.read_csv(tiny_favorita_files["holidays"])
+
+    clean_train["date"] = pd.to_datetime(clean_train["date"])
+    max_d = clean_train["date"].max()
+    eval_dates = pd.date_range(max_d - pd.Timedelta(days=27), max_d, freq="D")
+    t_review_date = eval_dates[0]
+
+    # 1. Clean run
+    clean_fc = generate_review_forecasts(
+        clean_train,
+        stores_df=stores_df,
+        holidays_df=holidays_df,
+        eval_dates=eval_dates,
+        n_folds=2,
+        horizon_days=16,
+        fold_step_days=16,
+        holdout_days=16,
+        start_train_date="2016-01-01",
+        params={"n_estimators": 5, "min_child_samples": 2},
+    )
+    clean_sub = clean_fc[clean_fc["review_date"] == t_review_date].sort_values(
+        ["horizon_step", "store_nbr", "family"]
+    )
+
+    # 2. Poisoned run: heavily mutate sales strictly after t_review_date
+    poisoned_train = clean_train.copy()
+    future_mask = poisoned_train["date"] > t_review_date
+    poisoned_train.loc[future_mask, "sales"] = 999999.0
+
+    poisoned_fc = generate_review_forecasts(
+        poisoned_train,
+        stores_df=stores_df,
+        holidays_df=holidays_df,
+        eval_dates=eval_dates,
+        n_folds=2,
+        horizon_days=16,
+        fold_step_days=16,
+        holdout_days=16,
+        start_train_date="2016-01-01",
+        params={"n_estimators": 5, "min_child_samples": 2},
+    )
+    poisoned_sub = poisoned_fc[poisoned_fc["review_date"] == t_review_date].sort_values(
+        ["horizon_step", "store_nbr", "family"]
+    )
+
+    # Predictions and sigmas at origin t MUST be bit-for-bit identical
+    # despite massive future sales mutations
+    np.testing.assert_allclose(
+        clean_sub["pred_lgbm"].to_numpy(),
+        poisoned_sub["pred_lgbm"].to_numpy(),
+        err_msg="Point forecast at origin t leaked future sales!",
+    )
+    np.testing.assert_allclose(
+        clean_sub["pred_p50"].to_numpy(),
+        poisoned_sub["pred_p50"].to_numpy(),
+        err_msg="P50 forecast at origin t leaked future sales!",
+    )
+    np.testing.assert_allclose(
+        clean_sub["pred_snaive"].to_numpy(),
+        poisoned_sub["pred_snaive"].to_numpy(),
+        err_msg="Seasonal naive forecast at origin t leaked future sales!",
+    )
+    np.testing.assert_allclose(
+        clean_sub["sigma_lgbm"].to_numpy(),
+        poisoned_sub["sigma_lgbm"].to_numpy(),
+        err_msg="LightGBM sigma at origin t leaked future sales!",
+    )
+    np.testing.assert_allclose(
+        clean_sub["sigma_snaive"].to_numpy(),
+        poisoned_sub["sigma_snaive"].to_numpy(),
+        err_msg="Seasonal naive sigma at origin t leaked future sales!",
+    )
+
+
+def test_stitching_rules_support(mock_predictions_df: pd.DataFrame):
+    """Verify that PeriodicReviewSimulator supports all three stitching rules cleanly."""
+    cfg = SimConfig(review_period_days=7, lead_times_days=(3,), warmup_days=7, seed=42)
+
+    # 1. Clamped and scaled rule
+    sim_clamped = PeriodicReviewSimulator(
+        mock_predictions_df, config=cfg, stitching_rule="clamped_scaled"
+    )
+    res_clamped = sim_clamped.simulate_policy("lightgbm_p50_safety_stock", lead_time_days=3)
+    assert res_clamped["stitching_rule"] == "clamped_scaled"
+
+    # 2. Inside fold only rule
+    sim_inside = PeriodicReviewSimulator(
+        mock_predictions_df, config=cfg, stitching_rule="inside_fold_only"
+    )
+    res_inside = sim_inside.simulate_policy("lightgbm_p50_safety_stock", lead_time_days=3)
+    assert res_inside["stitching_rule"] == "inside_fold_only"
+
+    # 3. Reforecast rule (fallback without review_forecasts_df)
+    sim_reforecast = PeriodicReviewSimulator(
+        mock_predictions_df, config=cfg, stitching_rule="reforecast"
+    )
+    res_reforecast = sim_reforecast.simulate_policy("lightgbm_p50_safety_stock", lead_time_days=3)
+    assert res_reforecast["stitching_rule"] == "reforecast"
