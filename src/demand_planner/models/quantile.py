@@ -7,8 +7,9 @@ and empirical interval coverage across rolling-origin backtest folds and holdout
 Empirical Coverage & Uncertainty Observations (Measured):
 - CLEANING achieves 72.49% empirical coverage and PERSONAL CARE achieves 77.60%
   across the 5 folds + holdout relative to the nominal 80% target interval (P10-P90).
-- Families with high zero rates show higher empirical coverage: BOOKS (55.4% zero rate)
-  achieves 98.15% coverage, and BABY CARE (66.8% zero rate) achieves 94.00% coverage.
+- Families with high zero rates show higher empirical coverage: BOOKS (96.96% zero rate
+  across full 2013-2017 history; 94.64% post-2015) achieves 98.15% coverage, and BABY CARE
+  (94.13% full history; 90.20% post-2015) achieves 94.00% coverage.
 - Across 5-fold backtest evaluation, the LightGBM point model achieves 13.49% mean WAPE,
   while the LightGBM P50 quantile model achieves 14.27% mean WAPE (+0.78% higher).
 """
@@ -554,5 +555,215 @@ def generate_all_predictions(
         test_sub["split"] = test_sub["split"].astype("category")
 
         records.append(test_sub)
+
+    return pd.concat(records, ignore_index=True)
+
+
+def generate_review_forecasts(
+    sales_df: pd.DataFrame,
+    stores_df: pd.DataFrame | None = None,
+    holidays_df: pd.DataFrame | None = None,
+    eval_dates: list[pd.Timestamp] | pd.DatetimeIndex | None = None,
+    review_period_days: int = 7,
+    horizon_days: int = 16,
+    start_train_date: str = "2015-01-01",
+    target_col: str = "sales",
+    exclude_preopening: bool = True,
+    n_folds: int = 5,
+    fold_step_days: int = 16,
+    holdout_days: int = 16,
+    lookback_days: int = 56,
+    params: dict[str, Any] | None = None,
+) -> pd.DataFrame:
+    """Generate per-review-date 16-day forecasts and pre-origin residual sigmas for all forecasters.
+
+    For each weekly review date t (origin = t), generates 16-day forecasts for:
+    - Seasonal Naive (7-day pattern repeated over 16 days)
+    - LightGBM Point (L2 conditional mean model from latest fold origin <= t)
+    - LightGBM P50 (pinball alpha=0.5 model from latest fold origin <= t)
+
+    Features and lags are strictly built using data <= t.
+    Pre-origin empirical residual standard deviations (sigma) are computed using only data
+    in the 56-day lookback window <= t.
+    """
+    from demand_planner.evaluation.backtest import generate_rolling_folds
+    from demand_planner.models.lightgbm import (
+        get_store_opening_dates,
+        predict_lightgbm,
+        train_lightgbm,
+    )
+
+    df_raw = sales_df.copy()
+    df_raw["date"] = pd.to_datetime(df_raw["date"])
+
+    df_feat, feature_names = build_features(
+        df_raw, stores_df=stores_df, holidays_df=holidays_df, target_col=target_col
+    )
+
+    cv_folds, holdout = generate_rolling_folds(
+        df_raw,
+        n_folds=n_folds,
+        horizon_days=horizon_days,
+        fold_step_days=fold_step_days,
+        holdout_days=holdout_days,
+    )
+    all_splits = [(f"fold_{f.fold_idx}", f) for f in cv_folds] + [("holdout", holdout)]
+    fold_origins = [s[1].origin_date for s in all_splits]
+
+    start_date = pd.to_datetime(start_train_date)
+    opening_dates = (
+        get_store_opening_dates(df_raw, target_col=target_col) if exclude_preopening else None
+    )
+    is_open = df_feat["store_nbr"].map(opening_dates) if opening_dates else None
+
+    # Train point and P50 models once per fold origin
+    trained_point = {}
+    trained_p50 = {}
+    for _, split in all_splits:
+        train_mask = (df_feat["date"] <= split.origin_date) & (df_feat["date"] >= start_date)
+        if is_open is not None:
+            train_mask = train_mask & (df_feat["date"] >= is_open)
+
+        X_train = df_feat.loc[train_mask, feature_names]
+        y_train = np.log1p(df_feat.loc[train_mask, target_col])
+
+        trained_point[split.origin_date] = train_lightgbm(X_train, y_train, params=params)
+        q_mods = train_lightgbm_quantiles(X_train, y_train, alphas=(0.5,), params=params)
+        trained_p50[split.origin_date] = q_mods[0.5]
+
+    # Evaluation dates
+    if eval_dates is None:
+        start_eval = cv_folds[0].origin_date + pd.Timedelta(days=1)
+        end_eval = holdout.origin_date + pd.Timedelta(days=holdout_days)
+        eval_dates_list = pd.date_range(start_eval, end_eval, freq="D")
+    else:
+        eval_dates_list = pd.to_datetime(eval_dates)
+
+    series_keys = (
+        df_raw[["store_nbr", "family"]]
+        .drop_duplicates()
+        .sort_values(["store_nbr", "family"])
+        .reset_index(drop=True)
+    )
+
+    # Pivot raw sales for fast lookup
+    sales_by_date = df_raw.pivot(
+        index=["store_nbr", "family"], columns="date", values=target_col
+    ).reindex(index=pd.MultiIndex.from_frame(series_keys))
+
+    review_day_indices = [t for t in range(len(eval_dates_list)) if t % review_period_days == 0]
+
+    records = []
+    for t in review_day_indices:
+        d_t = eval_dates_list[t]
+        valid_origins = [orig for orig in fold_origins if orig <= d_t]
+        active_origin = max(valid_origins)
+
+        pt_mod = trained_point[active_origin]
+        p50_mod = trained_p50[active_origin]
+
+        # 16 target dates ahead: d_t + 1 .. d_t + 16
+        target_dates = pd.date_range(d_t + pd.Timedelta(days=1), periods=horizon_days, freq="D")
+
+        sub_feat = df_feat[df_feat["date"].isin(target_dates)].copy()
+        sub_feat["pred_lgbm"] = predict_lightgbm(pt_mod, sub_feat[feature_names]).astype(np.float32)
+        sub_feat["pred_p50"] = predict_lightgbm(p50_mod, sub_feat[feature_names]).astype(np.float32)
+
+        # Seasonal naive: repeat last 7 observed days [d_t - 6 .. d_t]
+        last_7_dates = pd.date_range(d_t - pd.Timedelta(days=6), d_t, freq="D")
+
+        # Compute pre-origin residual sigmas on lookback window <= d_t
+        lb_dates = pd.date_range(d_t - pd.Timedelta(days=lookback_days - 1), d_t, freq="D")
+
+        # 1. Seasonal Naive sigma
+        avail_lb = [
+            d
+            for d in pd.date_range(d_t - pd.Timedelta(days=lookback_days + 6), d_t, freq="D")
+            if d in sales_by_date.columns
+        ]
+        if len(avail_lb) > 7:
+            lb_mat = sales_by_date[avail_lb].to_numpy(dtype=np.float32)
+            res_sn = lb_mat[:, 7:] - lb_mat[:, :-7]
+            sig_sn = np.nanstd(res_sn, axis=1)
+            sig_sn = np.nan_to_num(sig_sn, nan=0.0).astype(np.float32)
+        else:
+            sig_sn = np.zeros(len(series_keys), dtype=np.float32)
+
+        # 2. LightGBM sigma
+        sub_lb = df_feat[df_feat["date"].isin(lb_dates)].copy()
+        if len(sub_lb) > 0:
+            lb_preds = predict_lightgbm(pt_mod, sub_lb[feature_names])
+            sub_lb["res"] = sub_lb[target_col] - lb_preds
+            sig_lgbm_df = (
+                sub_lb.groupby(["store_nbr", "family"], observed=False)["res"]
+                .std()
+                .fillna(0.0)
+                .reindex(pd.MultiIndex.from_frame(series_keys))
+                .to_numpy(dtype=np.float32)
+            )
+            sig_lgbm = np.nan_to_num(sig_lgbm_df, nan=0.0).astype(np.float32)
+        else:
+            sig_lgbm = np.zeros(len(series_keys), dtype=np.float32)
+
+        sig_lgbm_dict = dict(
+            zip(
+                zip(series_keys["store_nbr"], series_keys["family"], strict=False),
+                sig_lgbm,
+                strict=False,
+            )
+        )
+        sig_sn_dict = dict(
+            zip(
+                zip(series_keys["store_nbr"], series_keys["family"], strict=False),
+                sig_sn,
+                strict=False,
+            )
+        )
+
+        # Build records for each target date
+        for step_idx, t_date in enumerate(target_dates, start=1):
+            sub_step = sub_feat[sub_feat["date"] == t_date].copy()
+            # Map seasonal naive
+            day_mod = (step_idx - 1) % 7
+            day_col = last_7_dates[day_mod]
+            if day_col in sales_by_date.columns:
+                sn_vals = sales_by_date[day_col].to_dict()
+                sub_step["pred_snaive"] = [
+                    sn_vals.get((s, f), 0.0)
+                    for s, f in zip(sub_step["store_nbr"], sub_step["family"], strict=False)
+                ]
+            else:
+                sub_step["pred_snaive"] = 0.0
+
+            sub_step["review_day_idx"] = np.int16(t)
+            sub_step["review_date"] = d_t
+            sub_step["target_date"] = t_date
+            sub_step["horizon_step"] = np.int8(step_idx)
+            sub_step["sigma_lgbm"] = [
+                sig_lgbm_dict.get((s, f), 0.0)
+                for s, f in zip(sub_step["store_nbr"], sub_step["family"], strict=False)
+            ]
+            sub_step["sigma_snaive"] = [
+                sig_sn_dict.get((s, f), 0.0)
+                for s, f in zip(sub_step["store_nbr"], sub_step["family"], strict=False)
+            ]
+
+            records.append(
+                sub_step[
+                    [
+                        "review_day_idx",
+                        "review_date",
+                        "target_date",
+                        "horizon_step",
+                        "store_nbr",
+                        "family",
+                        "pred_lgbm",
+                        "pred_p50",
+                        "pred_snaive",
+                        "sigma_lgbm",
+                        "sigma_snaive",
+                    ]
+                ]
+            )
 
     return pd.concat(records, ignore_index=True)
