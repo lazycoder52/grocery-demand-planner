@@ -85,6 +85,21 @@ def _register_models_stage() -> None:
 _register_models_stage()
 
 
+def _register_reports_stage() -> None:
+    from demand_planner.reports.charts import generate_all_charts
+
+    def stage_reports() -> None:
+        log.info("Generating report charts...")
+        charts = generate_all_charts()
+        for c in charts:
+            log.info("Generated chart: %s", c)
+
+    STAGES["reports"] = stage_reports
+
+
+_register_reports_stage()
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="python -m demand_planner.pipeline",
