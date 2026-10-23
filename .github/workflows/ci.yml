@@ -1,0 +1,66 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  large-files:
+    name: Tracked files under 5 MB
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: Fail if any tracked file is over 5 MB
+        run: |
+          limit=$((5 * 1024 * 1024))
+          status=0
+          while IFS= read -r -d '' f; do
+            size=$(stat -c %s "$f")
+            if [ "$size" -gt "$limit" ]; then
+              echo "::error file=$f::$f is $size bytes (limit $limit)"
+              status=1
+            fi
+          done < <(git ls-files -z)
+          total=$(git ls-files -z outputs | xargs -0 -r stat -c %s | awk '{s+=$1} END {print s+0}')
+          echo "outputs/ total: $total bytes"
+          if [ "$total" -gt "$limit" ]; then
+            echo "::error::outputs/ totals $total bytes (limit $limit)"
+            status=1
+          fi
+          exit $status
+
+  lint:
+    name: Lint (pre-commit)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.14"
+      - uses: pre-commit/action@v3.0.1
+
+  test:
+    name: Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.14"
+          cache: pip
+          cache-dependency-path: requirements-dev.txt
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements-dev.txt
+          python -m pip install -e . --no-deps
+      - name: Pytest
+        run: python -m pytest

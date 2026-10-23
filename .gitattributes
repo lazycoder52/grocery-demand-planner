@@ -1,0 +1,6 @@
+# Normalize line endings so Windows checkouts and Linux CI agree.
+* text=auto eol=lf
+*.ps1 text eol=crlf
+*.png binary
+*.jpg binary
+*.parquet binary
