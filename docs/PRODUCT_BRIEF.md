@@ -20,8 +20,8 @@ Under walk-forward evaluation, static heuristics prove inadequate:
 ### Business Impact: Working Capital Optimization
 Under periodic $(R, S)$ inventory control with out-of-sample error safety stock:
 * **Chain-Level Inventory Reduction:** **-12.27% to -14.51%** average inventory reduction compared to Seasonal Naive at a matched 99.0% fill rate.
-  * **$L = 3$ days:** **-12.27%** inventory [95% Series Bootstrap CI: -14.59% to -10.05%; 95% Time-Block Bootstrap CI: -19.97% to -2.25%].
-  * **$L = 7$ days:** **-14.51%** inventory [95% Series Bootstrap CI: -17.53% to -11.37%; 95% Time-Block Bootstrap CI: -21.22% to -7.31%].
+  * **$L = 3$ days:** **-12.27%** inventory (95% Series CI: [-14.59%, -10.05%]; 95% Time-Block CI: [-19.97%, -2.25%]).
+  * **$L = 7$ days:** **-14.51%** inventory (95% Series CI: [-17.53%, -11.37%]; 95% Time-Block CI: [-21.22%, -7.31%]).
   * Both series and time-block 95% bootstrap confidence intervals strictly exclude 0 across both operational lead times.
 * **Why Compare at Matched Fill Rate?** Comparing policies at an identical safety multiplier $z$ conflates forecast accuracy with customer service: an over-forecasting model holds more inventory while achieving higher fill, whereas an under-forecaster appears lean while causing stockouts. Matching policies at target on-shelf availability (e.g. 99.0% fill rate) controls for service level, providing an apples-to-apples working capital comparison.
 * **Lead-Time Error Autocorrelation:** The empirical ratio of multi-day window-sum error standard deviation to theoretical independent $\sigma_{\text{oos}} \sqrt{R+L}$ is **1.436 at $W=10$ days** ($L=3$) and **1.522 at $W=14$ days** ($L=7$).
