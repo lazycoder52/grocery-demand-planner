@@ -1,6 +1,8 @@
--- Perishable Spoilage and Inventory Waste Proxy View
--- Analyzes demand volatility (coefficient of variation) across fresh/perishable departments
--- where order errors lead to physical waste and markdown write-offs rather than backorders.
+-- Perishable Demand Volatility Diagnostic View (Proxy for Perishable Inventory Risk)
+-- Analyzes demand volatility (coefficient of variation, CV = std / mean) across fresh/perishable departments.
+-- IMPORTANT: Physical spoilage, scrap, and shrinkage logs are not recorded in the dataset.
+-- High coefficient of variation in perishables serves as an empirical proxy for inventory volatility exposure,
+-- not an audit of confirmed physical shrinkage.
 
 WITH daily_stats AS (
     SELECT
@@ -42,14 +44,14 @@ SELECT
     ROUND(std_daily_sales / NULLIF(mean_daily_sales, 0.0), 4) AS cv_demand,
     max_daily_sales,
     zero_sales_days,
-    ROUND(mean_daily_sales * (std_daily_sales / NULLIF(mean_daily_sales, 0.0)), 2) AS spoilage_exposure_index,
+    ROUND(mean_daily_sales * (std_daily_sales / NULLIF(mean_daily_sales, 0.0)), 2) AS volatility_exposure_index,
     CASE
         WHEN perishability_class = 'PERISHABLE' AND (std_daily_sales / NULLIF(mean_daily_sales, 0.0)) >= 0.75
-            THEN 'HIGH_SPOILAGE_RISK'
+            THEN 'HIGH_VOLATILITY_PERISHABLE_PROXY'
         WHEN perishability_class = 'PERISHABLE'
-            THEN 'MODERATE_SPOILAGE_RISK'
-        ELSE 'LOW_NON_PERISHABLE'
-    END AS spoilage_risk_tier
+            THEN 'MODERATE_VOLATILITY_PERISHABLE_PROXY'
+        ELSE 'NON_PERISHABLE_OR_LOW_VOLATILITY'
+    END AS volatility_proxy_tier
 FROM daily_stats
 WHERE total_days >= 60
   AND mean_daily_sales >= 1.0
