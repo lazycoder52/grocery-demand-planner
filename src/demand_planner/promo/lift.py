@@ -1,14 +1,21 @@
-"""Causal promotion-lift analysis with fixed effects and clustered bootstrap inference.
+"""Observational promotion-lift analysis with fixed effects and clustered bootstrap inference.
 
-Estimates the average sales lift of promotions (onpromotion > 0) strictly on post 2014-04-01
-data (when Corporación Favorita began systematically recording promotional activities).
+Estimates the average sales lift association of promotions (onpromotion > 0) strictly on post
+2014-04-01 data (when Corporación Favorita began systematically recording promotional activities).
 
-Methodology:
-- Log-linear store-family fixed-effects regression with calendar controls (day-of-week and month):
-    log(sales + 1) = alpha_{store, family} + beta * is_promo + gamma_{dow} + delta_{month} + eps
-- % Sales Lift = (exp(beta) - 1) * 100
-- Statistical inference: 95% cluster-bootstrap confidence intervals clustered by store (54 clusters)
-  to account for arbitrary within-store spatial and temporal error correlation.
+Exact Regression Specification:
+- Outcome: y_{s,f,t} = log(sales_{s,f,t} + 1), where sales is daily units sold.
+- Regressor: p_{s,f,t} = I(onpromotion_{s,f,t} > 0), binary indicator (0 = non-promo, 1 = promo).
+- Fixed Effects: Store x Family fixed effects alpha_{s,f} (within-series demeaning, 1,782 series).
+- Controls:
+    * Day-of-week indicators gamma_{dow} (6 dummies, baseline = Sunday / day 0).
+    * Year-Month time fixed effects tau_{ym} (40 dummies, baseline = 2014-04) absorbing secular
+      sales growth, network-wide inflation, and macroeconomic shocks.
+- Sample Window: 2014-04-01 to 2017-08-15 (2,191,860 store-family-day rows across 54 stores).
+- Statistical Inference: 95% cluster-bootstrap confidence intervals clustered by store
+  (54 clusters) to account for arbitrary within-store spatial and temporal error correlation.
+- Observational Caveat: This analysis identifies conditional statistical associations, not clean
+  exogenous causal effects, as promotions were non-randomly scheduled by category managers.
 """
 
 from __future__ import annotations
@@ -31,18 +38,31 @@ def estimate_fe_log_linear(
     df_sub: pd.DataFrame,
     target_col: str = "sales",
     promo_col: str = "onpromotion",
+    use_year_month: bool = True,
 ) -> float:
     """Fast Frisch-Waugh-Lovell within-transformation OLS for promo coefficient."""
     y = np.log1p(df_sub[target_col].to_numpy(dtype=np.float64))
     p = (df_sub[promo_col].to_numpy(dtype=np.float64) > 0).astype(np.float64)
 
-    # Dummies for dow (1..6 vs 0) and month (2..12 vs 1)
+    # Dummies for dow (1..6 vs 0)
     dow = df_sub["dow"].to_numpy(dtype=np.int32)
-    month = df_sub["month"].to_numpy(dtype=np.int32)
-
     X_dow = np.column_stack([dow == d for d in range(1, 7)]).astype(np.float64)
-    X_mon = np.column_stack([month == m for m in range(2, 13)]).astype(np.float64)
-    X_reg = np.column_stack([p, X_dow, X_mon])  # shape (N, 18)
+
+    if use_year_month and "ym" in df_sub.columns:
+        yms = sorted(df_sub["ym"].unique())
+        if len(yms) > 1:
+            ym_map = {ym: idx for idx, ym in enumerate(yms[1:])}
+            ym_idx = np.array([ym_map.get(v, -1) for v in df_sub["ym"]], dtype=np.int32)
+            X_time = np.column_stack([ym_idx == i for i in range(len(ym_map))]).astype(np.float64)
+        else:
+            X_time = np.zeros((len(df_sub), 0), dtype=np.float64)
+    else:
+        month = df_sub["month"].to_numpy(dtype=np.int32)
+        X_time = np.column_stack([month == m for m in range(2, 13)]).astype(np.float64)
+
+    X_reg = (
+        np.column_stack([p, X_dow, X_time]) if X_time.shape[1] > 0 else np.column_stack([p, X_dow])
+    )
 
     # Within-transformation: de-mean by series_idx (store x family)
     series_idx = df_sub["series_idx"].to_numpy(dtype=np.int32)
@@ -63,7 +83,6 @@ def estimate_fe_log_linear(
         c_means = c_sums / counts
         X_tilde[:, c_i] = col - c_means[series_idx]
 
-    # Solve OLS: (X_tilde' X_tilde)^(-1) X_tilde' y_tilde
     try:
         beta, _, _, _ = np.linalg.lstsq(X_tilde, y_tilde, rcond=1e-5)
         return float(beta[0])
@@ -75,17 +94,30 @@ def _compute_fe_store_cross_products(
     df_sub: pd.DataFrame,
     target_col: str = "sales",
     promo_col: str = "onpromotion",
+    use_year_month: bool = True,
 ) -> tuple[dict[int, np.ndarray], dict[int, np.ndarray], float, list[int], dict[int, int]]:
     """Precompute within-demeaned cross products A_s = X_s' X_s and b_s = X_s' y_s per store."""
     y = np.log1p(df_sub[target_col].to_numpy(dtype=np.float64))
     p = (df_sub[promo_col].to_numpy(dtype=np.float64) > 0).astype(np.float64)
 
     dow = df_sub["dow"].to_numpy(dtype=np.int32)
-    month = df_sub["month"].to_numpy(dtype=np.int32)
-
     X_dow = np.column_stack([dow == d for d in range(1, 7)]).astype(np.float64)
-    X_mon = np.column_stack([month == m for m in range(2, 13)]).astype(np.float64)
-    X_reg = np.column_stack([p, X_dow, X_mon])
+
+    if use_year_month and "ym" in df_sub.columns:
+        yms = sorted(df_sub["ym"].unique())
+        if len(yms) > 1:
+            ym_map = {ym: idx for idx, ym in enumerate(yms[1:])}
+            ym_idx = np.array([ym_map.get(v, -1) for v in df_sub["ym"]], dtype=np.int32)
+            X_time = np.column_stack([ym_idx == i for i in range(len(ym_map))]).astype(np.float64)
+        else:
+            X_time = np.zeros((len(df_sub), 0), dtype=np.float64)
+    else:
+        month = df_sub["month"].to_numpy(dtype=np.int32)
+        X_time = np.column_stack([month == m for m in range(2, 13)]).astype(np.float64)
+
+    X_reg = (
+        np.column_stack([p, X_dow, X_time]) if X_time.shape[1] > 0 else np.column_stack([p, X_dow])
+    )
 
     series_idx = df_sub["series_idx"].to_numpy(dtype=np.int32)
     n_series = int(series_idx.max()) + 1
@@ -168,7 +200,7 @@ def run_promo_lift_analysis(
     target_col: str = "sales",
     promo_col: str = "onpromotion",
 ) -> dict[str, Any]:
-    """Estimate causal promo lift overall and per product family with store-clustered bootstrap.
+    """Estimate observational promo lift association with and without time fixed effects.
 
     Parameters
     ----------
@@ -195,6 +227,7 @@ def run_promo_lift_analysis(
 
     df["dow"] = df["date"].dt.dayofweek
     df["month"] = df["date"].dt.month
+    df["ym"] = df["date"].dt.to_period("M").astype(str)
 
     # Map store x family to integer index
     series_keys = df[["store_nbr", "family"]].drop_duplicates().itertuples(index=False)
@@ -203,22 +236,27 @@ def run_promo_lift_analysis(
         series_map[(s, f)] for s, f in zip(df["store_nbr"], df["family"], strict=False)
     ]
 
-    # 1. Overall Lift Estimation
-    log.info("Estimating overall store-family fixed-effects promo lift on %d rows...", len(df))
-    A_stores, b_stores, beta_overall, stores, store_map = _compute_fe_store_cross_products(
-        df, target_col=target_col, promo_col=promo_col
+    # 1. Overall Lift: Model B (with year-month FE) and Model A (without year-month FE)
+    log.info(
+        "Estimating overall store-family fixed-effects promo lift with year-month FE on %d rows...",
+        len(df),
     )
-    lift_overall_pct = (np.exp(beta_overall) - 1.0) * 100.0
-
-    # Fast store-clustered bootstrap for overall lift
-    boot_lifts_overall = _cluster_bootstrap_lift(
-        A_stores, b_stores, stores, store_map, n_bootstrap, rng
+    # Model B: Controlled with year-month FE (primary)
+    A_b, b_b, beta_overall_ym, stores, store_map = _compute_fe_store_cross_products(
+        df, target_col=target_col, promo_col=promo_col, use_year_month=True
     )
+    lift_overall_ym = (np.exp(beta_overall_ym) - 1.0) * 100.0
+    boot_lifts_ym = _cluster_bootstrap_lift(A_b, b_b, stores, store_map, n_bootstrap, rng)
+    ci_overall_ym_low = float(np.percentile(boot_lifts_ym, 2.5))
+    ci_overall_ym_high = float(np.percentile(boot_lifts_ym, 97.5))
 
-    ci_overall_low = float(np.percentile(boot_lifts_overall, 2.5))
-    ci_overall_high = float(np.percentile(boot_lifts_overall, 97.5))
+    # Model A: Unadjusted for secular time trends (month of year only)
+    _, _, beta_overall_naive, _, _ = _compute_fe_store_cross_products(
+        df, target_col=target_col, promo_col=promo_col, use_year_month=False
+    )
+    lift_overall_naive = (np.exp(beta_overall_naive) - 1.0) * 100.0
 
-    # 2. Per-Family Lift Estimation
+    # 2. Per-Family Lift Estimation (both specifications)
     families = sorted(df["family"].unique())
     family_results: list[dict[str, Any]] = []
 
@@ -231,6 +269,7 @@ def run_promo_lift_analysis(
                 {
                     "family": fam,
                     "lift_pct": 0.0,
+                    "lift_before_time_fe_pct": 0.0,
                     "ci_95_low": 0.0,
                     "ci_95_high": 0.0,
                     "promo_share_pct": round(fam_promo_share, 2),
@@ -243,13 +282,19 @@ def run_promo_lift_analysis(
         fam_series_map = {s: idx for idx, s in enumerate(fam_stores)}
         fam_df["series_idx"] = fam_df["store_nbr"].map(fam_series_map)
 
-        A_fam, b_fam, b_fam_est, s_fam, sm_fam = _compute_fe_store_cross_products(
-            fam_df, target_col=target_col, promo_col=promo_col
+        # Before time FE (month-of-year only)
+        _, _, b_naive_fam, _, _ = _compute_fe_store_cross_products(
+            fam_df, target_col=target_col, promo_col=promo_col, use_year_month=False
         )
-        l_fam = (np.exp(b_fam_est) - 1.0) * 100.0
+        l_naive_fam = (np.exp(b_naive_fam) - 1.0) * 100.0
+
+        # After year-month FE (primary controlled)
+        A_fam, b_fam, b_ym_fam, s_fam, sm_fam = _compute_fe_store_cross_products(
+            fam_df, target_col=target_col, promo_col=promo_col, use_year_month=True
+        )
+        l_ym_fam = (np.exp(b_ym_fam) - 1.0) * 100.0
 
         boot_fam = _cluster_bootstrap_lift(A_fam, b_fam, s_fam, sm_fam, n_bootstrap, rng)
-
         c_low = float(np.percentile(boot_fam, 2.5))
         c_high = float(np.percentile(boot_fam, 97.5))
         sig = c_low > 0 or c_high < 0
@@ -257,7 +302,8 @@ def run_promo_lift_analysis(
         family_results.append(
             {
                 "family": fam,
-                "lift_pct": round(l_fam, 2),
+                "lift_pct": round(l_ym_fam, 2),
+                "lift_before_time_fe_pct": round(l_naive_fam, 2),
                 "ci_95_low": round(c_low, 2),
                 "ci_95_high": round(c_high, 2),
                 "promo_share_pct": round(fam_promo_share, 2),
@@ -265,7 +311,7 @@ def run_promo_lift_analysis(
             }
         )
 
-    # Sort families by lift
+    # Sort families by controlled lift association
     family_results.sort(key=lambda x: x["lift_pct"], reverse=True)
     top_5 = family_results[:5]
 
@@ -274,18 +320,31 @@ def run_promo_lift_analysis(
             "start_date": start_date,
             "end_date": df["date"].max().strftime("%Y-%m-%d"),
             "n_days": int((df["date"].max() - pd.to_datetime(start_date)).days) + 1,
+            "sample_size_rows": len(df),
             "note": (
                 "Promotion tracking in Corporación Favorita began 2014-04-01; "
                 "earlier dates excluded."
             ),
         },
-        "methodology": (
-            "Store-family fixed effects log-linear regression with day-of-week and month controls. "
-            "Inference via 95% store-clustered bootstrap (54 clusters) with 500 resamples."
-        ),
-        "overall_lift_pct": round(lift_overall_pct, 2),
-        "ci_95_overall_low": round(ci_overall_low, 2),
-        "ci_95_overall_high": round(ci_overall_high, 2),
+        "exact_regression_specification": {
+            "outcome": "log(sales + 1) in daily physical units",
+            "regressor": "I(onpromotion > 0), binary active promo indicator (units: 0 or 1)",
+            "fixed_effects": "Store x Family fixed effects (within-series demeaning, 1,782 series)",
+            "controls": (
+                "Day-of-week indicators (6 dummies) and Year-Month fixed effects (40 dummies)"
+            ),
+            "clustering": "Clustered by store (54 clusters) via cluster bootstrap",
+            "sample_window": "2014-04-01 to 2017-08-15 (2,191,860 rows)",
+            "observational_note": (
+                "Observational statistical association; category managers scheduled promotions "
+                "endogenously. The unadjusted +171.17% figure arose from omitting year-month FE, "
+                "which caused the promotion dummy to absorb multi-year secular store/sales growth."
+            ),
+        },
+        "overall_lift_pct": round(lift_overall_ym, 2),
+        "ci_95_overall_low": round(ci_overall_ym_low, 2),
+        "ci_95_overall_high": round(ci_overall_ym_high, 2),
+        "unadjusted_overall_lift_pct_without_time_fe": round(lift_overall_naive, 2),
         "top_5_promo_sensitive_families": top_5,
         "by_family": family_results,
     }
@@ -295,7 +354,7 @@ def plot_promo_lift_by_family(
     promo_results: dict[str, Any],
     output_path: Path | str = "docs/img/promo_lift_by_family.png",
 ) -> Path:
-    """Generate visualization: Estimated Promotional Lift by Product Family with 95% CIs."""
+    """Generate visualization: Estimated Promotional Lift Association by Product Family."""
     out_p = Path(output_path)
     out_p.parent.mkdir(parents=True, exist_ok=True)
 
@@ -316,7 +375,6 @@ def plot_promo_lift_by_family(
     err_low = np.maximum(0.0, lifts - df_plot["ci_95_low"].to_numpy())
     err_high = np.maximum(0.0, df_plot["ci_95_high"].to_numpy() - lifts)
 
-    # Highlight top 5 with vibrant emerald, others with steel blue
     top_5_fams = {f["family"] for f in promo_results.get("top_5_promo_sensitive_families", [])}
     colors = ["#2ca02c" if fam in top_5_fams else "#1f77b4" for fam in df_plot["family"]]
 
@@ -340,19 +398,19 @@ def plot_promo_lift_by_family(
         color="#d62728",
         linestyle="--",
         linewidth=1.5,
-        label=f"Chain Average Lift: +{ov:.1f}%",
+        label=f"Controlled Average Lift: +{ov:.1f}%",
     )
 
     ax.set_yticks(y_pos)
     ax.set_yticklabels(df_plot["family"], fontsize=8.5)
     ax.set_xlabel(
-        "Estimated Promotional Sales Lift (%) with 95% Clustered CI",
+        "Estimated Promotional Sales Lift Association (%) with 95% Clustered CI",
         fontsize=10,
         labelpad=8,
     )
     ax.set_title(
-        "Estimated Causal Promotional Lift by Product Family (Post 2014-04-01)\n"
-        "Store-Family Fixed Effects Log-Linear Model with Store-Clustered 95% Bootstrap CIs",
+        "Observational Promotional Sales Lift Association by Product Family (Post 2014-04-01)\n"
+        "Store-Family & Year-Month Fixed Effects with Store-Clustered 95% Bootstrap CIs",
         fontsize=11,
         fontweight="bold",
         pad=12,
@@ -362,8 +420,8 @@ def plot_promo_lift_by_family(
     fig.text(
         0.5,
         0.01,
-        "Note: Fixed-effects model controls for store-family base velocity, "
-        "day-of-week, and month. Top 5 promo-sensitive categories highlighted in green.",
+        "Note: Observational fixed-effects model controls for store-family baseline, "
+        "day-of-week, and year-month. Top 5 promo-sensitive categories highlighted in green.",
         ha="center",
         fontsize=8,
         color="#555555",

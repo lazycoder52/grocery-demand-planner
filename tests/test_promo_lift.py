@@ -1,4 +1,4 @@
-"""Tests for causal promotion-lift analysis."""
+"""Tests for observational promotion-lift analysis."""
 
 from pathlib import Path
 

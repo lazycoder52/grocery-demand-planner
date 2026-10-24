@@ -412,10 +412,10 @@ def _register_reports_stage() -> None:
         for c in charts:
             log.info("Generated chart: %s", c)
 
-        # Causal promo lift analysis
+        # Observational promo lift analysis
         train_path = DATA_RAW / "train.csv"
         if train_path.exists():
-            log.info("Running causal promo-lift analysis post 2014-04-01...")
+            log.info("Running observational promo-lift analysis post 2014-04-01...")
             df_train = pd.read_csv(train_path)
             promo_res = run_promo_lift_analysis(
                 df_train, start_date="2014-04-01", n_bootstrap=500, seed=42
