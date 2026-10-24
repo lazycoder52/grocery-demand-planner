@@ -1,93 +1,105 @@
 # Product Brief: ML Demand Forecasting & Replenishment System
 
-**Product:** Grocery Demand Planner
-**Role:** AI/ML Product Management & Product Analytics
+**Product:** Corporación Favorita Demand Planner
+**Role:** AI/ML Product Manager & Senior Product Analyst
 **Target Organization:** Corporación Favorita (Ecuadorian Grocery Chain)
-**Status:** MVP v1.0 Baseline & Selected Model Verified
+**Status:** Validated Pipeline & Re-frozen Replenishment Benchmark
 
 ---
 
-## 1. Problem Statement & Opportunity
+## 1. Problem Statement & Business Opportunity
 
-Grocery inventory management requires balancing two costly failure modes: over-ordering perishable items (spoilage, holding costs, and margin-eroding markdowns) and under-ordering fast-moving staples (stockouts, lost revenue, and degraded shopper loyalty).
+Grocery supply chains operate under an unforgiving trade-off: over-replenishing inventory triggers margin-eroding spoilage and capital holding costs, while under-replenishing leads to phantom stockouts, lost sales, and degraded customer loyalty.
 
-Across **54 stores** and **33 product families** spanning **3,000,888 historical daily records** (2013-01-01 to 2017-08-15), store managers currently rely on static heuristic ordering rules—predominantly 7-day seasonal naive repeating and 28-day moving averages.
+Across **54 supermarket stores** and **33 product families** in Ecuador (3,000,888 historical daily POS records), store inventory replenishment has historically relied on static heuristic ordering rules—predominantly 7-day seasonal naive repeating and 28-day moving averages.
 
-Across an expanding-window **5-fold rolling-origin backtest** (origins stepping 16 days from 2017-05-11 to 2017-07-14), static heuristics yield:
-- **Last-Value Naive:** **27.83% Mean WAPE** (MAE: 134.20 units).
-- **28-Day Moving Average:** **23.65% Mean WAPE** (MAE: 114.12 units).
-- **7-Day Seasonal Naive:** **16.33% Mean WAPE** (MAE: 78.99 units).
+Under walk-forward evaluation, static heuristics prove inadequate:
+* **7-Day Seasonal Naive:** **16.33% Mean WAPE** across 5 backtest folds; **20.67% WAPE** on the final 16-day holdout.
+* **Selected LightGBM Model:** **13.56% Mean WAPE** across 5 backtest folds (**+2.77 pts FVA**, 16.96% relative error reduction); **15.16% WAPE** on the untouched 16-day holdout (2017-07-31 to 2017-08-15, **13,319,179.78 units sold**, **+5.51 pts FVA**, 26.66% relative error reduction).
 
-Our **headline result** across the 5-fold backtest demonstrates that the **selected LightGBM global regressor** captures bi-weekly paydays (15th and month-end), non-transferred public holidays, and promotional velocity, achieving **13.49% Mean WAPE** (MAE: 65.21 units, Bias: **-0.76%**) compared to **16.33% Mean WAPE** for 7-day Seasonal Naive, delivering **+2.84 percentage points of Forecast Value Added (FVA)** (**17.39% relative error reduction**).
-
-As a single-window operational confirmation, on the final untouched **16-day holdout** (2017-07-31 to 2017-08-15, representing **13,319,179.78 units sold** across **28,512 store-family-day combinations**), the selected model achieves **15.29% WAPE** (MAE: 71.42 units, Bias: **+2.46%**) vs. **20.67% WAPE** for 7-day Seasonal Naive (**+5.38 pts FVA**, a **26.02% relative error reduction**). The holdout window is noticeably harder for the heuristic baseline due to the compounding volatility of the month-turn restocking surge and the Tuesday, August 15 payday.
-
-*Note on WAPE and Bias:* WAPE is volume-weighted ($\text{WAPE} = \frac{\sum |y - \hat{y}|}{\sum y}$), evaluating aggregate unit error across total chain volume rather than averaging percentage errors across SKUs. Bias was +2.46% on the holdout and averaged -0.76% across folds (range -4.0% to +1.9%), showing no systematic directional bias.
+### Business Impact: Working Capital Optimization
+Under periodic $(R, S)$ inventory control with out-of-sample error safety stock:
+* **Chain-Level Inventory Reduction:** **-12.27% to -14.51%** average inventory reduction compared to Seasonal Naive at a matched 99.0% fill rate.
+  * **$L = 3$ days:** **-12.27%** inventory [95% Series Bootstrap CI: -14.59% to -10.05%; 95% Time-Block Bootstrap CI: -19.97% to -2.25%].
+  * **$L = 7$ days:** **-14.51%** inventory [95% Series Bootstrap CI: -17.53% to -11.37%; 95% Time-Block Bootstrap CI: -21.22% to -7.31%].
+  * Both series and time-block 95% bootstrap confidence intervals strictly exclude 0 across both operational lead times.
 
 ---
 
-## 2. Target Users & Decisions Supported
+## 2. Target Personas & Key Decisions Supported
 
-| Persona | Primary Workflow | Key Decision Supported |
+| Persona | Primary Workflow | Key Operational Decision Supported |
 | :--- | :--- | :--- |
-| **Category Demand Planner** | Weekly replenishment review | Determines 16-day order quantities $(Q = \hat{y}_{16d} + SS - I_{hand})$ by store-family. |
-| **Store Operations Manager** | Daily receiving & shelf stocking | Prepares backroom staging space based on predicted inflow peaks. |
-| **Regional Supply Chain Lead** | Distribution center load balancing | Schedules fleet shipments from central warehouses in Quito/Guayaquil to outlying provinces. |
+| **Category Demand Planner** | Weekly replenishment review | Sets order-up-to level $S = \hat{D}_{R+L} + z \cdot \sigma_{\text{oos}}$ by store-family. |
+| **Store Operations Manager** | Daily receiving & stockroom staging | Anticipates high-volume delivery days and balances floor shelf labor. |
+| **Category Merchant** | Promotional campaign design | Sizes supplier buy-in orders using empirical promo lift (+171.2% chain average). |
 
 ---
 
-## 3. Metric Tree
+## 3. Value Driver Metric Tree
 
 ```mermaid
 graph TD
-    A["North Star: Working Capital & On-Shelf Availability"] --> B["Inventory Holding & Shrinkage Cost"]
-    A --> C["On-Shelf Fill Rate (%)"]
-    B --> D["Forecast Value Added (FVA vs Baseline)"]
+    A["North Star: Working Capital & Customer Service Level"] --> B["Working Capital Freed (-12.3% to -14.5% Inventory)"]
+    A --> C["On-Shelf Fill Rate (Matched 99.0% Target)"]
+    B --> D["Safety Stock Buffer Compression (z * sigma_oos)"]
     C --> D
-    D --> E["Mean WAPE: 13.49% (vs 16.33% Baseline)"]
-    D --> F["Mean Bias: -0.76% (Range -4.0% to +1.9%)"]
-    D --> G["Mean MAE: 65.21 units (vs 78.99 Baseline)"]
-    E --> H["Intermittent Families (7 families >50% zero-rate)"]
-    E --> I["High-Velocity Staples (Grocery I, Beverages)"]
+    D --> E["Residual Forecast Error Reduction"]
+    E --> F["5-Fold Backtest WAPE: 13.56% (vs 16.33% Naive)"]
+    E --> G["Holdout WAPE: 15.16% (vs 20.67% Naive)"]
+    F --> H["High-Velocity Staples (Grocery I, Bread/Bakery)"]
+    F --> I["Perishable Departments (Poultry, Deli, Meats)"]
 ```
 
 ---
 
-## 4. Key Assumptions & Product Limits
+## 4. Pre-Specified Primary Family Results
 
-1. **Sales Observations Are Censored Demand:**
-   Historical point-of-sale data records fulfilled transactions, not customer intent. When a shelf stocks out, sales register as zero. Without unfulfilled order logs, our forecasts represent an optimistic lower bound on true customer demand.
-2. **Absence of Direct Inventory Data:**
-   The benchmark dataset provides transactions and sales without live on-hand stock or supplier lead-time variances. Inventory simulations must parameterize target service levels (e.g., 90%, 95%, 98%) under periodic-review $(R, S)$ models.
-3. **Observational Nature of Promotions:**
-   Promotional tracking commenced on **2014-04-01** (prior to which `onpromotion` was unrecorded). Promotional uplifts represent observational historical associations rather than randomized A/B trial increments.
-4. **Deterministic Institutional Closures:**
-   All stores close on Christmas Day (**4 dates missing**: 2013-12-25, 2014-12-25, 2015-12-25, 2016-12-25). Demand for December 25 is treated as deterministically zero.
-5. **Demand Intermittency:**
-   **7 product families** exhibit $>50\%$ zero-sales days (e.g., `BOOKS` at **96.96%**, `BABY CARE` at **94.13%**). WAPE is the mandatory evaluation metric; percentage metrics with individual item denominators (MAPE) are structurally invalid.
-6. **Training Window Inception (2015-01-01):**
-   Training intentionally begins on **2015-01-01** rather than 2013-01-01. Promotional data was unrecorded in 2013 (0%) and only partially phased in during mid-2014; starting at 2015-01-01 ensures that all 16-to-28-day lags and rolling aggregates have complete promotional history, avoids artificial zero-sales biases from late-opening stores (e.g., Store 53 in May 2014, Store 20 in Feb 2015), and provides 2.5 years of clean, consistent post-inception data for gradient boosting.
+To prevent false discovery from multiple comparisons, one primary comparison was pre-specified per family: **Target Fill Rate = 99.0%, LightGBM Point vs Seasonal Naive, evaluated at both $L=3$ and $L=7$**, with statistical significance requiring both 95% Series and Time-Block CIs to exclude 0 under Holm-Bonferroni correction ($\alpha = 0.05$ across 13 families).
 
----
-
-## 5. Pilot Implementation & Rollout Plan
-
-- **Pilot Scope:** 4-week A/B pilot across **10 stores** (5 treatment, 5 control) balanced across Store Types (A, B, C, D) and clusters.
-- **Treatment Arm:** Replenishment quantities generated using LightGBM P50 predictions with dynamic safety buffers.
-- **Control Arm:** Existing 7-day seasonal naive replenishment schedule.
-- **Success Criteria:**
-  1. $\ge 15\%$ reduction in recorded stockout incidents on top-20 revenue SKUs.
-  2. Maintained or decreased end-of-cycle inventory write-offs.
-  3. Planner override rate $< 15\%$ on suggested order quantities.
+* **$L=3$ Primary Win:**
+  * `LAWN AND GARDEN`: **-32.25%** inventory (absolute diff: **-2,780.66 units**, Series CI: [-41.50%, -23.58%], Time CI: [-45.14%, -20.01%], $p < 0.001$).
+* **$L=7$ Primary Wins (6 families):**
+  1. `GROCERY I`: **-19.57%** ($p < 0.001$, Series CI: [-26.68%, -12.58%], Time CI: [-30.60%, -7.83%])
+  2. `BREAD/BAKERY`: **-10.02%** ($p < 0.001$, Series CI: [-14.58%, -5.14%], Time CI: [-13.48%, -5.24%])
+  3. `POULTRY`: **-14.75%** ($p < 0.001$, Series CI: [-21.47%, -8.68%], Time CI: [-22.29%, -6.45%])
+  4. `DELI`: **-22.73%** ($p < 0.001$, Series CI: [-26.00%, -18.61%], Time CI: [-31.03%, -13.70%])
+  5. `LAWN AND GARDEN`: **-38.02%** ($p < 0.001$, absolute diff: **-3,652.14 units**, Series CI: [-44.13%, -30.82%], Time CI: [-48.07%, -24.10%])
+  6. `MEATS`: **-9.71%** ($p = 0.004 \le 0.00625$, Series CI: [-17.07%, -4.18%], Time CI: [-16.66%, -2.63%])
+* **Boundary & Exploratory Cases:**
+  * `BABY CARE`: Status is *target above frontier maximum* (frontier max fill rate is 92.65% for Point, 94.38% for Seasonal Naive due to low-volume sparsity).
+  * `BOOKS`: Reachable at 99.0% fill rate; $L=3$ uses -13.23% (-26.46 units, Series CI: [-23.59%, +16.50%]), $L=7$ uses +18.44% (+30.19 units, Series CI: [-21.00%, +47.65%]). Both differences are within noise (CIs cross 0).
 
 ---
 
-## 6. Scope & Roadmap: First-Ship vs. Later Iterations
+## 5. Critical Assumptions & Methodological Limitations
 
-| Feature Dimension | MVP / First-Ship (Current) | Phase 2 (Next Milestone) | Future Vision |
-| :--- | :--- | :--- | :--- |
-| **Forecast Horizon** | 16-day fixed multi-step horizon | Dynamic 1-30 day horizons | Real-time intra-day re-forecasting |
-| **Model Architecture** | Global LightGBM Regressor | Multi-quantile P10/P50/P90 models | Hierarchical reconciliation (MinT) |
-| **Promotions** | Promo item counts & active flags | Econometric uplift curve by discount % | Joint pricing & promo optimizer |
-| **Inventory Logic** | Heuristic $(R, S)$ simulation | Cost-optimal safety stock sizing | Multi-echelon DC-to-store optimization |
-| **Interface** | CLI pipeline & executive reports | Interactive Streamlit Scenario Planner | ERP / SAP automated order webhook |
+1. **Out-of-Sample Safety Stock Construction:** Safety stock residual $\sigma_{\text{oos}}$ is strictly computed from out-of-sample forecast errors originating prior to review date $t$.
+2. **Demand Proxy and Censoring Caveat:** Point-of-sale records capture fulfilled transactions, not unconstrained consumer demand. When a stockout occurs, unobserved demand is censored, which can bias naive baselines downward during replenishment recovery.
+3. **Observational Promotions:** Promotional tracking commenced on 2014-04-01; promotional lift reflects observational historical co-occurrence rather than randomized pricing trials.
+4. **Institutional Calendar Shocks:** December 25 is a deterministic chain-wide closure (sales = 0). Bi-weekly paydays (15th and month-end) create recurring non-linear demand spikes.
+
+---
+
+## 6. 5-Store Pilot Implementation Protocol
+
+* **Design:** 6-week randomized controlled field experiment across **10 matched stores** (5 treatment, 5 control).
+* **Stratification:** Matched pairs balanced across Store Types (A, B, C, D) and regional clusters in Pichincha and Guayas.
+* **Treatment Arm:** Weekly replenishment quantities generated via LightGBM Point forecasts with out-of-sample safety stock ($R=7, L=3$).
+* **Control Arm:** Existing 7-day seasonal naive heuristic replenishment schedule.
+* **Pilot Success Metrics:**
+  1. $\ge 10\%$ reduction in average working capital tied to stock on shelf.
+  2. Maintained customer on-shelf availability ($\ge 99.0\%$ measured fill rate).
+  3. $\le 15\%$ planner manual override rate on recommended replenishment orders.
+
+---
+
+## 7. Product Scope: What to Ship First vs. Build Later
+
+| Capability Dimension | What to Ship First (MVP / v1.0) | What to Build Later (Phase 2 & Roadmap) |
+| :--- | :--- | :--- |
+| **Forecasting Engine** | Global LightGBM point model with recursive multi-step lags | Direct multi-quantile forecasting (P10/P50/P90) & deep learning (TFT) |
+| **Replenishment Logic** | Periodic $(R, S)$ order-up-to policy with out-of-sample safety stock | Multi-echelon distribution center to store joint optimization |
+| **Service Level Targets** | Frontier service-level tuning grid ($z \in [-1.5, 2.5]$) | Category-specific dynamic service-level optimization based on margins |
+| **User Interface** | Interactive Streamlit executive dashboard & SQL analytical exports | Enterprise ERP / SAP automated purchase order write-back integration |
+| **Causal Controls** | Store-family fixed effects log-linear regression for promotional lift | Real-time cross-elasticity pricing engine and markdown planner |
