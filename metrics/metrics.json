@@ -2708,11 +2708,11 @@
   },
   "replenishment_simulation": {
     "run_metadata": {
-      "git_commit": "64530d4de9f1bcdb721beac6b94a31b7690b4da2",
-      "git_dirty": false,
+      "git_commit": "76f0349012e2c76fa9c49d4576bc42ff5b216370",
+      "git_dirty": true,
       "config_hash_sha256": "ae742de9659e2e8eee12c6c52d46f1d046cd80d85b0ed22af2c41a23bea8cf05",
       "seed": 42,
-      "timestamp_utc": "2026-10-24T08:19:02.787316+00:00"
+      "timestamp_utc": "2026-10-24T11:11:59.054965+00:00"
     },
     "stitching_rule": "reforecast",
     "empirical_window_sum_error_ratios": {
