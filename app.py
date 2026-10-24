@@ -107,10 +107,10 @@ def render_summary_overview(metrics: dict[str, Any]):
         )
     with col4:
         st.metric(
-            label="Promotional Sales Lift",
-            value="+171.2%",
-            delta="Store-Clustered 95% CI",
-            delta_color="off",
+            label="Forecast Value Added",
+            value="+5.38 pts FVA",
+            delta="26.02% error reduction on holdout",
+            delta_color="normal",
         )
 
     st.markdown("---")
@@ -182,89 +182,91 @@ def render_summary_overview(metrics: dict[str, Any]):
         "To safeguard against multiple comparisons, one primary comparison was pre-specified "
         "per family: **Target Fill Rate = 99.0%, LightGBM Point vs Seasonal Naive, evaluated at "
         "both L=3 and L=7**. Statistical significance requires both 95% Series and Time-Block CIs "
-        "to exclude 0 under Holm-Bonferroni step-down adjustment across all 13 families."
+        "to exclude 0 under Holm-Bonferroni step-down adjustment "
+        "($B=1000$, resolution $\\le 0.001$). "
+        "Table is dynamically loaded strictly from `metrics.json`."
     )
 
-    family_primary = [
-        {
-            "Family": "LAWN AND GARDEN",
-            "L=3 Diff": "-32.25%",
-            "L=3 Status": "Win (p_adj < 0.001)",
-            "L=7 Diff": "-38.02%",
-            "L=7 Status": "Win (p_adj < 0.001)",
-        },
-        {
-            "Family": "GROCERY I",
-            "L=3 Diff": "-18.51%",
-            "L=3 Status": "Exploratory (Holm-adj p >= 0.05)",
-            "L=7 Diff": "-19.57%",
-            "L=7 Status": "Win (p_adj < 0.001)",
-        },
-        {
-            "Family": "DELI",
-            "L=3 Diff": "-17.63%",
-            "L=3 Status": "Exploratory (Holm-adj p >= 0.05)",
-            "L=7 Diff": "-22.73%",
-            "L=7 Status": "Win (p_adj < 0.001)",
-        },
-        {
-            "Family": "POULTRY",
-            "L=3 Diff": "-9.91%",
-            "L=3 Status": "Exploratory (Holm-adj p >= 0.05)",
-            "L=7 Diff": "-14.75%",
-            "L=7 Status": "Win (p_adj < 0.001)",
-        },
-        {
-            "Family": "BREAD/BAKERY",
-            "L=3 Diff": "-7.52%",
-            "L=3 Status": "Exploratory (Time CI crosses 0)",
-            "L=7 Diff": "-10.02%",
-            "L=7 Status": "Win (p_adj < 0.001)",
-        },
-        {
-            "Family": "MEATS",
-            "L=3 Diff": "-9.23%",
-            "L=3 Status": "Exploratory (Holm-adj p >= 0.05)",
-            "L=7 Diff": "-9.71%",
-            "L=7 Status": "Win (p_adj = 0.032)",
-        },
-        {
-            "Family": "DAIRY",
-            "L=3 Diff": "N/A",
-            "L=3 Status": "Target below frontier min (>99% at z=-1.5)",
-            "L=7 Diff": "N/A",
-            "L=7 Status": "Target below frontier min (>99% at z=-1.5)",
-        },
-        {
-            "Family": "BABY CARE",
-            "L=3 Diff": "N/A",
-            "L=3 Status": "Target above frontier max (max 92.7%)",
-            "L=7 Diff": "N/A",
-            "L=7 Status": "Target above frontier max (max 91.8%)",
-        },
-        {
-            "Family": "BOOKS",
-            "L=3 Diff": "-13.23%",
-            "L=3 Status": "Within noise (CI crosses 0)",
-            "L=7 Diff": "+18.44%",
-            "L=7 Status": "Within noise (CI crosses 0)",
-        },
-    ]
-    st.dataframe(pd.DataFrame(family_primary), use_container_width=True)
+    # Rebuild family table dynamically from metrics.json only
+    fam_entries = metrics.get("replenishment_simulation", {}).get(
+        "per_family_matched_fill_rate", []
+    )
+    primary_l3 = {
+        e["family"]: e
+        for e in fam_entries
+        if e.get("comparison_type") == "primary" and e.get("lead_time_days") == 3
+    }
+    primary_l7 = {
+        e["family"]: e
+        for e in fam_entries
+        if e.get("comparison_type") == "primary" and e.get("lead_time_days") == 7
+    }
+
+    family_primary_rows = []
+    all_fams = sorted(list(set(primary_l3.keys()) | set(primary_l7.keys())))
+    for fam in all_fams:
+        e3 = primary_l3.get(fam, {})
+        e7 = primary_l7.get(fam, {})
+
+        diff3_str = (
+            f"{e3['pct_diff_point_vs_snaive']:+.2f}%"
+            if e3.get("pct_diff_point_vs_snaive") is not None
+            else "N/A"
+        )
+        if e3.get("is_finding"):
+            status3_label = "Win"
+        elif e3.get("pct_diff_point_vs_snaive") is not None:
+            status3_label = "Not Sig"
+        else:
+            status3_label = e3.get("status_point", "N/A")
+        p3_fmt = e3.get("p_value_adjusted_formatted", "")
+        status3_str = f"{status3_label} (p_adj={p3_fmt})" if p3_fmt else status3_label
+
+        diff7_str = (
+            f"{e7['pct_diff_point_vs_snaive']:+.2f}%"
+            if e7.get("pct_diff_point_vs_snaive") is not None
+            else "N/A"
+        )
+        if e7.get("is_finding"):
+            status7_label = "Win"
+        elif e7.get("pct_diff_point_vs_snaive") is not None:
+            status7_label = "Not Sig"
+        else:
+            status7_label = e7.get("status_point", "N/A")
+        p7_fmt = e7.get("p_value_adjusted_formatted", "")
+        status7_str = f"{status7_label} (p_adj={p7_fmt})" if p7_fmt else status7_label
+
+        family_primary_rows.append(
+            {
+                "Family": fam,
+                "L=3 Diff": diff3_str,
+                "L=3 Status": status3_str,
+                "L=7 Diff": diff7_str,
+                "L=7 Status": status7_str,
+            }
+        )
+
+    st.dataframe(pd.DataFrame(family_primary_rows), use_container_width=True)
 
     # Inline Visualizations
     col_img1, col_img2 = st.columns(2)
     with col_img1:
         tradeoff_img = DOCS_IMG_DIR / "replenishment_policy_tradeoff.png"
         if tradeoff_img.exists():
-            st.image(str(tradeoff_img), caption="Figure 1: Fill Rate vs Average Inventory Frontier")
+            fig1_caption = (
+                "Figure 1: Achievable fill rate vs. required average inventory units across "
+                "service levels. LightGBM reaches a given fill rate with less inventory than "
+                "Seasonal Naive."
+            )
+            st.image(str(tradeoff_img), caption=fig1_caption)
     with col_img2:
         promo_img = DOCS_IMG_DIR / "promo_lift_by_family.png"
         if promo_img.exists():
-            st.image(
-                str(promo_img),
-                caption="Figure 2: Promotional Lift Associations by Product Family",
+            fig2_caption = (
+                "Figure 2: Exploratory observational promotional sales lift by family on "
+                "positive-sales days (intensive margin, store-clustered 95% CIs)."
             )
+            st.image(str(promo_img), caption=fig2_caption)
 
     # Critical Methodological Assumptions & Limitations
     st.info(

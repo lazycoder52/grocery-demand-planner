@@ -1234,6 +1234,7 @@ class PeriodicReviewSimulator:
                             else 1.0
                         )
                         p_val_pt = float(max(p_ser, p_time))
+                        p_val_pt = max(p_val_pt, 1.0 / n_bootstrap)
 
                         entry.update(
                             {
@@ -1290,16 +1291,36 @@ class PeriodicReviewSimulator:
             )
 
             prior_passed = True
+            cum_max_p = 0.0
             for rank_idx, e in enumerate(primary_entries):
                 k = rank_idx + 1
-                alpha_holm = 0.05 / (m_tests - k + 1)
+                multiplier = m_tests - k + 1
+                alpha_holm = 0.05 / multiplier
+                p_raw = e.get("p_value_point", 1.0)
+                cum_max_p = max(cum_max_p, multiplier * p_raw)
+                p_adj = min(1.0, cum_max_p)
+
+                e["bootstrap_B"] = n_bootstrap
+                e["p_value_resolution"] = round(1.0 / n_bootstrap, 4)
+                e["p_value_raw"] = p_raw
+                e["p_value_adjusted"] = round(p_adj, 4)
+                e["p_value_raw_formatted"] = (
+                    f"<= {1.0 / n_bootstrap:.3f}"
+                    if p_raw <= (1.0 / n_bootstrap)
+                    else f"{p_raw:.4f}"
+                )
+                e["p_value_adjusted_formatted"] = (
+                    f"<= {1.0 / n_bootstrap:.3f}"
+                    if p_adj <= (1.0 / n_bootstrap)
+                    else f"{p_adj:.4f}"
+                )
                 e["comparison_type"] = "primary"
                 e["holm_rank"] = k
                 e["holm_alpha_threshold"] = round(alpha_holm, 5)
 
                 is_win = (
                     e.get("is_statistically_significant_win_point", False)
-                    and e.get("p_value_point", 1.0) <= alpha_holm
+                    and p_adj <= 0.05
                     and prior_passed
                 )
                 if not is_win:
@@ -1315,6 +1336,16 @@ class PeriodicReviewSimulator:
         # Label all other entries exploratory
         for e in results:
             if "comparison_type" not in e:
+                p_raw = e.get("p_value_point", 1.0)
+                e["bootstrap_B"] = n_bootstrap
+                e["p_value_resolution"] = round(1.0 / n_bootstrap, 4)
+                e["p_value_raw"] = p_raw
+                e["p_value_adjusted"] = None
+                e["p_value_raw_formatted"] = (
+                    f"<= {1.0 / n_bootstrap:.3f}"
+                    if p_raw <= (1.0 / n_bootstrap)
+                    else f"{p_raw:.4f}"
+                )
                 e["comparison_type"] = "exploratory"
                 e["is_finding"] = False
                 e["finding_label"] = "Exploratory"
