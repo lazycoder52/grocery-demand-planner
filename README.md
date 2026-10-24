@@ -6,6 +6,7 @@
 [![Python 3.12 | 3.14](https://img.shields.io/badge/python-3.12%20%7C%203.14-blue.svg)](pyproject.toml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
+Live app: https://grocery-demand-planner-7xqsqdetuynw8druzhiswp.streamlit.app/#frontier-points-at-l-3-days-target-selected-99-7
 ---
 
 ## 1. Headline Results
