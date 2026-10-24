@@ -150,39 +150,59 @@ Under rigorous walk-forward backtesting with out-of-sample residual safety stock
 
 ---
 
-## 5. Intensive-Margin Promotional Lift & Exploratory Family Findings (`metrics.json` `promo_lift_analysis`)
+## 5. Intensive-Margin Promotional Lift (Exploratory Analysis)
 
-### Sample Size Arithmetic
-* **Series $\times$ Time Breakdown:**
-  * Total Cartesian product: $54 \text{ stores} \times 33 \text{ families} = \mathbf{1,782 \text{ potential series}}$.
-  * Exactly **53 series** have never sold a single unit across the entire dataset history (zero sales on every date: 28 in `BOOKS`, 12 in `BABY CARE`, 10 in `LADIESWEAR`, 3 in `LAWN AND GARDEN`).
-  * Exactly **1,729 series** have positive sales recorded post 2014-04-01.
-  * Across **1,230 calendar days** (from 2014-04-01 to 2017-08-15, excluding Dec 25 closures), filtering to active post-store-opening dates and positive sales days ($\text{sales} > 0$) yields:
-    * Exactly **1,637,596 positive-sales series-days**
-    * Exactly **60,647 series-months**
-    * Excluding zero-sales days, pre-opening dates, and holiday closures isolates the *intensive margin* of promotional demand.
+### Estimator & Sample Specification
+* **Sample Window & Coverage:** 2014-04-01 to 2017-08-15 (reflecting the period after promotional tracking was initiated across Corporación Favorita).
+* **Sample Size Arithmetic:**
+  * Total potential series: $54 \text{ stores} \times 33 \text{ families} = 1,782 \text{ potential series}$. Exactly 53 series never recorded a positive sale across the entire dataset history; analysis evaluates **1,729 of 1,782 series** with positive sales.
+  * Across 1,230 calendar days (excluding Dec 25 closures), conditioning on active post-store-opening dates and positive sales days ($\text{sales} > 0$) yields exactly **1,637,596 positive-sales series-days** (60,647 series-months).
+* **Econometric Estimator:**
+  * Log-linear within-series demeaning: $\log(\text{sales}_{i,t}) = \beta_f I(\text{onpromotion}_{i,t} > 0) + \alpha_i + \gamma_m + \delta_w + \varepsilon_{i,t}$, where $\alpha_i$ are Store $\times$ Family fixed effects, $\gamma_m$ are Year-Month fixed effects, and $\delta_w$ are day-of-week fixed effects.
+  * Inference via store-clustered bootstrap (54 clusters) reporting 95% confidence intervals.
+* **Intensive-Margin Limitation:**
+  * By restricting the estimation sample strictly to positive-sales days ($\text{sales} > 0$), this estimator isolates the *intensive margin* of demand (sales volume conditional on positive sales). It does not model the *extensive margin* (converting zero-demand days to positive-demand days) or lost sales due to stockouts.
+* **Seasonal Confounding:**
+  * Estimates for highly seasonal families (e.g. `SCHOOL AND OFFICE SUPPLIES`) are likely confounded by seasonality not fully removed by monthly fixed effects (such as localized back-to-school promotional campaigns coinciding with annual purchasing surges).
+* **Support Rule:**
+  * The promotional support rule ($\ge 1,000$ positive-sales promo days and $\ge 2.0\%$ promotional day share) was chosen after inspecting results to identify categories where promotional occurrences are too sparse for reliable estimation.
 
-### Exact Regression Specification
-* **Outcome:** $\log(\text{sales})$ in daily positive physical units ($\text{sales} > 0$).
-* **Regressor:** $I(\text{onpromotion} > 0)$, binary active promotion indicator (units: 0 or 1).
-* **Fixed Effects:** Store $\times$ Family fixed effects (within-series demeaning across 1,729 active series).
-* **Controls:** Day-of-week indicators (6 dummies) and Year-Month fixed effects absorbing secular sales growth, network expansion, and macroeconomic shifts.
-* **Clustering:** Clustered by store (54 clusters) via cluster bootstrap with 95% confidence intervals.
-* **Sample Window:** 2014-04-01 to 2017-08-15 (1,637,596 positive-sales series-days).
-
-### Exploratory Family Results & Pre-Specified Support Rule
-All per-family promotional lift results are designated as **exploratory only**. To separate stable estimations from noisy low-support series, we apply a pre-specified promotional support rule:
-* **Pre-Specified Support Threshold:** A family must have at least **1,000 positive-sales promotional days** AND at least **2.0% promotional day share** across the network to be considered statistically reliable for exploratory reporting.
-* **Unreliable Categories (Failing Support Threshold):**
-  * Categories failing this threshold (`BOOKS` with 0 promo days / 0.0%, `HOME APPLIANCES` with 58 days / 0.34%, `HARDWARE` with 132 days / 0.36%, `MAGAZINES` with 159 days / 0.41%, `BABY CARE` with 53 days / 1.00%, `LADIESWEAR` with 460 days / 1.34%, `PLAYERS AND ELECTRONICS` with 848 days / 1.79%) have sparse promotional data and wide estimators. They are reported as **Unreliable (insufficient support)** instead of substantive findings.
-* **High-Volume Core Grocery Families (Meeting Support Threshold):**
-  * `GROCERY I`: **+2.67%** lift [95% CI: +0.96%, +4.25%], 91.00% promo day share (56,885 promo days).
-  * `BEVERAGES`: **+2.44%** lift [95% CI: +0.38%, +4.30%], 82.72% promo day share (51,705 promo days).
-  * `DAIRY`: **+3.47%** lift [95% CI: +2.27%, +4.81%], 73.57% promo day share (45,985 promo days).
-  * `DELI`: **+3.62%** lift [95% CI: +2.35%, +4.94%], 63.16% promo day share (39,479 promo days).
-  * `MEATS`: **+18.98%** lift [95% CI: +15.82%, +21.90%], 36.32% promo day share (22,704 promo days).
-  * `POULTRY`: **+9.55%** lift [95% CI: +7.52%, +11.29%], 31.52% promo day share (19,704 promo days).
-  * `SCHOOL AND OFFICE SUPPLIES`: **+270.37%** lift [95% CI: +215.12%, +335.25%], 17.77% promo day share (4,054 promo days; designated as exploratory).
+### Exploratory Per-Family Promotional Lift Estimates
+| Product Family | Estimated Lift (%) | 95% Clustered CI | Positive-Sales Promo Days | Promo Day Share (%) | Support Status (Exploratory) |
+| :--- | :---: | :---: | :---: | :---: | :--- |
+| `AUTOMOTIVE` | +23.96% | [+21.12%, +26.93%] | 3,054 | 5.10% | Exploratory (Meets Support Rule) |
+| `BABY CARE` | -6.86% | [-13.23%, +0.30%] | 53 | 1.00% | Exploratory (Fails Support Rule: < 1,000 days, < 2.0%) |
+| `BEAUTY` | +29.55% | [+27.14%, +31.89%] | 11,116 | 21.86% | Exploratory (Meets Support Rule) |
+| `BEVERAGES` | +2.44% | [+0.38%, +4.30%] | 51,705 | 82.72% | Exploratory (Meets Support Rule) |
+| `BOOKS` | +0.00% | [+0.00%, +0.00%] | 0 | 0.00% | Exploratory (Fails Support Rule: 0 promo days) |
+| `BREAD/BAKERY` | +2.14% | [+0.36%, +4.31%] | 38,896 | 62.22% | Exploratory (Meets Support Rule) |
+| `CELEBRATION` | +9.70% | [+5.91%, +13.93%] | 3,211 | 6.63% | Exploratory (Meets Support Rule) |
+| `CLEANING` | +0.95% | [-0.08%, +1.96%] | 49,899 | 79.83% | Exploratory (Meets Support Rule) |
+| `DAIRY` | +3.47% | [+2.27%, +4.81%] | 45,985 | 73.57% | Exploratory (Meets Support Rule) |
+| `DELI` | +3.62% | [+2.35%, +4.94%] | 39,479 | 63.16% | Exploratory (Meets Support Rule) |
+| `EGGS` | +11.34% | [+9.84%, +12.92%] | 27,481 | 43.96% | Exploratory (Meets Support Rule) |
+| `FROZEN FOODS` | +12.09% | [+9.81%, +14.26%] | 35,819 | 57.31% | Exploratory (Meets Support Rule) |
+| `GROCERY I` | +2.67% | [+0.96%, +4.25%] | 56,885 | 91.00% | Exploratory (Meets Support Rule) |
+| `GROCERY II` | +10.42% | [+2.94%, +18.68%] | 4,145 | 6.97% | Exploratory (Meets Support Rule) |
+| `HARDWARE` | +12.01% | [+5.28%, +20.69%] | 132 | 0.36% | Exploratory (Fails Support Rule: < 1,000 days, < 2.0%) |
+| `HOME AND KITCHEN I` | +29.94% | [+26.13%, +33.64%] | 14,600 | 25.80% | Exploratory (Meets Support Rule) |
+| `HOME AND KITCHEN II` | +48.56% | [+40.57%, +55.97%] | 18,982 | 33.58% | Exploratory (Meets Support Rule) |
+| `HOME APPLIANCES` | -2.64% | [-8.25%, +2.23%] | 58 | 0.34% | Exploratory (Fails Support Rule: < 1,000 days, < 2.0%) |
+| `HOME CARE` | +1.03% | [-0.40%, +2.72%] | 32,535 | 63.96% | Exploratory (Meets Support Rule) |
+| `LADIESWEAR` | +14.45% | [+7.47%, +22.85%] | 460 | 1.34% | Exploratory (Fails Support Rule: < 1,000 days, < 2.0%) |
+| `LAWN AND GARDEN` | +34.94% | [+29.34%, +42.21%] | 4,232 | 11.21% | Exploratory (Meets Support Rule) |
+| `LINGERIE` | +27.95% | [+22.38%, +33.93%] | 2,127 | 3.77% | Exploratory (Meets Support Rule) |
+| `LIQUOR,WINE,BEER` | +17.18% | [+13.51%, +21.25%] | 17,916 | 31.56% | Exploratory (Meets Support Rule) |
+| `MAGAZINES` | +0.27% | [-7.75%, +8.88%] | 159 | 0.41% | Exploratory (Fails Support Rule: < 1,000 days, < 2.0%) |
+| `MEATS` | +18.98% | [+16.07%, +21.85%] | 21,468 | 34.34% | Exploratory (Meets Support Rule) |
+| `PERSONAL CARE` | +3.51% | [+1.54%, +5.19%] | 38,228 | 61.16% | Exploratory (Meets Support Rule) |
+| `PET SUPPLIES` | +13.15% | [+10.81%, +15.63%] | 3,053 | 7.77% | Exploratory (Meets Support Rule) |
+| `PLAYERS AND ELECTRONICS` | +14.96% | [+9.78%, +21.13%] | 848 | 1.79% | Exploratory (Fails Support Rule: < 1,000 days, < 2.0%) |
+| `POULTRY` | +9.55% | [+7.52%, +11.29%] | 19,704 | 31.52% | Exploratory (Meets Support Rule) |
+| `PREPARED FOODS` | +10.38% | [+7.56%, +12.84%] | 17,678 | 28.29% | Exploratory (Meets Support Rule) |
+| `PRODUCE` | +14.35% | [+11.11%, +16.69%] | 30,784 | 55.54% | Exploratory (Meets Support Rule) |
+| `SCHOOL AND OFFICE SUPPLIES` | +270.37% | [+209.05%, +326.00%] | 4,054 | 17.77% | Exploratory (Meets Support Rule; Confounded by Seasonality) |
+| `SEAFOOD` | +15.34% | [+11.76%, +18.71%] | 16,566 | 30.06% | Exploratory (Meets Support Rule) |
 
 ---
 
