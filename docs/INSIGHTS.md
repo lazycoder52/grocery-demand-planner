@@ -86,16 +86,16 @@ Under rigorous walk-forward backtesting with out-of-sample residual safety stock
   4. `LOW_ZERO_SALES_DAYS`: Baseline operational continuity.
 
 ### Exact Computed Query Findings (`sql/zero_sales_day_proxy.sql`)
-* **Evaluated Series:** 1,782 series meet the 60-day filter.
+* **Evaluated Series:** 1,728 series meet the 60-day filter (excluding dates prior to each series' first positive sale and Dec 25 closures).
 * **Tier Distribution:**
-  * `LOW_ZERO_SALES_DAYS`: **1,289 series** (72.33%)
-  * `SLOW_MOVING_INTERMITTENT_TAIL`: **304 series** (17.06%)
-  * `HIGH_VELOCITY_ELEVATED_ZERO_SALES_DAYS_PROXY`: **115 series** (6.45%)
-  * `MODERATE_ZERO_SALES_DAYS_PROXY`: **74 series** (4.15%)
+  * `LOW_ZERO_SALES_DAYS`: **1,386 series** (80.21%)
+  * `SLOW_MOVING_INTERMITTENT_TAIL`: **222 series** (12.85%)
+  * `HIGH_VELOCITY_ELEVATED_ZERO_SALES_DAYS_PROXY`: **117 series** (6.77%)
+  * `MODERATE_ZERO_SALES_DAYS_PROXY`: **3 series** (0.17%)
 * **Top Velocity Elevated Zero-Sales Series:**
-  1. Store 8 `PRODUCE`: Mean daily sales **3,061.34 units/day**, **265 zero-sales days** out of 1,683 total days (**15.75%** zero-sales rate).
-  2. Store 24 `PRODUCE`: Mean daily sales **2,267.36 units/day**, **223 zero-sales days** out of 1,683 total days (**13.25%** zero-sales rate).
-  3. Store 1 `PRODUCE`: Mean daily sales **1,846.59 units/day**, **174 zero-sales days** out of 1,683 total days (**10.34%** zero-sales rate).
+  1. Store 8 `PRODUCE`: Mean daily sales **3,200.14 units/day**, **192 zero-sales days** out of 1,610 total days (**11.93%** zero-sales rate).
+  2. Store 39 `PRODUCE`: Mean daily sales **1,356.85 units/day**, **303 zero-sales days** out of 1,319 total days (**22.97%** zero-sales rate).
+  3. Store 9 `PRODUCE`: Mean daily sales **1,237.32 units/day**, **303 zero-sales days** out of 1,319 total days (**22.97%** zero-sales rate).
 
 ---
 
@@ -133,13 +133,13 @@ Under rigorous walk-forward backtesting with out-of-sample residual safety stock
   3. `NON_PERISHABLE_OR_LOW_VOLATILITY`: Shelf-stable categories.
 
 ### Exact Computed Query Findings (`sql/perishable_volatility_proxy.sql`)
-* **Evaluated Series:** 1,503 series with $\ge 60$ total days and mean daily sales $\ge 1.0$ unit.
+* **Evaluated Series:** 1,525 series with $\ge 60$ total days and mean daily sales $\ge 1.0$ unit.
 * **Tier Distribution:**
-  * `NON_PERISHABLE_OR_LOW_VOLATILITY`: **1,073 series** (71.39%)
-  * `MODERATE_VOLATILITY_PERISHABLE_PROXY`: **349 series** (23.22%)
-  * `HIGH_VOLATILITY_PERISHABLE_PROXY`: **81 series** (5.39%)
+  * `NON_PERISHABLE_OR_LOW_VOLATILITY`: **1,095 series** (71.80%)
+  * `MODERATE_VOLATILITY_PERISHABLE_PROXY`: **369 series** (24.20%)
+  * `HIGH_VOLATILITY_PERISHABLE_PROXY`: **61 series** (4.00%)
 * **Highest Volatility Series & Anomaly Investigation:**
-  * Store 39 `MEATS`: Mean daily sales **240.11 units/day**, daily sales standard deviation **2,223.16 units**, resulting in $\text{CV} = \mathbf{9.2585}$ and volatility exposure index of **2,223.16**.
+  * Store 39 `MEATS`: Mean daily sales **240.12 units/day**, daily sales standard deviation **2,223.16 units**, resulting in $\text{CV} = \mathbf{9.2585}$ and volatility exposure index of **2,223.16**.
   * **Investigation of Store 39 MEATS:** Deep-dive analysis confirms this extreme volatility is driven by an isolated **single-day data entry / recording anomaly** on **2016-10-07**, where recorded meat sales spiked to **89,576.36 units** (accounting for 22.2% of the store's entire 4.5-year cumulative meat sales in a single day; the 2nd highest day was 5,519 units). Store 39 has traded continuously since 2013-01-02 (the second day of the entire dataset), confirming that this is an anomalous recording spike, not a store opening effect.
   * **Sensitivity & Impact on Pipeline:**
     - *Safety Stock Estimation:* Zero effect. Out-of-sample safety stock residual standard deviation ($\sigma$) is computed over a 56-day lookback window strictly before each forecast origin. For CV Fold 1 (origin 2017-05-11), the lookback window begins 2017-03-16—more than 215 days after the 2016-10-07 spike. The anomaly is completely outside the safety stock estimation window.
