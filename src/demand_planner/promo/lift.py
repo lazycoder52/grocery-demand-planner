@@ -448,8 +448,7 @@ def plot_promo_lift_by_family(
     err_low = np.maximum(0.0, lifts - df_plot["ci_95_low"].to_numpy())
     err_high = np.maximum(0.0, df_plot["ci_95_high"].to_numpy() - lifts)
 
-    top_5_fams = {f["family"] for f in promo_results.get("top_5_promo_sensitive_families", [])}
-    colors = ["#2ca02c" if fam in top_5_fams else "#1f77b4" for fam in df_plot["family"]]
+    colors = "#1f77b4"
 
     ax.barh(
         y_pos,
@@ -484,8 +483,9 @@ def plot_promo_lift_by_family(
     fig.text(
         0.5,
         0.01,
-        "Note: Exploratory estimates on positive-sales days, excluding closures & pre-opening.\n"
-        "Green: top promo response; sparse/seasonal spikes are labeled unreliable.",
+        "Note: Exploratory estimates on positive-sales series-days (sales > 0), "
+        "excluding closures & pre-opening.\n"
+        "Estimator: within-series and year-month fixed effects with store-clustered 95% CIs.",
         ha="center",
         fontsize=8,
         color="#555555",
