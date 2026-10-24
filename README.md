@@ -1,6 +1,6 @@
-# Grocery Demand Planner
+# Corporación Favorita Demand Planner & Replenishment Toolkit
 
-> End-to-end ML demand forecasting and inventory replenishment toolkit for a 54-store Ecuadorian supermarket chain, cutting forecast error from **16.33% to 13.49% WAPE** (**17.39% relative error reduction**, +2.84 pts FVA) across 5 rolling-origin backtest folds.
+> End-to-end ML demand forecasting and inventory replenishment system for an Ecuadorian supermarket chain (54 stores, 33 product families), reducing walk-forward forecast error from **16.33% to 13.49% WAPE** (**17.39% relative error reduction**, +2.84 pts FVA) and delivering a **-12.27% to -14.51% average inventory reduction** at a matched 99.0% fill rate under periodic review replenishment.
 
 [![CI](https://github.com/lazycoder52/grocery-demand-planner/actions/workflows/ci.yml/badge.svg)](https://github.com/lazycoder52/grocery-demand-planner/actions/workflows/ci.yml)
 [![Python 3.12 | 3.14](https://img.shields.io/badge/python-3.12%20%7C%203.14-blue.svg)](pyproject.toml)
@@ -10,138 +10,161 @@
 
 ## 1. Headline Results
 
-### Primary Headline Result: 5-Fold Rolling-Origin Backtest
+### Primary Walk-Forward Evaluation: 5-Fold Rolling-Origin Backtest
 Evaluated across **5 expanding-window folds** (16-day horizons; origins stepping every 16 days from 2017-05-11 to 2017-07-14) covering all **54 stores** and **33 product families** (pre-opening zero rows cleanly excluded from training):
 
-| Model | Mean WAPE (%) | WAPE Std (%) | Mean Bias (%) | Mean MAE (Units) | Status |
+| Model | Mean WAPE (%) | WAPE Std (%) | Mean Bias (%) | Mean MAE (Units) | Operational Status |
 | :--- | :---: | :---: | :---: | :---: | :--- |
-| **LightGBM Global Regressor** | **13.49%** | **±0.98%** | **-0.76%** | **65.21** | **Selected model** |
+| **LightGBM Global Regressor** | **13.49%** | **±0.98%** | **-0.76%** | **65.21** | **Selected Model** |
 | Seasonal Naive (7-Day Lag) | 16.33% | ±1.29% | -1.58% | 78.99 | Retail Benchmark |
 | 28-Day Moving Average | 23.65% | ±1.03% | -0.89% | 114.12 | Moving Average Baseline |
 | Last-Value Naive | 27.83% | ±2.67% | -10.42% | 134.20 | Heuristic Benchmark |
 
-> **Cross-Validation Forecast Value Added (FVA):** LightGBM consistently outperforms the strongest retail baseline across all 5 folds, delivering a mean **+2.84 percentage points** of WAPE reduction (**17.39% relative error reduction**).
+> **Cross-Validation Forecast Value Added (FVA):** LightGBM consistently outperforms the strongest seasonal baseline across all 5 folds, delivering a mean **+2.84 percentage points** of WAPE reduction (**17.39% relative error reduction**).
 
 ### Single-Window Confirmation: Untouched Holdout (2017-07-31 to 2017-08-15)
-Evaluated once on the final unseen 16-day window (**28,512 store-family predictions**, totaling **13,319,179.78 units sold**) as a single-window operational confirmation:
+Evaluated once on the final unseen 16-day window (**28,512 store-family predictions**, totaling **13,319,179.78 units sold**) as an operational confirmation:
 
 | Model | WAPE (%) | Bias (%) | MAE (Units) | RMSLE | Status |
 | :--- | :---: | :---: | :---: | :---: | :--- |
-| **LightGBM Global Regressor** | **15.29%** | **+2.46%** | **71.42** | **0.4069** | **Selected model** |
+| **LightGBM Global Regressor** | **15.29%** | **+2.46%** | **71.42** | **0.4069** | **Selected Model** |
 | Seasonal Naive (7-Day Lag) | 20.67% | +0.41% | 96.54 | 0.6170 | Retail Benchmark |
 | 28-Day Moving Average | 20.81% | +1.34% | 97.22 | 0.5216 | Moving Average Baseline |
 | Last-Value Naive | 44.42% | +34.99% | 207.51 | 0.6595 | Heuristic Benchmark |
 
-> **Holdout FVA:** LightGBM achieves **+5.38 percentage points** of WAPE reduction (**26.03% relative error reduction**) on this confirmation window.
-
-*Note on WAPE:* WAPE is volume-weighted ($\text{WAPE} = \frac{\sum |y - \hat{y}|}{\sum y}$), evaluating aggregate unit error across total chain volume rather than averaging percentage errors across SKUs, which naturally prioritizes revenue drivers and avoids the division-by-zero distortion that invalidates MAPE on intermittent grocery categories.
-
-*Note on Bias:* Forecast bias was +2.46% on the holdout and averaged -0.76% across the 5 backtest folds (ranging from -4.01% to +1.94%), confirming there is no systematic directional over- or under-forecasting bias.
-
-### Per-Fold Variation in Gain Over Seasonal-Naive
-
-Across the 5 backtest folds, LightGBM outperformed seasonal-naive in every single window, but the margin of gain (Forecast Value Added) varies across horizons:
-
-| Fold | Origin Date | Test Window (16 Days) | LightGBM WAPE (%) | S.Naive WAPE (%) | FVA Gain (pts) | Relative Gain (%) | LightGBM Bias (%) | S.Naive Bias (%) |
-| :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| **1** | 2017-05-11 | 2017-05-12 to 2017-05-27 | 15.23% | 16.66% | **+1.43 pts** | 8.58% | -1.94% | +0.48% |
-| **2** | 2017-05-27 | 2017-05-28 to 2017-06-12 | 13.64% | 17.83% | **+4.19 pts** | 23.50% | -4.01% | -4.91% |
-| **3** | 2017-06-12 | 2017-06-13 to 2017-06-28 | 13.07% | 16.93% | **+3.86 pts** | 22.80% | +1.86% | +6.22% |
-| **4** | 2017-06-28 | 2017-06-29 to 2017-07-14 | 12.26% | 16.26% | **+4.00 pts** | 24.60% | +1.94% | -9.11% |
-| **5** | 2017-07-14 | 2017-07-15 to 2017-07-30 | 13.25% | 13.97% | **+0.72 pts** | 5.15% | -1.92% | -0.59% |
-| **Mean** | — | — | **13.49%** | **16.33%** | **+2.84 pts** | **17.39%** | **-0.76%** | **-1.58%** |
-
-#### Hypotheses for Fold-Level Variation & Empirical Day-Type Breakdown
-
-To assess why the heuristic baseline struggles more in certain windows (and whether calendar paydays drive the variation), we partitioned all 96 out-of-fold days (171,072 observations across Folds 1–5 and Holdout) by day-type regime:
-
-| Day-Type Regime | Observations | LightGBM WAPE (%) | S.Naive WAPE (%) | FVA Gain (pts) | LightGBM Bias (%) | S.Naive Bias (%) |
-| :--- | :---: | :---: | :---: | :---: | :---: | :---: |
-| **Payday Weeks** (week containing 15th or month-end) | 78,408 | **13.28%** | 16.93% | **+3.65 pts** | -0.52% | -3.60% |
-| **Other Weeks** (non-payday weeks) | 92,664 | **14.22%** | 17.14% | **+2.92 pts** | -0.10% | +0.57% |
-| **Exact Payday Dates** (15th & month-end days) | 12,474 | **12.52%** | 15.01% | **+2.49 pts** | -0.86% | -4.90% |
-
-**Working Hypotheses:**
-- *Hypothesis 1 (Payday Under-forecasting — Supported):* The seasonal-naive heuristic systematically under-forecasts during payday periods (Bias = -3.60% across payday weeks, -4.90% on exact paydays), whereas LightGBM adapts to the calendar (Bias = -0.52%), generating higher FVA (+3.65 pts on payday weeks vs. +2.92 pts on other weeks).
-- *Hypothesis 2 (Holdout Difficulty Driven Solely by Payday — Disconfirmed):* On the single holdout window (July 31–Aug 15), LightGBM achieved large gains across *both* regimes (+5.54 pts FVA in non-payday weeks; +5.27 pts FVA in payday weeks). Thus, the elevated holdout difficulty (20.67% baseline WAPE vs 16.33% CV average) is a multi-factor effect (combining promotional schedule shifts and product mix changes), not isolated to the August 15 payday.
-- *Hypothesis 3 (Mid-Month Seasonal Regularity — Supported):* In mid-month windows with stable consumer purchasing rhythms (e.g. Fold 5, July 15–30), seasonal-naive achieves its lowest error (13.97%), narrowing LightGBM's FVA gain (+0.72 pts).
-
+> **Holdout FVA:** LightGBM achieves **+5.38 percentage points** of WAPE reduction (**26.02% relative error reduction**) on the holdout window.
 
 ---
 
-## 2. Forecast vs. Actuals
+## 2. Replenishment Policy Benchmark
 
-![Actual Sales vs Forecasts](docs/img/actual_vs_forecast_stores.png)
+Under a periodic $(R, S)$ order-up-to inventory control policy ($R=7$ days) with out-of-sample forecast error safety stock buffers ($S = \hat{D}_{R+L} + z \cdot \sigma_{\text{oos}}$):
 
-*Figure 1: Daily store-level actuals vs. model forecasts across the 16-day holdout period for Store 1 (Quito, Type D) and Store 2 (Guayaquil, Type B). The model captures weekend demand peaks and mid-month bi-weekly payday surges (August 15).*
+| Lead Time ($L$) | Target Fill Rate | LightGBM vs. Seasonal Naive | 95% Series Bootstrap CI | 95% Time-Block Bootstrap CI | Status |
+| :---: | :---: | :---: | :---: | :---: | :--- |
+| **$L = 3$ days** | 98.5% | **-13.22%** | [-15.26%, -11.28%] | [-20.48%, -3.07%] | Interior / Win |
+| **$L = 3$ days** | **99.0%** | **-12.27%** | **[-14.59%, -10.05%]** | **[-19.97%, -2.25%]** | **Primary Win** |
+| **$L = 3$ days** | 99.5% | **-10.13%** | [-12.65%, -6.99%] | [-16.28%, +0.88%] | Interior / Win |
+| **$L = 7$ days** | 98.5% | **-15.36%** | [-18.09%, -12.80%] | [-22.22%, -8.17%] | Interior / Win |
+| **$L = 7$ days** | **99.0%** | **-14.51%** | **[-17.53%, -11.37%]** | **[-21.22%, -7.31%]** | **Primary Win** |
+| **$L = 7$ days** | 99.5% | **-11.33%** | [-14.98%, -6.99%] | [-17.66%, -4.11%] | Interior / Win |
+
+> **Working Capital Impact:** Across operational lead times ($L=3$ and $L=7$), **LightGBM delivers a -12.27% to -14.51% average inventory reduction** at a matched 99.0% fill rate. Both Series and Time-Block 95% bootstrap confidence intervals strictly exclude 0.
+
+### Pre-Specified Primary Per-Family Findings (Holm-Bonferroni FWER α = 0.05)
+To safeguard against multiple comparisons, one primary comparison was pre-specified per family: **Target Fill Rate = 99.0%, LightGBM Point vs Seasonal Naive, evaluated at both $L=3$ and $L=7$**, requiring both Series and Time-Block CIs to exclude 0 under Holm-Bonferroni adjustment across all 13 families:
+* **$L = 3$ Primary Win:**
+  * `LAWN AND GARDEN`: **-32.25%** inventory (absolute diff: **-2,780.66 units**, Series CI: [-41.50%, -23.58%], Time CI: [-45.14%, -20.01%], $p < 0.001$).
+* **$L = 7$ Primary Wins (6 families):**
+  1. `GROCERY I`: **-19.57%** ($p < 0.001$, Series CI: [-26.68%, -12.58%], Time CI: [-30.60%, -7.83%])
+  2. `BREAD/BAKERY`: **-10.02%** ($p < 0.001$, Series CI: [-14.58%, -5.14%], Time CI: [-13.48%, -5.24%])
+  3. `POULTRY`: **-14.75%** ($p < 0.001$, Series CI: [-21.47%, -8.68%], Time CI: [-22.29%, -6.45%])
+  4. `DELI`: **-22.73%** ($p < 0.001$, Series CI: [-26.00%, -18.61%], Time CI: [-31.03%, -13.70%])
+  5. `LAWN AND GARDEN`: **-38.02%** ($p < 0.001$, absolute diff: **-3,652.14 units**, Series CI: [-44.13%, -30.82%], Time CI: [-48.07%, -24.10%])
+  6. `MEATS`: **-9.71%** ($p = 0.004 \le 0.00625$, Series CI: [-17.07%, -4.18%], Time CI: [-16.66%, -2.63%])
+* **Boundary & Exploratory Cases:**
+  * `BABY CARE`: Status is *target above frontier maximum* (maximum reachable fill rate is 92.65% for Point and 94.38% for Seasonal Naive due to low-volume sparsity).
+  * `BOOKS`: Reachable at 99.0% fill rate; $L=3$ Point uses -13.23% (-26.46 units, Series CI: [-23.59%, +16.50%]), $L=7$ Point uses +18.44% (+30.19 units, Series CI: [-21.00%, +47.65%]). Both differences are within noise (CIs cross 0).
 
 ---
 
-## 3. Quick Start
+## 3. Visual Gallery
 
-### Installation
-```bash
-# Clone and enter directory
-git clone https://github.com/lazycoder52/grocery-demand-planner.git
-cd grocery-demand-planner
+### Replenishment Policy Trade-Off Frontier
+![Replenishment Frontier](docs/img/replenishment_policy_tradeoff.png)
+*Figure 1: Achievable fill rate vs. required average inventory units across service levels ($z \in [-1.5, 2.5]$). LightGBM achieves superior customer availability at lower average holding.*
 
-# Create and activate virtual environment
-python -m venv .venv
-.venv\Scripts\activate   # On Linux/macOS: source .venv/bin/activate
+### Causal Promotional Lift by Product Family
+![Promotional Lift by Family](docs/img/promo_lift_by_family.png)
+*Figure 2: Estimated promotional sales lift by family post 2014-04-01 using store-family fixed-effects log-linear regression with store-clustered 95% bootstrap CIs (chain average lift: +171.2%).*
 
-# Install dependencies in editable mode
-pip install -r requirements-dev.txt
-pip install -e . --no-deps
+### Holdout Forecast vs. Actuals
+![Daily Actuals vs Forecast](docs/img/actual_vs_forecast_stores.png)
+*Figure 3: Daily store-level actuals vs. model forecasts across the 16-day holdout period for Store 1 (Type D) and Store 2 (Type B), showing capture of bi-weekly payday spikes.*
+
+---
+
+## 4. End-to-End Architecture
+
+```mermaid
+graph LR
+    subgraph Data Layer
+        A[Kaggle Favorita CSVs] --> B[DuckDB Typed Ingestion]
+        B --> C[Audit & Data Card]
+    end
+
+    subgraph Feature & Modeling Engine
+        B --> D[Lags 16-28d & Rolling Stats]
+        D --> E[Calendar & Payday Signals]
+        E --> F[5-Fold Rolling Backtest]
+        E --> G[LightGBM Point & P50 Regressors]
+    end
+
+    subgraph Evaluation & Simulation
+        F --> H[WAPE / Bias / FVA Engine]
+        G --> I[Periodic R,S Replenishment]
+        I --> J[Out-of-Sample Safety Stock Frontier]
+    end
+
+    subgraph Product & Decision Layer
+        H --> K[Multi-Page Streamlit App]
+        J --> K
+        B --> L[Production SQL Analytics Views]
+        L --> K
+    end
 ```
 
-### Run Pipeline
+---
+
+## 5. Quick Start (3 Commands)
+
 ```bash
-# Execute end-to-end pipeline (Data Ingestion, Model Training, Executive Charts)
-python -m demand_planner.pipeline --stages data models reports
+# 1. Clone repository and install dependencies
+git clone https://github.com/lazycoder52/grocery-demand-planner.git && cd grocery-demand-planner
+pip install -r requirements-dev.txt && pip install -e . --no-deps
+
+# 2. Run test suite & verify code quality
+pytest && ruff check .
+
+# 3. Launch interactive Streamlit application
+streamlit run app.py
 ```
 
-### Run Tests & Linters
+### Full Pipeline Execution
+To execute the complete end-to-end pipeline (data audit, model training, evaluation, replenishment simulation, causal promo lift, and chart generation):
 ```bash
-# Run pytest test suite (runs fast logic tests in CI via tiny Favorita fixture)
-pytest
-
-# Code quality checks
-ruff check .
-pre-commit run --all-files
+python -m demand_planner.pipeline
 ```
 
 ---
 
-## 4. Key Design Decisions
+## 6. Model Architecture & Trade-Off Matrix
 
-1. **WAPE Over MAPE:**
-   With 7 product categories exhibiting $>50\%$ zero-sales days (`BOOKS` at **96.96%**, `BABY CARE` at **94.13%**), Mean Absolute Percentage Error (MAPE) encounters division-by-zero instability. Weighted Absolute Percentage Error (WAPE) evaluates aggregate volume error, naturally weighting high-velocity revenue categories.
-2. **Strict Zero-Leakage 16-Day Lags:**
-   To forecast the entire 16-day replenishment window at origin $t_0$, sales lag features are restricted to $\ge 16$ days ($t-16, t-21, t-28$, and 7d/28d rolling means over lag 16). No future signals or same-day post-checkout transactions are ever exposed to the test set.
-3. **Training Inception Date (2015-01-01) & Promotion Conditioning:**
-   Training data starts at `2015-01-01` rather than 2013-01-01 for three distinct data integrity reasons:
-   - *Promotional Data Integrity:* Automated audits revealed promotional tracking officially started on **2014-04-01** (all 2013 promotional counts were zero). Starting training on `2015-01-01` ensures 8+ months of prior promotional history, so all 16-to-28-day lags and rolling aggregates have complete, uncorrupted promotional pre-history without mid-2014 rollout transitional artifacts.
-   - *Store Opening Stability:* Several stores opened late in 2013–2014 (e.g., Store 53 in May 2014, Store 20 in Feb 2015), meaning 2013–2014 records contain artificial zeroes before stores physically existed.
-   - *Sample Balance & Computational Efficiency:* 2.5 years of clean post-2015 data provides over 1.6 million records—more than sufficient to capture annual seasonality and bi-weekly paydays—while drastically cutting memory footprint and boosting training speed.
-4. **Fast Columnar Storage & Ingestion:**
-   DuckDB handles typed schema validation and aggregation (< 2s ingestion of 3M+ rows), writing lightweight parquet summaries for instant app consumption.
+| Architectural Approach | Walk-Forward WAPE | Operational Pros | Operational Cons | Production Decision |
+| :--- | :---: | :--- | :--- | :--- |
+| **Global LightGBM Regressor** | **13.49%** | Fast training (<45s), natively handles non-linear paydays, oil interactions, and promotional counters. | Requires recursive multi-step forecasting or lag truncation $\ge 16$ days. | **Selected (Production)** |
+| **Seasonal Naive (7-Day Lag)** | 16.33% | Zero compute, deterministic, robust on stable weekday patterns. | Blind to bi-weekly paydays (15th / month-end) and holiday calendar shifts. | **Baseline Benchmark** |
+| **28-Day Moving Average** | 23.65% | Smooths out extreme noise in low-volume stores. | High lag latency; severely suppresses peak promotions. | Deprecated |
+| **Deep Learning (TFT / N-BEATS)** | ~13-14% (Est.) | Joint quantile prediction and multi-horizon attention. | Excessive compute footprint, high maintenance overhead, opaque debugging for planners. | Post-MVP Roadmap |
 
 ---
 
-## 5. Known Limitations
+## 7. Operational Assumptions & Limitations
 
-- **Favorita Inventory Data Absence & Demand Censoring:** Corporación Favorita has no inventory data, on-hand balances, or recorded lead times. Sales are used as a demand proxy and are censored by stockouts, so simulated fill rates are optimistic upper bounds; all replenishment simulation results are assumption-driven and parameter-contingent (with zero assumed holding or penalty costs).
-- **Sales $\ne$ True Demand (Censoring):** Point-of-sale data records fulfilled transactions. When a store stocks out, recorded sales drop to zero regardless of true customer demand.
-- **Observational Promotional Lift:** Promotional assignments are observational historical records, not randomized A/B experiments.
-
+1. **Out-of-Sample Safety Stock Construction:**
+   Safety stock buffers $\sigma_{\text{oos}}$ are strictly calculated from out-of-sample forecast errors from earlier walk-forward origins whose actual sales were fully completed prior to review date $t$.
+2. **Demand Censoring Caveat:**
+   Historical point-of-sale data captures fulfilled transactions, not unconstrained consumer demand. When an item stocks out, sales register as zero. Without lost-demand records, empirical fill rates represent upper bounds and naive baselines are biased downward during replenishment recovery.
+3. **Observational Promotions:**
+   Promotional tracking commenced across Favorita on **2014-04-01**. Promotional lifts reflect observational historical associations rather than randomized A/B trial pricing experiments.
+4. **Institutional Calendar Shocks:**
+   December 25 is a deterministic chain-wide holiday closure (sales = 0). Demand for Christmas is treated as zero.
 
 ---
 
-## 6. Documentation & Product Resources
+## 8. Documentation Index
 
-- 📄 **[Product Brief](docs/PRODUCT_BRIEF.md):** 2-page executive summary covering target personas, metric tree (Mermaid), pilot rollout plan, and scope roadmap.
-- 📊 **[Data Card](docs/DATA_CARD.md):** Schema specifications, audit findings, missing date resolutions, and cleaning decisions.
-- 📈 **[Executive Visualizations](docs/img/):**
-  - [WAPE by Family vs. Baseline](docs/img/wape_by_family_vs_baseline.png)
-  - [Daily Actuals vs. Forecast](docs/img/actual_vs_forecast_stores.png)
-  - [Demand Intermittency Distribution](docs/img/zero_rate_by_family.png)
+- 📋 **[Product Brief](docs/PRODUCT_BRIEF.md):** Executive 2-page brief with metric tree, 5-store randomized pilot protocol, and scope roadmap.
+- 📊 **[Business Insights & SQL](docs/INSIGHTS.md):** Analysis of the 4 production SQL views (`promo_elasticity.sql`, `stockout_risk.sql`, `weekly_store_family.sql`, `shrinkage_or_waste_proxy.sql`).
+- 📁 **[Data Card](docs/DATA_CARD.md):** Dataset lineage, schema definitions, missing calendar dates, and store opening audit.
+- 💻 **[Interactive App](app.py):** Multi-page executive dashboard (`streamlit run app.py`).

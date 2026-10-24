@@ -15,7 +15,7 @@ Across **54 supermarket stores** and **33 product families** in Ecuador (3,000,8
 
 Under walk-forward evaluation, static heuristics prove inadequate:
 * **7-Day Seasonal Naive:** **16.33% Mean WAPE** across 5 backtest folds; **20.67% WAPE** on the final 16-day holdout.
-* **Selected LightGBM Model:** **13.56% Mean WAPE** across 5 backtest folds (**+2.77 pts FVA**, 16.96% relative error reduction); **15.16% WAPE** on the untouched 16-day holdout (2017-07-31 to 2017-08-15, **13,319,179.78 units sold**, **+5.51 pts FVA**, 26.66% relative error reduction).
+* **Selected LightGBM Model:** **13.49% Mean WAPE** across 5 backtest folds (**+2.84 pts FVA**, 17.39% relative error reduction); **15.29% WAPE** on the untouched 16-day holdout (2017-07-31 to 2017-08-15, **13,319,179.78 units sold**, **+5.51 pts FVA**, 26.66% relative error reduction).
 
 ### Business Impact: Working Capital Optimization
 Under periodic $(R, S)$ inventory control with out-of-sample error safety stock:
@@ -45,8 +45,8 @@ graph TD
     B --> D["Safety Stock Buffer Compression (z * sigma_oos)"]
     C --> D
     D --> E["Residual Forecast Error Reduction"]
-    E --> F["5-Fold Backtest WAPE: 13.56% (vs 16.33% Naive)"]
-    E --> G["Holdout WAPE: 15.16% (vs 20.67% Naive)"]
+    E --> F["5-Fold Backtest WAPE: 13.49% (vs 16.33% Naive)"]
+    E --> G["Holdout WAPE: 15.29% (vs 20.67% Naive)"]
     F --> H["High-Velocity Staples (Grocery I, Bread/Bakery)"]
     F --> I["Perishable Departments (Poultry, Deli, Meats)"]
 ```

@@ -55,3 +55,35 @@ def test_readme_and_product_brief_match_metrics_json():
         assert snaive_cv_wape in brief_text, f"CV S.Naive WAPE {snaive_cv_wape} not in brief"
         assert lgbm_holdout_wape in brief_text, f"Holdout WAPE {lgbm_holdout_wape} not in brief"
         assert snaive_holdout_wape in brief_text, "Holdout S.Naive mismatch"
+
+    # 4. Replenishment Matched Fill Rate Range Consistency
+    rep = metrics.get("replenishment_simulation", {})
+    tradeoffs = rep.get("target_fill_rate_tradeoffs", [])
+    l3_99 = next(
+        (
+            t
+            for t in tradeoffs
+            if t["lead_time_days"] == 3
+            and t["target_fill_rate_pct"] == 99.0
+            and "Point" in t["forecaster"]
+        ),
+        None,
+    )
+    l7_99 = next(
+        (
+            t
+            for t in tradeoffs
+            if t["lead_time_days"] == 7
+            and t["target_fill_rate_pct"] == 99.0
+            and "Point" in t["forecaster"]
+        ),
+        None,
+    )
+    if l3_99 and l7_99:
+        l3_diff = f"{l3_99['pct_difference']:.2f}%"
+        l7_diff = f"{l7_99['pct_difference']:.2f}%"
+        assert l3_diff in readme_text, f"L=3 replenishment diff {l3_diff} not in README"
+        assert l7_diff in readme_text, f"L=7 replenishment diff {l7_diff} not in README"
+        if brief_text:
+            assert l3_diff in brief_text, f"L=3 replenishment diff {l3_diff} not in brief"
+            assert l7_diff in brief_text, f"L=7 replenishment diff {l7_diff} not in brief"
