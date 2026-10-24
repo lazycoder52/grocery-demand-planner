@@ -71,6 +71,95 @@ def estimate_fe_log_linear(
         return 0.0
 
 
+def _compute_fe_store_cross_products(
+    df_sub: pd.DataFrame,
+    target_col: str = "sales",
+    promo_col: str = "onpromotion",
+) -> tuple[dict[int, np.ndarray], dict[int, np.ndarray], float, list[int], dict[int, int]]:
+    """Precompute within-demeaned cross products A_s = X_s' X_s and b_s = X_s' y_s per store."""
+    y = np.log1p(df_sub[target_col].to_numpy(dtype=np.float64))
+    p = (df_sub[promo_col].to_numpy(dtype=np.float64) > 0).astype(np.float64)
+
+    dow = df_sub["dow"].to_numpy(dtype=np.int32)
+    month = df_sub["month"].to_numpy(dtype=np.int32)
+
+    X_dow = np.column_stack([dow == d for d in range(1, 7)]).astype(np.float64)
+    X_mon = np.column_stack([month == m for m in range(2, 13)]).astype(np.float64)
+    X_reg = np.column_stack([p, X_dow, X_mon])
+
+    series_idx = df_sub["series_idx"].to_numpy(dtype=np.int32)
+    n_series = int(series_idx.max()) + 1
+
+    counts = np.bincount(series_idx, minlength=n_series).astype(np.float64)
+    counts = np.maximum(counts, 1.0)
+
+    y_sums = np.bincount(series_idx, weights=y, minlength=n_series)
+    y_means = y_sums / counts
+    y_tilde = y - y_means[series_idx]
+
+    X_tilde = np.empty_like(X_reg)
+    for c_i in range(X_reg.shape[1]):
+        col = X_reg[:, c_i]
+        c_sums = np.bincount(series_idx, weights=col, minlength=n_series)
+        c_means = c_sums / counts
+        X_tilde[:, c_i] = col - c_means[series_idx]
+
+    store_col = df_sub["store_nbr"].to_numpy(dtype=np.int32)
+    stores = sorted(df_sub["store_nbr"].unique())
+    store_map = {s: idx for idx, s in enumerate(stores)}
+
+    A_stores: dict[int, np.ndarray] = {}
+    b_stores: dict[int, np.ndarray] = {}
+    p_dim = X_reg.shape[1]
+
+    for s in stores:
+        mask = store_col == s
+        Xs = X_tilde[mask]
+        ys = y_tilde[mask]
+        if len(ys) > 0:
+            A_stores[s] = Xs.T @ Xs
+            b_stores[s] = Xs.T @ ys
+        else:
+            A_stores[s] = np.zeros((p_dim, p_dim), dtype=np.float64)
+            b_stores[s] = np.zeros(p_dim, dtype=np.float64)
+
+    A_tot = sum(A_stores.values())
+    b_tot = sum(b_stores.values())
+    try:
+        beta_hat, _, _, _ = np.linalg.lstsq(A_tot, b_tot, rcond=1e-5)
+        beta = float(beta_hat[0])
+    except Exception:
+        beta = 0.0
+
+    return A_stores, b_stores, beta, stores, store_map
+
+
+def _cluster_bootstrap_lift(
+    A_stores: dict[int, np.ndarray],
+    b_stores: dict[int, np.ndarray],
+    stores: list[int],
+    store_map: dict[int, int],
+    n_bootstrap: int,
+    rng: np.random.Generator,
+) -> list[float]:
+    """Fast cluster-bootstrap for OLS using precomputed cross-products."""
+    n_stores = len(stores)
+    boot_lifts: list[float] = []
+    for _ in range(n_bootstrap):
+        b_sample = rng.choice(stores, size=n_stores, replace=True)
+        counts = np.bincount([store_map[s] for s in b_sample], minlength=n_stores).astype(
+            np.float64
+        )
+        A_b = sum(c * A_stores[s] for c, s in zip(counts, stores, strict=False))
+        b_b = sum(c * b_stores[s] for c, s in zip(counts, stores, strict=False))
+        try:
+            b_hat, _, _, _ = np.linalg.lstsq(A_b, b_b, rcond=1e-5)
+            boot_lifts.append((np.exp(float(b_hat[0])) - 1.0) * 100.0)
+        except Exception:
+            continue
+    return boot_lifts
+
+
 def run_promo_lift_analysis(
     df_sales: pd.DataFrame,
     start_date: str = "2014-04-01",
@@ -114,29 +203,17 @@ def run_promo_lift_analysis(
         series_map[(s, f)] for s, f in zip(df["store_nbr"], df["family"], strict=False)
     ]
 
-    stores = sorted(df["store_nbr"].unique())
-    n_stores = len(stores)
-    store_indices = {s: np.where(df["store_nbr"] == s)[0] for s in stores}
-
     # 1. Overall Lift Estimation
     log.info("Estimating overall store-family fixed-effects promo lift on %d rows...", len(df))
-    beta_overall = estimate_fe_log_linear(df, target_col=target_col, promo_col=promo_col)
+    A_stores, b_stores, beta_overall, stores, store_map = _compute_fe_store_cross_products(
+        df, target_col=target_col, promo_col=promo_col
+    )
     lift_overall_pct = (np.exp(beta_overall) - 1.0) * 100.0
 
-    # Store-clustered bootstrap for overall lift
-    boot_lifts_overall: list[float] = []
-    for _ in range(n_bootstrap):
-        b_stores = rng.choice(stores, size=n_stores, replace=True)
-        b_row_indices = np.concatenate([store_indices[s] for s in b_stores])
-        b_df = df.iloc[b_row_indices].copy()
-        # Re-index series within bootstrap sample
-        b_series_keys = b_df[["store_nbr", "family"]].drop_duplicates().itertuples(index=False)
-        b_series_map = {k: idx for idx, k in enumerate(b_series_keys)}
-        b_df["series_idx"] = [
-            b_series_map[(s, f)] for s, f in zip(b_df["store_nbr"], b_df["family"], strict=False)
-        ]
-        b_beta = estimate_fe_log_linear(b_df, target_col=target_col, promo_col=promo_col)
-        boot_lifts_overall.append((np.exp(b_beta) - 1.0) * 100.0)
+    # Fast store-clustered bootstrap for overall lift
+    boot_lifts_overall = _cluster_bootstrap_lift(
+        A_stores, b_stores, stores, store_map, n_bootstrap, rng
+    )
 
     ci_overall_low = float(np.percentile(boot_lifts_overall, 2.5))
     ci_overall_high = float(np.percentile(boot_lifts_overall, 97.5))
@@ -147,8 +224,6 @@ def run_promo_lift_analysis(
 
     for fam in families:
         fam_df = df[df["family"] == fam].copy().reset_index(drop=True)
-        fam_stores = sorted(fam_df["store_nbr"].unique())
-        fam_store_idx = {s: np.where(fam_df["store_nbr"] == s)[0] for s in fam_stores}
         fam_promo_share = float((fam_df[promo_col] > 0).mean()) * 100.0
 
         if fam_promo_share < 0.01:
@@ -164,22 +239,16 @@ def run_promo_lift_analysis(
             )
             continue
 
-        # Point estimate
+        fam_stores = sorted(fam_df["store_nbr"].unique())
         fam_series_map = {s: idx for idx, s in enumerate(fam_stores)}
         fam_df["series_idx"] = fam_df["store_nbr"].map(fam_series_map)
-        b_fam = estimate_fe_log_linear(fam_df, target_col=target_col, promo_col=promo_col)
-        l_fam = (np.exp(b_fam) - 1.0) * 100.0
 
-        # Store-clustered bootstrap
-        boot_fam: list[float] = []
-        for _ in range(n_bootstrap):
-            b_s = rng.choice(fam_stores, size=len(fam_stores), replace=True)
-            b_rows = np.concatenate([fam_store_idx[s] for s in b_s])
-            sub_b = fam_df.iloc[b_rows].copy()
-            sub_series_map = {s: idx for idx, s in enumerate(sorted(sub_b["store_nbr"].unique()))}
-            sub_b["series_idx"] = sub_b["store_nbr"].map(sub_series_map)
-            bb = estimate_fe_log_linear(sub_b, target_col=target_col, promo_col=promo_col)
-            boot_fam.append((np.exp(bb) - 1.0) * 100.0)
+        A_fam, b_fam, b_fam_est, s_fam, sm_fam = _compute_fe_store_cross_products(
+            fam_df, target_col=target_col, promo_col=promo_col
+        )
+        l_fam = (np.exp(b_fam_est) - 1.0) * 100.0
+
+        boot_fam = _cluster_bootstrap_lift(A_fam, b_fam, s_fam, sm_fam, n_bootstrap, rng)
 
         c_low = float(np.percentile(boot_fam, 2.5))
         c_high = float(np.percentile(boot_fam, 97.5))
