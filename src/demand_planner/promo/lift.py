@@ -222,12 +222,38 @@ def run_promo_lift_analysis(
 
     df = df_sales.copy()
     df["date"] = pd.to_datetime(df["date"])
-    df = df[df["date"] >= pd.to_datetime(start_date)].copy()
+
+    # 1. Exclude dates prior to each store's first positive-sales date
+    first_sales = (
+        df[df[target_col] > 0].groupby("store_nbr")["date"].min().rename("first_sale_date")
+    )
+    df = df.merge(first_sales, on="store_nbr", how="left")
+    df = df[df["date"] >= df["first_sale_date"]].drop(columns=["first_sale_date"])
+
+    # 2. Exclude Dec 25 closures
+    df = df[~((df["date"].dt.month == 12) & (df["date"].dt.day == 25))]
+
+    # 3. Exclude store closure days (where total store sales across all families is zero)
+    store_totals = df.groupby(["store_nbr", "date"])[target_col].sum().rename("store_daily_total")
+    df = df.merge(store_totals, on=["store_nbr", "date"], how="left")
+    df = df[df["store_daily_total"] > 0].drop(columns=["store_daily_total"])
+
+    # 4. Filter to post start_date and positive-sales days only (intensive margin)
+    df = df[df["date"] >= pd.to_datetime(start_date)]
+    df = df[df[target_col] > 0].copy()
     df = df.sort_values(["store_nbr", "family", "date"]).reset_index(drop=True)
 
     df["dow"] = df["date"].dt.dayofweek
     df["month"] = df["date"].dt.month
     df["ym"] = df["date"].dt.to_period("M").astype(str)
+
+    # Sample size arithmetic
+    n_unique_stores = int(df["store_nbr"].nunique())
+    n_unique_families = int(df["family"].nunique())
+    n_series = int(df.groupby(["store_nbr", "family"]).ngroups)
+    n_series_months = int(df.groupby(["store_nbr", "family", "ym"]).ngroups)
+    n_days = int(df["date"].nunique())
+    sample_size_rows = len(df)
 
     # Map store x family to integer index
     series_keys = df[["store_nbr", "family"]].drop_duplicates().itertuples(index=False)
@@ -236,35 +262,35 @@ def run_promo_lift_analysis(
         series_map[(s, f)] for s, f in zip(df["store_nbr"], df["family"], strict=False)
     ]
 
-    # 1. Overall Lift: Model B (with year-month FE) and Model A (without year-month FE)
+    # 1. Overall Lift (Intensive Margin): Model B (with year-month FE) & Model A
     log.info(
-        "Estimating overall store-family fixed-effects promo lift with year-month FE on %d rows...",
+        "Estimating intensive-margin promo lift with year-month FE on %d positive-sales rows...",
         len(df),
     )
-    # Model B: Controlled with year-month FE (primary)
     A_b, b_b, beta_overall_ym, stores, store_map = _compute_fe_store_cross_products(
         df, target_col=target_col, promo_col=promo_col, use_year_month=True
     )
     lift_overall_ym = (np.exp(beta_overall_ym) - 1.0) * 100.0
     boot_lifts_ym = _cluster_bootstrap_lift(A_b, b_b, stores, store_map, n_bootstrap, rng)
-    ci_overall_ym_low = float(np.percentile(boot_lifts_ym, 2.5))
-    ci_overall_ym_high = float(np.percentile(boot_lifts_ym, 97.5))
+    ci_overall_ym_low = float(np.percentile(boot_lifts_ym, 2.5)) if boot_lifts_ym else 0.0
+    ci_overall_ym_high = float(np.percentile(boot_lifts_ym, 97.5)) if boot_lifts_ym else 0.0
 
-    # Model A: Unadjusted for secular time trends (month of year only)
     _, _, beta_overall_naive, _, _ = _compute_fe_store_cross_products(
         df, target_col=target_col, promo_col=promo_col, use_year_month=False
     )
     lift_overall_naive = (np.exp(beta_overall_naive) - 1.0) * 100.0
 
-    # 2. Per-Family Lift Estimation (both specifications)
+    # 2. Per-Family Lift Estimation (Exploratory Only)
     families = sorted(df["family"].unique())
     family_results: list[dict[str, Any]] = []
 
     for fam in families:
         fam_df = df[df["family"] == fam].copy().reset_index(drop=True)
         fam_promo_share = float((fam_df[promo_col] > 0).mean()) * 100.0
+        n_promo_days = int((fam_df[promo_col] > 0).sum())
+        n_fam_rows = len(fam_df)
 
-        if fam_promo_share < 0.01:
+        if fam_promo_share < 0.01 or n_promo_days < 10:
             family_results.append(
                 {
                     "family": fam,
@@ -273,7 +299,12 @@ def run_promo_lift_analysis(
                     "ci_95_low": 0.0,
                     "ci_95_high": 0.0,
                     "promo_share_pct": round(fam_promo_share, 2),
+                    "promo_positive_days": n_promo_days,
+                    "total_positive_days": n_fam_rows,
                     "is_statistically_significant": False,
+                    "is_reliable": False,
+                    "status": "Unreliable (insufficient promotional support)",
+                    "comparison_type": "exploratory",
                 }
             )
             continue
@@ -295,9 +326,20 @@ def run_promo_lift_analysis(
         l_ym_fam = (np.exp(b_ym_fam) - 1.0) * 100.0
 
         boot_fam = _cluster_bootstrap_lift(A_fam, b_fam, s_fam, sm_fam, n_bootstrap, rng)
-        c_low = float(np.percentile(boot_fam, 2.5))
-        c_high = float(np.percentile(boot_fam, 97.5))
+        c_low = float(np.percentile(boot_fam, 2.5)) if boot_fam else 0.0
+        c_high = float(np.percentile(boot_fam, 97.5)) if boot_fam else 0.0
         sig = c_low > 0 or c_high < 0
+
+        # Assess plausibility/reliability
+        if fam_promo_share < 0.5:
+            finding_status = "Unreliable (sparse promotion <0.5%)"
+            is_reliable = False
+        elif l_ym_fam > 150.0:
+            finding_status = "Unreliable (extreme seasonal elasticity spike)"
+            is_reliable = False
+        else:
+            finding_status = "Exploratory"
+            is_reliable = True
 
         family_results.append(
             {
@@ -307,38 +349,67 @@ def run_promo_lift_analysis(
                 "ci_95_low": round(c_low, 2),
                 "ci_95_high": round(c_high, 2),
                 "promo_share_pct": round(fam_promo_share, 2),
+                "promo_positive_days": n_promo_days,
+                "total_positive_days": n_fam_rows,
                 "is_statistically_significant": sig,
+                "is_reliable": is_reliable,
+                "status": finding_status,
+                "comparison_type": "exploratory",
             }
         )
 
     # Sort families by controlled lift association
     family_results.sort(key=lambda x: x["lift_pct"], reverse=True)
-    top_5 = family_results[:5]
+    top_5 = [f for f in family_results if f.get("is_reliable", True)][:5]
 
     return {
         "analysis_period": {
             "start_date": start_date,
             "end_date": df["date"].max().strftime("%Y-%m-%d"),
-            "n_days": int((df["date"].max() - pd.to_datetime(start_date)).days) + 1,
-            "sample_size_rows": len(df),
+            "n_days": n_days,
+            "sample_size_rows": sample_size_rows,
             "note": (
-                "Promotion tracking in Corporación Favorita began 2014-04-01; "
-                "earlier dates excluded."
+                "Promotion tracking in Corporación Favorita began 2014-04-01. "
+                "Filtered strictly to post-store-opening dates, positive-sales days "
+                "(intensive margin), and excludes Dec 25 closures."
+            ),
+        },
+        "sample_size_arithmetic": {
+            "n_unique_stores": n_unique_stores,
+            "n_unique_families": n_unique_families,
+            "n_active_series": n_series,
+            "n_series_months": n_series_months,
+            "n_calendar_days": n_days,
+            "sample_size_positive_series_days": sample_size_rows,
+            "arithmetic_summary": (
+                f"{n_unique_stores} stores x {n_unique_families} families = {n_series} "
+                f"active positive-sales series across {n_days} calendar days "
+                f"({start_date} to {df['date'].max().strftime('%Y-%m-%d')} excluding Dec 25 "
+                f"closures), yielding {sample_size_rows:,} positive-sales series-days "
+                f"and {n_series_months:,} series-months."
             ),
         },
         "exact_regression_specification": {
-            "outcome": "log(sales + 1) in daily physical units",
+            "outcome": "log(sales) in daily positive physical units (intensive margin)",
             "regressor": "I(onpromotion > 0), binary active promo indicator (units: 0 or 1)",
-            "fixed_effects": "Store x Family fixed effects (within-series demeaning, 1,782 series)",
-            "controls": (
-                "Day-of-week indicators (6 dummies) and Year-Month fixed effects (40 dummies)"
+            "fixed_effects": (
+                f"Store x Family fixed effects (within-series demeaning, {n_series} series)"
             ),
-            "clustering": "Clustered by store (54 clusters) via cluster bootstrap",
-            "sample_window": "2014-04-01 to 2017-08-15 (2,191,860 rows)",
+            "controls": (
+                "Day-of-week indicators (6 dummies) and Year-Month fixed effects absorbing secular "
+                "sales growth, network inflation, and macroeconomic trends"
+            ),
+            "clustering": f"Clustered by store ({n_unique_stores} clusters) via cluster bootstrap",
+            "sample_window": (
+                f"{start_date} to {df['date'].max().strftime('%Y-%m-%d')} "
+                f"({sample_size_rows:,} positive-sales series-days)"
+            ),
             "observational_note": (
                 "Observational statistical association; category managers scheduled promotions "
-                "endogenously. The unadjusted +171.17% figure arose from omitting year-month FE, "
-                "which caused the promotion dummy to absorb multi-year secular store/sales growth."
+                "endogenously. Evaluated strictly on the intensive margin (sales > 0), excluding "
+                "pre-opening dates, zero-sales days, and store closures. Per-family results are "
+                "exploratory only; families with sparse promotions or seasonal spikes are labeled "
+                "unreliable."
             ),
         },
         "overall_lift_pct": round(lift_overall_ym, 2),
@@ -392,14 +463,6 @@ def plot_promo_lift_by_family(
     )
 
     ax.axvline(0, color="black", linestyle="-", linewidth=0.8, alpha=0.7)
-    ov = promo_results.get("overall_lift_pct", 0.0)
-    ax.axvline(
-        ov,
-        color="#d62728",
-        linestyle="--",
-        linewidth=1.5,
-        label=f"Controlled Average Lift: +{ov:.1f}%",
-    )
 
     ax.set_yticks(y_pos)
     ax.set_yticklabels(df_plot["family"], fontsize=8.5)
@@ -409,26 +472,25 @@ def plot_promo_lift_by_family(
         labelpad=8,
     )
     ax.set_title(
-        "Observational Promotional Sales Lift Association by Product Family (Post 2014-04-01)\n"
-        "Store-Family & Year-Month Fixed Effects with Store-Clustered 95% Bootstrap CIs",
+        "Exploratory Observational Promotional Sales Lift Association by Product Family\n"
+        "Intensive Margin (sales > 0), Store-Family & Year-Month FE with Clustered 95% CIs",
         fontsize=11,
         fontweight="bold",
         pad=12,
     )
-    ax.legend(frameon=True, facecolor="white", framealpha=0.9, fontsize=9, loc="lower right")
 
     fig.text(
         0.5,
         0.01,
-        "Note: Observational fixed-effects model controls for store-family baseline, "
-        "day-of-week, and year-month. Top 5 promo-sensitive categories highlighted in green.",
+        "Note: Exploratory estimates on positive-sales days, excluding closures & pre-opening.\n"
+        "Green: top promo response; sparse/seasonal spikes are labeled unreliable.",
         ha="center",
         fontsize=8,
         color="#555555",
         style="italic",
     )
 
-    plt.tight_layout(rect=[0, 0.02, 1, 0.98])
+    plt.tight_layout(rect=[0, 0.03, 1, 0.97])
     fig.savefig(out_p, dpi=300)
     plt.close(fig)
     return out_p
