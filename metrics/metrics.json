@@ -3935,7 +3935,9 @@
         "holm_rank": 5,
         "holm_alpha_threshold": 0.00556,
         "is_finding": false,
-        "finding_label": "Primary Comparison (Not Significant after Holm adjustment)"
+        "finding_label": "Exploratory (Holm-adjusted p >= 0.05)",
+        "m_hypotheses_tested": 13,
+        "p_value_adjusted_holm": 0.144
       },
       {
         "family": "GROCERY I",
@@ -4105,7 +4107,9 @@
         "holm_rank": 3,
         "holm_alpha_threshold": 0.00455,
         "is_finding": true,
-        "finding_label": "Primary Finding (Statistically Significant Win after Holm adjustment)"
+        "finding_label": "Primary Finding (Statistically Significant Win)",
+        "m_hypotheses_tested": 13,
+        "p_value_adjusted_holm": 0.0
       },
       {
         "family": "GROCERY I",
@@ -4275,7 +4279,9 @@
         "holm_rank": 8,
         "holm_alpha_threshold": 0.00833,
         "is_finding": false,
-        "finding_label": "Primary Comparison (Not Significant after Holm adjustment)"
+        "finding_label": "Exploratory (CI crosses 0)",
+        "m_hypotheses_tested": 13,
+        "p_value_adjusted_holm": 0.48
       },
       {
         "family": "BEVERAGES",
@@ -4445,7 +4451,9 @@
         "holm_rank": 7,
         "holm_alpha_threshold": 0.00714,
         "is_finding": false,
-        "finding_label": "Primary Comparison (Not Significant after Holm adjustment)"
+        "finding_label": "Exploratory (CI crosses 0)",
+        "m_hypotheses_tested": 13,
+        "p_value_adjusted_holm": 0.966
       },
       {
         "family": "BEVERAGES",
@@ -4615,7 +4623,9 @@
         "holm_rank": 11,
         "holm_alpha_threshold": 0.01667,
         "is_finding": false,
-        "finding_label": "Primary Comparison (Not Significant after Holm adjustment)"
+        "finding_label": "Exploratory (CI crosses 0)",
+        "m_hypotheses_tested": 13,
+        "p_value_adjusted_holm": 1.0
       },
       {
         "family": "PRODUCE",
@@ -4785,7 +4795,9 @@
         "holm_rank": 9,
         "holm_alpha_threshold": 0.01,
         "is_finding": false,
-        "finding_label": "Primary Comparison (Not Significant after Holm adjustment)"
+        "finding_label": "Exploratory (CI crosses 0)",
+        "m_hypotheses_tested": 13,
+        "p_value_adjusted_holm": 1.0
       },
       {
         "family": "PRODUCE",
@@ -4955,7 +4967,9 @@
         "holm_rank": 4,
         "holm_alpha_threshold": 0.005,
         "is_finding": false,
-        "finding_label": "Primary Comparison (Not Significant after Holm adjustment)"
+        "finding_label": "Exploratory (Holm-adjusted p >= 0.05)",
+        "m_hypotheses_tested": 13,
+        "p_value_adjusted_holm": 0.105
       },
       {
         "family": "CLEANING",
@@ -5122,10 +5136,12 @@
         "is_statistically_significant_win_point": false,
         "p_value_point": 1.0,
         "comparison_type": "primary",
-        "holm_rank": 11,
-        "holm_alpha_threshold": 0.01667,
+        "holm_rank": 12,
+        "holm_alpha_threshold": 0.025,
         "is_finding": false,
-        "finding_label": "Primary Comparison (Not Significant after Holm adjustment)"
+        "finding_label": "Unreachable: target above frontier maximum",
+        "m_hypotheses_tested": 13,
+        "p_value_adjusted_holm": 1.0
       },
       {
         "family": "CLEANING",
@@ -5292,10 +5308,12 @@
         "is_statistically_significant_win_point": false,
         "p_value_point": 1.0,
         "comparison_type": "primary",
-        "holm_rank": 12,
-        "holm_alpha_threshold": 0.025,
+        "holm_rank": 13,
+        "holm_alpha_threshold": 0.05,
         "is_finding": false,
-        "finding_label": "Primary Comparison (Not Significant after Holm adjustment)"
+        "finding_label": "Unreachable: target below frontier minimum",
+        "m_hypotheses_tested": 13,
+        "p_value_adjusted_holm": 1.0
       },
       {
         "family": "DAIRY",
@@ -5462,10 +5480,12 @@
         "is_statistically_significant_win_point": false,
         "p_value_point": 1.0,
         "comparison_type": "primary",
-        "holm_rank": 12,
-        "holm_alpha_threshold": 0.025,
+        "holm_rank": 13,
+        "holm_alpha_threshold": 0.05,
         "is_finding": false,
-        "finding_label": "Primary Comparison (Not Significant after Holm adjustment)"
+        "finding_label": "Unreachable: target below frontier minimum",
+        "m_hypotheses_tested": 13,
+        "p_value_adjusted_holm": 1.0
       },
       {
         "family": "DAIRY",
@@ -5635,7 +5655,9 @@
         "holm_rank": 9,
         "holm_alpha_threshold": 0.01,
         "is_finding": false,
-        "finding_label": "Primary Comparison (Not Significant after Holm adjustment)"
+        "finding_label": "Exploratory (CI crosses 0)",
+        "m_hypotheses_tested": 13,
+        "p_value_adjusted_holm": 0.48
       },
       {
         "family": "BREAD/BAKERY",
@@ -5802,10 +5824,12 @@
         "is_statistically_significant_win_point": true,
         "p_value_point": 0.0,
         "comparison_type": "primary",
-        "holm_rank": 5,
-        "holm_alpha_threshold": 0.00556,
+        "holm_rank": 1,
+        "holm_alpha_threshold": 0.00385,
         "is_finding": true,
-        "finding_label": "Primary Finding (Statistically Significant Win after Holm adjustment)"
+        "finding_label": "Primary Finding (Statistically Significant Win)",
+        "m_hypotheses_tested": 13,
+        "p_value_adjusted_holm": 0.0
       },
       {
         "family": "BREAD/BAKERY",
@@ -5975,7 +5999,9 @@
         "holm_rank": 6,
         "holm_alpha_threshold": 0.00625,
         "is_finding": false,
-        "finding_label": "Primary Comparison (Not Significant after Holm adjustment)"
+        "finding_label": "Exploratory (Holm-adjusted p >= 0.05)",
+        "m_hypotheses_tested": 13,
+        "p_value_adjusted_holm": 0.24
       },
       {
         "family": "POULTRY",
@@ -6142,10 +6168,12 @@
         "is_statistically_significant_win_point": true,
         "p_value_point": 0.0,
         "comparison_type": "primary",
-        "holm_rank": 4,
-        "holm_alpha_threshold": 0.005,
+        "holm_rank": 5,
+        "holm_alpha_threshold": 0.00556,
         "is_finding": true,
-        "finding_label": "Primary Finding (Statistically Significant Win after Holm adjustment)"
+        "finding_label": "Primary Finding (Statistically Significant Win)",
+        "m_hypotheses_tested": 13,
+        "p_value_adjusted_holm": 0.0
       },
       {
         "family": "POULTRY",
@@ -6315,7 +6343,9 @@
         "holm_rank": 3,
         "holm_alpha_threshold": 0.00455,
         "is_finding": false,
-        "finding_label": "Primary Comparison (Not Significant after Holm adjustment)"
+        "finding_label": "Exploratory (Holm-adjusted p >= 0.05)",
+        "m_hypotheses_tested": 13,
+        "p_value_adjusted_holm": 0.096
       },
       {
         "family": "MEATS",
@@ -6485,7 +6515,9 @@
         "holm_rank": 6,
         "holm_alpha_threshold": 0.00625,
         "is_finding": true,
-        "finding_label": "Primary Finding (Statistically Significant Win after Holm adjustment)"
+        "finding_label": "Primary Finding (Statistically Significant Win)",
+        "m_hypotheses_tested": 13,
+        "p_value_adjusted_holm": 0.032
       },
       {
         "family": "MEATS",
@@ -6655,7 +6687,9 @@
         "holm_rank": 2,
         "holm_alpha_threshold": 0.00417,
         "is_finding": false,
-        "finding_label": "Primary Comparison (Not Significant after Holm adjustment)"
+        "finding_label": "Exploratory (Holm-adjusted p >= 0.05)",
+        "m_hypotheses_tested": 13,
+        "p_value_adjusted_holm": 0.096
       },
       {
         "family": "DELI",
@@ -6825,7 +6859,9 @@
         "holm_rank": 2,
         "holm_alpha_threshold": 0.00417,
         "is_finding": true,
-        "finding_label": "Primary Finding (Statistically Significant Win after Holm adjustment)"
+        "finding_label": "Primary Finding (Statistically Significant Win)",
+        "m_hypotheses_tested": 13,
+        "p_value_adjusted_holm": 0.0
       },
       {
         "family": "DELI",
@@ -6995,7 +7031,9 @@
         "holm_rank": 7,
         "holm_alpha_threshold": 0.00714,
         "is_finding": false,
-        "finding_label": "Primary Comparison (Not Significant after Holm adjustment)"
+        "finding_label": "Exploratory (Holm-adjusted p >= 0.05)",
+        "m_hypotheses_tested": 13,
+        "p_value_adjusted_holm": 0.24
       },
       {
         "family": "PERSONAL CARE",
@@ -7165,7 +7203,9 @@
         "holm_rank": 8,
         "holm_alpha_threshold": 0.00833,
         "is_finding": false,
-        "finding_label": "Primary Comparison (Not Significant after Holm adjustment)"
+        "finding_label": "Exploratory (CI crosses 0)",
+        "m_hypotheses_tested": 13,
+        "p_value_adjusted_holm": 0.966
       },
       {
         "family": "PERSONAL CARE",
@@ -7332,10 +7372,12 @@
         "is_statistically_significant_win_point": false,
         "p_value_point": 1.0,
         "comparison_type": "primary",
-        "holm_rank": 13,
-        "holm_alpha_threshold": 0.05,
+        "holm_rank": 12,
+        "holm_alpha_threshold": 0.025,
         "is_finding": false,
-        "finding_label": "Primary Comparison (Not Significant after Holm adjustment)"
+        "finding_label": "Unreachable: target above frontier maximum",
+        "m_hypotheses_tested": 13,
+        "p_value_adjusted_holm": 1.0
       },
       {
         "family": "BABY CARE",
@@ -7502,10 +7544,12 @@
         "is_statistically_significant_win_point": false,
         "p_value_point": 1.0,
         "comparison_type": "primary",
-        "holm_rank": 13,
-        "holm_alpha_threshold": 0.05,
+        "holm_rank": 11,
+        "holm_alpha_threshold": 0.01667,
         "is_finding": false,
-        "finding_label": "Primary Comparison (Not Significant after Holm adjustment)"
+        "finding_label": "Unreachable: target above frontier maximum",
+        "m_hypotheses_tested": 13,
+        "p_value_adjusted_holm": 1.0
       },
       {
         "family": "BABY CARE",
@@ -7675,7 +7719,9 @@
         "holm_rank": 10,
         "holm_alpha_threshold": 0.0125,
         "is_finding": false,
-        "finding_label": "Primary Comparison (Not Significant after Holm adjustment)"
+        "finding_label": "Exploratory (CI crosses 0)",
+        "m_hypotheses_tested": 13,
+        "p_value_adjusted_holm": 1.0
       },
       {
         "family": "BOOKS",
@@ -7845,7 +7891,9 @@
         "holm_rank": 10,
         "holm_alpha_threshold": 0.0125,
         "is_finding": false,
-        "finding_label": "Primary Comparison (Not Significant after Holm adjustment)"
+        "finding_label": "Exploratory (CI crosses 0)",
+        "m_hypotheses_tested": 13,
+        "p_value_adjusted_holm": 1.0
       },
       {
         "family": "BOOKS",
@@ -8015,7 +8063,9 @@
         "holm_rank": 1,
         "holm_alpha_threshold": 0.00385,
         "is_finding": true,
-        "finding_label": "Primary Finding (Statistically Significant Win after Holm adjustment)"
+        "finding_label": "Primary Finding (Statistically Significant Win)",
+        "m_hypotheses_tested": 13,
+        "p_value_adjusted_holm": 0.0
       },
       {
         "family": "LAWN AND GARDEN",
@@ -8182,10 +8232,12 @@
         "is_statistically_significant_win_point": true,
         "p_value_point": 0.0,
         "comparison_type": "primary",
-        "holm_rank": 1,
-        "holm_alpha_threshold": 0.00385,
+        "holm_rank": 4,
+        "holm_alpha_threshold": 0.005,
         "is_finding": true,
-        "finding_label": "Primary Finding (Statistically Significant Win after Holm adjustment)"
+        "finding_label": "Primary Finding (Statistically Significant Win)",
+        "m_hypotheses_tested": 13,
+        "p_value_adjusted_holm": 0.0
       },
       {
         "family": "LAWN AND GARDEN",

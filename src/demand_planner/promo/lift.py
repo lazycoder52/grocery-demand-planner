@@ -15,7 +15,7 @@ Exact Regression Specification:
 - Statistical Inference: 95% cluster-bootstrap confidence intervals clustered by store
   (54 clusters) to account for arbitrary within-store spatial and temporal error correlation.
 - Observational Caveat: This analysis identifies conditional statistical associations, not clean
-  exogenous causal effects, as promotions were non-randomly scheduled by category managers.
+  exogenous treatment effects, as promotions were non-randomly scheduled by category managers.
 """
 
 from __future__ import annotations

@@ -270,7 +270,7 @@ class PeriodicReviewSimulator:
         Strictly clamps the forecast slice to the end of the active fold containing day t
         so that no future-fold models (whose origin date > order date) can be accessed.
         If the protection window exceeds the remaining days of the active fold, the available
-        causal forecast is scaled proportionally over the full protection window.
+        available forecast is scaled proportionally over the full protection window.
         """
         fold_end = self.active_fold_end_idx[t]
         end = min(t + protection_days, fold_end + 1, self.n_days)

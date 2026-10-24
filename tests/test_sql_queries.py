@@ -1,4 +1,4 @@
-"""Tests for production SQL queries in sql/."""
+"""Tests for analytical SQL queries in sql/."""
 
 from __future__ import annotations
 
