@@ -399,6 +399,11 @@ _register_simulation_stage()
 
 
 def _register_reports_stage() -> None:
+    import pandas as pd
+
+    from demand_planner.config import DATA_RAW
+    from demand_planner.data.audit import update_metrics_json
+    from demand_planner.promo.lift import plot_promo_lift_by_family, run_promo_lift_analysis
     from demand_planner.reports.charts import generate_all_charts
 
     def stage_reports() -> None:
@@ -406,6 +411,21 @@ def _register_reports_stage() -> None:
         charts = generate_all_charts()
         for c in charts:
             log.info("Generated chart: %s", c)
+
+        # Causal promo lift analysis
+        train_path = DATA_RAW / "train.csv"
+        if train_path.exists():
+            log.info("Running causal promo-lift analysis post 2014-04-01...")
+            df_train = pd.read_csv(train_path)
+            promo_res = run_promo_lift_analysis(
+                df_train, start_date="2014-04-01", n_bootstrap=500, seed=42
+            )
+            promo_chart = plot_promo_lift_by_family(
+                promo_res, output_path="docs/img/promo_lift_by_family.png"
+            )
+            log.info("Saved promo lift chart to %s", promo_chart)
+            update_metrics_json(promo_res, section="promo_lift_analysis")
+            log.info("Saved promo lift analysis to metrics.json")
 
     STAGES["reports"] = stage_reports
 
