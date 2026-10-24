@@ -90,15 +90,15 @@ def render_executive_summary(metrics: dict[str, Any]):
     with col1:
         st.metric(
             label="5-Fold Backtest WAPE",
-            value="13.56%",
-            delta="-2.77% vs Naive (16.33%)",
+            value="13.49%",
+            delta="-2.84% vs Naive (16.33%)",
             delta_color="normal",
         )
     with col2:
         st.metric(
             label="Holdout (Aug 2017) WAPE",
-            value="15.16%",
-            delta="-5.51% vs Naive (20.67%)",
+            value="15.29%",
+            delta="-5.38% vs Naive (20.67%)",
             delta_color="normal",
         )
     with col3:
