@@ -165,6 +165,6 @@ python -m demand_planner.pipeline
 ## 8. Documentation Index
 
 - 📋 **[Product Brief](docs/PRODUCT_BRIEF.md):** Executive 2-page brief with metric tree, 5-store randomized pilot protocol, and scope roadmap.
-- 📊 **[Business Insights & SQL](docs/INSIGHTS.md):** Analysis of the 4 production SQL views (`promo_elasticity.sql`, `stockout_risk.sql`, `weekly_store_family.sql`, `shrinkage_or_waste_proxy.sql`).
+- 📊 **[Business Insights & SQL](docs/INSIGHTS.md):** Analysis of the 4 production SQL views (`promo_elasticity.sql`, `zero_sales_day_proxy.sql`, `weekly_store_family.sql`, `perishable_volatility_proxy.sql`).
 - 📁 **[Data Card](docs/DATA_CARD.md):** Dataset lineage, schema definitions, missing calendar dates, and store opening audit.
 - 💻 **[Interactive App](app.py):** Multi-page executive dashboard (`streamlit run app.py`).

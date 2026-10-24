@@ -38,10 +38,10 @@ def test_promo_elasticity_sql(tiny_favorita_dir: Path):
         assert (df["promo_day_share_pct"] <= 100.0).all()
 
 
-def test_stockout_risk_sql(tiny_favorita_dir: Path):
-    """Test that stockout_risk.sql executes cleanly and categorizes risk tiers."""
+def test_zero_sales_day_proxy_sql(tiny_favorita_dir: Path):
+    """Test that zero_sales_day_proxy.sql executes cleanly and categorizes proxy tiers."""
     con = ingest_csvs(raw_dir=tiny_favorita_dir)
-    query = (SQL_DIR / "stockout_risk.sql").read_text(encoding="utf-8")
+    query = (SQL_DIR / "zero_sales_day_proxy.sql").read_text(encoding="utf-8")
     df = con.execute(query).df()
     expected_cols = {
         "store_nbr",
@@ -56,25 +56,25 @@ def test_stockout_risk_sql(tiny_favorita_dir: Path):
         "active_mean_daily_sales",
         "max_daily_sales",
         "total_sales",
-        "stockout_risk_segment",
+        "zero_sales_proxy_tier",
     }
     assert expected_cols.issubset(set(df.columns))
     assert len(df) > 0
     assert (df["zero_sales_rate_pct"] >= 0.0).all()
     assert (df["zero_sales_rate_pct"] <= 100.0).all()
-    valid_segments = {
-        "CRITICAL_HIGH_VELOCITY_STOCKOUT_RISK",
-        "MODERATE_STOCKOUT_RISK",
+    valid_tiers = {
+        "HIGH_VELOCITY_ELEVATED_ZERO_SALES_DAYS_PROXY",
+        "MODERATE_ZERO_SALES_DAYS_PROXY",
         "SLOW_MOVING_INTERMITTENT_TAIL",
-        "STABLE_IN_STOCK",
+        "LOW_ZERO_SALES_DAYS",
     }
-    assert set(df["stockout_risk_segment"].unique()).issubset(valid_segments)
+    assert set(df["zero_sales_proxy_tier"].unique()).issubset(valid_tiers)
 
 
-def test_shrinkage_or_waste_proxy_sql(tiny_favorita_dir: Path):
-    """Test that shrinkage_or_waste_proxy.sql executes cleanly and computes CV."""
+def test_perishable_volatility_proxy_sql(tiny_favorita_dir: Path):
+    """Test that perishable_volatility_proxy.sql executes cleanly and computes CV."""
     con = ingest_csvs(raw_dir=tiny_favorita_dir)
-    query = (SQL_DIR / "shrinkage_or_waste_proxy.sql").read_text(encoding="utf-8")
+    query = (SQL_DIR / "perishable_volatility_proxy.sql").read_text(encoding="utf-8")
     df = con.execute(query).df()
     expected_cols = {
         "store_nbr",
@@ -88,14 +88,18 @@ def test_shrinkage_or_waste_proxy_sql(tiny_favorita_dir: Path):
         "cv_demand",
         "max_daily_sales",
         "zero_sales_days",
-        "spoilage_exposure_index",
-        "spoilage_risk_tier",
+        "volatility_exposure_index",
+        "volatility_proxy_tier",
     }
     assert expected_cols.issubset(set(df.columns))
     assert len(df) > 0
     assert set(df["perishability_class"].unique()).issubset({"PERISHABLE", "NON_PERISHABLE"})
-    valid_tiers = {"HIGH_SPOILAGE_RISK", "MODERATE_SPOILAGE_RISK", "LOW_NON_PERISHABLE"}
-    assert set(df["spoilage_risk_tier"].unique()).issubset(valid_tiers)
+    valid_tiers = {
+        "HIGH_VOLATILITY_PERISHABLE_PROXY",
+        "MODERATE_VOLATILITY_PERISHABLE_PROXY",
+        "NON_PERISHABLE_OR_LOW_VOLATILITY",
+    }
+    assert set(df["volatility_proxy_tier"].unique()).issubset(valid_tiers)
 
 
 def test_weekly_store_family_sql_joined_columns(tiny_favorita_dir: Path):

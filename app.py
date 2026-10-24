@@ -425,22 +425,22 @@ def render_business_insights():
                 "to optimize promo stock."
             ),
         },
-        "Stockout Risk & Censored Demand": {
-            "file": "stockout_risk.sql",
+        "Zero-Sales-Day Risk Proxy": {
+            "file": "zero_sales_day_proxy.sql",
             "summary": (
-                "Detects high-velocity items with frequent zero-sales days indicating "
-                "phantom stockouts."
+                "Identifies fast-moving store departments with elevated zero-sales days "
+                "as an empirical proxy for inventory availability risk."
             ),
         },
         "Weekly S&OP Multi-Source View": {
             "file": "weekly_store_family.sql",
             "summary": "Unifies weekly sales, store foot traffic, oil prices, and civic holidays.",
         },
-        "Perishable Spoilage & Waste Proxy": {
-            "file": "shrinkage_or_waste_proxy.sql",
+        "Perishable Demand Volatility Proxy": {
+            "file": "perishable_volatility_proxy.sql",
             "summary": (
-                "Identifies volatile fresh categories at risk of physical rotting and "
-                "inventory write-offs."
+                "Measures demand coefficient of variation (CV) in fresh departments as a "
+                "proxy for perishable volatility exposure."
             ),
         },
     }

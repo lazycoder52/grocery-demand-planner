@@ -1,6 +1,7 @@
--- Stockout Risk and Censored Demand Diagnostic View
--- Identifies high-velocity store-family items experiencing elevated zero-sales days,
--- which frequently represents on-shelf availability failure rather than zero true demand.
+-- Zero-Sales-Day Diagnostic View (Proxy for Stockout Risk)
+-- Measures frequency of zero-sales days across store-family series.
+-- IMPORTANT: Because on-hand inventory balances are unrecorded in the dataset,
+-- zero sales serves strictly as an empirical PROXY for stockout risk, not confirmed stockouts.
 
 WITH series_stats AS (
     SELECT
@@ -41,13 +42,13 @@ SELECT
     total_sales,
     CASE
         WHEN mean_daily_sales >= 50.0 AND (1.0 * zero_sales_days / total_days) >= 0.10
-            THEN 'CRITICAL_HIGH_VELOCITY_STOCKOUT_RISK'
+            THEN 'HIGH_VELOCITY_ELEVATED_ZERO_SALES_DAYS_PROXY'
         WHEN mean_daily_sales >= 15.0 AND (1.0 * zero_sales_days / total_days) >= 0.25
-            THEN 'MODERATE_STOCKOUT_RISK'
+            THEN 'MODERATE_ZERO_SALES_DAYS_PROXY'
         WHEN mean_daily_sales < 5.0 AND (1.0 * zero_sales_days / total_days) >= 0.50
             THEN 'SLOW_MOVING_INTERMITTENT_TAIL'
-        ELSE 'STABLE_IN_STOCK'
-    END AS stockout_risk_segment
+        ELSE 'LOW_ZERO_SALES_DAYS'
+    END AS zero_sales_proxy_tier
 FROM series_stats
 WHERE total_days >= 60
 ORDER BY
