@@ -39,3 +39,11 @@ def test_app_smoke_navigation_pages():
 
         assert not at.exception, f"Page '{page_name}' raised exceptions: {at.exception}"
         assert len(at.title) > 0
+
+
+def test_app_does_not_reference_raw_data_or_ingest():
+    """Verify app.py source code contains no imports of ingest or references to data/raw."""
+    src = APP_PATH.read_text(encoding="utf-8")
+    assert "data/raw" not in src
+    assert "ingest_csvs" not in src
+    assert "DATA_RAW" not in src

@@ -26,7 +26,6 @@ METRICS_PATH = Path("metrics/metrics.json")
 OUTPUTS_DIR = Path("outputs")
 SQL_DIR = Path("sql")
 DOCS_IMG_DIR = Path("docs/img")
-DATA_RAW = Path("data/raw")
 
 
 @st.cache_data
@@ -40,7 +39,12 @@ def load_metrics() -> dict[str, Any]:
 
 @st.cache_data
 def load_predictions() -> pd.DataFrame:
-    """Load out-of-fold and holdout predictions for interactive inspection."""
+    """Load compact forecast summary for interactive inspection."""
+    summary_path = OUTPUTS_DIR / "forecast_sample_summary.parquet"
+    if summary_path.exists():
+        df = pd.read_parquet(summary_path)
+        df["date"] = pd.to_datetime(df["date"])
+        return df
     pred_path = OUTPUTS_DIR / "oof_and_holdout_predictions.parquet"
     if pred_path.exists():
         df = pd.read_parquet(pred_path)
@@ -58,20 +62,13 @@ def load_sim_summary() -> pd.DataFrame:
     return pd.DataFrame()
 
 
-@st.cache_resource
-def get_duckdb_con():
-    """Create a cached DuckDB connection for analytical SQL queries."""
-    from demand_planner.data.ingest import ingest_csvs
-
-    if (DATA_RAW / "train.csv").exists():
-        return ingest_csvs(raw_dir=DATA_RAW)
-    # Fallback to synthetic data if raw data is missing
-    from tests.fixtures.tiny_favorita import generate_tiny_favorita
-
-    temp_dir = Path(".tmp_synthetic_favorita")
-    temp_dir.mkdir(parents=True, exist_ok=True)
-    generate_tiny_favorita(temp_dir)
-    return ingest_csvs(raw_dir=temp_dir)
+@st.cache_data
+def load_sql_summary(filename: str) -> pd.DataFrame:
+    """Load precomputed SQL analytical summary parquet (< 3 MB tracked)."""
+    p = OUTPUTS_DIR / filename
+    if p.exists():
+        return pd.read_parquet(p)
+    return pd.DataFrame()
 
 
 def render_executive_summary(metrics: dict[str, Any]):
@@ -420,6 +417,7 @@ def render_business_insights():
     queries = {
         "Promotional Elasticity & Lift": {
             "file": "promo_elasticity.sql",
+            "summary_file": "promo_elasticity_summary.parquet",
             "summary": (
                 "Measures empirical promotional lift by store-family post 2014-04-01 "
                 "to optimize promo stock."
@@ -427,6 +425,7 @@ def render_business_insights():
         },
         "Zero-Sales-Day Risk Proxy": {
             "file": "zero_sales_day_proxy.sql",
+            "summary_file": "zero_sales_day_proxy_summary.parquet",
             "summary": (
                 "Identifies fast-moving store departments with elevated zero-sales days "
                 "as an empirical proxy for inventory availability risk."
@@ -434,10 +433,12 @@ def render_business_insights():
         },
         "Weekly S&OP Multi-Source View": {
             "file": "weekly_store_family.sql",
+            "summary_file": "weekly_store_family_summary.parquet",
             "summary": "Unifies weekly sales, store foot traffic, oil prices, and civic holidays.",
         },
         "Perishable Demand Volatility Proxy": {
             "file": "perishable_volatility_proxy.sql",
+            "summary_file": "perishable_volatility_summary.parquet",
             "summary": (
                 "Measures demand coefficient of variation (CV) in fresh departments as a "
                 "proxy for perishable volatility exposure."
@@ -461,12 +462,9 @@ def render_business_insights():
     with st.expander("View SQL Definition", expanded=False):
         st.code(sql_text, language="sql")
 
-    # Execute and display results
-    con = get_duckdb_con()
-    try:
-        with st.spinner("Executing query in DuckDB..."):
-            res_df = con.execute(sql_text).df()
-
+    # Display results from precomputed tracked aggregate (< 3 MB total)
+    res_df = load_sql_summary(q_info["summary_file"])
+    if not res_df.empty:
         st.markdown(f"**Returned Records:** `{len(res_df):,}` rows")
         st.dataframe(res_df.head(200), use_container_width=True)
 
@@ -477,8 +475,11 @@ def render_business_insights():
             file_name=q_info["file"].replace(".sql", ".csv"),
             mime="text/csv",
         )
-    except Exception as e:
-        st.error(f"Error executing SQL query: {e}")
+    else:
+        st.info(
+            f"Precomputed aggregate `{q_info['summary_file']}` not found. "
+            "Run pipeline stage `reports` to generate tracked summaries."
+        )
 
 
 def main():

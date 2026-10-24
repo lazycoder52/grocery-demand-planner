@@ -130,8 +130,17 @@ pytest && ruff check .
 streamlit run app.py
 ```
 
+### Streamlit Community Cloud Deployment
+The dashboard is pre-configured for deployment to [Streamlit Community Cloud](https://streamlit.io/cloud):
+1. Fork or push this repository to your GitHub account.
+2. Sign in to Streamlit Community Cloud and click **New app**.
+3. Select this repository (`lazycoder52/grocery-demand-planner`), branch (`main`), and set the main file path to `app.py`.
+4. Click **Deploy!**
+
+> **Zero Raw Data Required:** The dashboard loads tracked parquet and JSON aggregates (< 5 MB total in `outputs/` and `metrics/`), requiring no external storage bucket, database connections, or raw CSV downloads to run.
+
 ### Full Pipeline Execution
-To execute the complete end-to-end pipeline (data audit, model training, evaluation, replenishment simulation, causal promo lift, and chart generation):
+To execute the complete end-to-end pipeline (data audit, model training, evaluation, replenishment simulation, promo lift, and chart generation):
 ```bash
 python -m demand_planner.pipeline
 ```

@@ -427,6 +427,11 @@ def _register_reports_stage() -> None:
             update_metrics_json(promo_res, section="promo_lift_analysis")
             log.info("Saved promo lift analysis to metrics.json")
 
+        log.info("Exporting small tracked aggregates for Streamlit app...")
+        from demand_planner.reports.aggregates import export_all_app_aggregates
+
+        export_all_app_aggregates()
+
     STAGES["reports"] = stage_reports
 
 
