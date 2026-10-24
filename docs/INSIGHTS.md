@@ -141,6 +141,9 @@ Under rigorous walk-forward backtesting with out-of-sample residual safety stock
 * **Highest Volatility Series & Anomaly Investigation:**
   * Store 39 `MEATS`: Mean daily sales **240.11 units/day**, daily sales standard deviation **2,223.16 units**, resulting in $\text{CV} = \mathbf{9.2585}$ and volatility exposure index of **2,223.16**.
   * **Investigation of Store 39 MEATS:** Deep-dive analysis confirms this extreme volatility is driven by an isolated **single-day data entry / recording anomaly** on **2016-10-07**, where recorded meat sales spiked to **89,576.36 units** (accounting for 22.2% of the store's entire 4.5-year cumulative meat sales in a single day; the 2nd highest day was 5,519 units). Store 39 has traded continuously since 2013-01-02 (the second day of the entire dataset), confirming that this is an anomalous recording spike, not a store opening effect.
+  * **Sensitivity & Impact on Pipeline:**
+    - *Safety Stock Estimation:* Zero effect. Out-of-sample safety stock residual standard deviation ($\sigma$) is computed over a 56-day lookback window strictly before each forecast origin. For CV Fold 1 (origin 2017-05-11), the lookback window begins 2017-03-16—more than 215 days after the 2016-10-07 spike. The anomaly is completely outside the safety stock estimation window.
+    - *Model Training & WAPE:* Because target sales are transformed via $\log(1 + \text{sales})$, the outlier value is dampened ($\log(1 + 89576.36) = 11.40$ vs median $\log(1 + 250) \approx 5.52$). Replacing the 2016-10-07 spike with median meat sales (250 units) changes Global Holdout WAPE by $-0.1341\%$ (from 15.2888% with spike to 15.1547% without spike) and changes Store 39 MEATS holdout WAPE by $+0.1461\%$ (from 17.1183% with spike to 17.2644% without spike, with mean predictions shifting from 187.15 to 188.12 vs 173.86 actuals). It is retained in benchmark pipelines as an audited historical dataset artifact.
 
 ---
 
@@ -148,11 +151,13 @@ Under rigorous walk-forward backtesting with out-of-sample residual safety stock
 
 ### Sample Size Arithmetic
 * **Series $\times$ Time Breakdown:**
-  $$\text{54 stores} \times \text{33 families} = \text{1,729 active positive-sales series}$$
-  Across **1,230 calendar days** (from 2014-04-01 to 2017-08-15, excluding Dec 25 closures), this yields:
-  * Exactly **1,637,596 positive-sales series-days**
-  * Exactly **60,647 series-months**
-  * Excluding zero-sales days, pre-opening dates, and holiday closures isolates the *intensive margin* of promotional demand.
+  * Total Cartesian product: $54 \text{ stores} \times 33 \text{ families} = \mathbf{1,782 \text{ potential series}}$.
+  * Exactly **53 series** have never sold a single unit across the entire dataset history (zero sales on every date: 28 in `BOOKS`, 12 in `BABY CARE`, 10 in `LADIESWEAR`, 3 in `LAWN AND GARDEN`).
+  * Exactly **1,729 series** have positive sales recorded post 2014-04-01.
+  * Across **1,230 calendar days** (from 2014-04-01 to 2017-08-15, excluding Dec 25 closures), filtering to active post-store-opening dates and positive sales days ($\text{sales} > 0$) yields:
+    * Exactly **1,637,596 positive-sales series-days**
+    * Exactly **60,647 series-months**
+    * Excluding zero-sales days, pre-opening dates, and holiday closures isolates the *intensive margin* of promotional demand.
 
 ### Exact Regression Specification
 * **Outcome:** $\log(\text{sales})$ in daily positive physical units ($\text{sales} > 0$).
@@ -162,24 +167,25 @@ Under rigorous walk-forward backtesting with out-of-sample residual safety stock
 * **Clustering:** Clustered by store (54 clusters) via cluster bootstrap with 95% confidence intervals.
 * **Sample Window:** 2014-04-01 to 2017-08-15 (1,637,596 positive-sales series-days).
 
-### Exploratory Family Results & Reliability Criteria
-All per-family promotional lift results are designated as **exploratory only**. To avoid misleading conclusions, categories are audited for statistical reliability:
-* **Unreliable Categories:**
-  * `SCHOOL AND OFFICE SUPPLIES` (+270.37% lift) is driven by extreme seasonal back-to-school purchasing spikes in coastal and sierra regions (March/April and August/September) coinciding with promotional campaigns, confounding promotional elasticity with seasonal calendar demand.
-  * Categories with sparse promotional support ($< 0.5\%$ promotional days) or insufficient observations (`HARDWARE` with 0.36% promo share, `MAGAZINES` with 0.41%, `HOME APPLIANCES` with 0.34%, and `BOOKS` with 0% promo support) have unstable estimators and wide confidence intervals. They are reported as **Unreliable** instead of substantive findings.
-* **Reliable High-Volume Core Grocery Families:**
+### Exploratory Family Results & Pre-Specified Support Rule
+All per-family promotional lift results are designated as **exploratory only**. To separate stable estimations from noisy low-support series, we apply a pre-specified promotional support rule:
+* **Pre-Specified Support Threshold:** A family must have at least **1,000 positive-sales promotional days** AND at least **2.0% promotional day share** across the network to be considered statistically reliable for exploratory reporting.
+* **Unreliable Categories (Failing Support Threshold):**
+  * Categories failing this threshold (`BOOKS` with 0 promo days / 0.0%, `HOME APPLIANCES` with 58 days / 0.34%, `HARDWARE` with 132 days / 0.36%, `MAGAZINES` with 159 days / 0.41%, `BABY CARE` with 53 days / 1.00%, `LADIESWEAR` with 460 days / 1.34%, `PLAYERS AND ELECTRONICS` with 848 days / 1.79%) have sparse promotional data and wide estimators. They are reported as **Unreliable (insufficient support)** instead of substantive findings.
+* **High-Volume Core Grocery Families (Meeting Support Threshold):**
   * `GROCERY I`: **+2.67%** lift [95% CI: +0.96%, +4.25%], 91.00% promo day share (56,885 promo days).
   * `BEVERAGES`: **+2.44%** lift [95% CI: +0.38%, +4.30%], 82.72% promo day share (51,705 promo days).
   * `DAIRY`: **+3.47%** lift [95% CI: +2.27%, +4.81%], 73.57% promo day share (45,985 promo days).
   * `DELI`: **+3.62%** lift [95% CI: +2.35%, +4.94%], 63.16% promo day share (39,479 promo days).
   * `MEATS`: **+18.98%** lift [95% CI: +15.82%, +21.90%], 36.32% promo day share (22,704 promo days).
   * `POULTRY`: **+9.55%** lift [95% CI: +7.52%, +11.29%], 31.52% promo day share (19,704 promo days).
+  * `SCHOOL AND OFFICE SUPPLIES`: **+270.37%** lift [95% CI: +215.12%, +335.25%], 17.77% promo day share (4,054 promo days; designated as exploratory).
 
 ---
 
 ## 6. Pre-Specified Primary Family Comparison Tables (`metrics.json` `replenishment_simulation`)
 
-The benchmark pre-specified $m = 13$ primary family comparisons at target 99.0% on-shelf fill rate for both lead times. Bootstrap iterations $B = 1,000$, with empirical resolution limit $\le 1/B = 0.001$. Multiple testing is controlled family-wise using the step-down Holm-Bonferroni procedure at $\text{FWER} \alpha = 0.05$. A family is classified as a **Primary Finding** only if its Holm-adjusted p-value is $\le 0.05$ and both Series and Time-Block 95% bootstrap confidence intervals strictly exclude 0.
+The benchmark pre-specified $m = 13$ primary family comparisons at target 99.0% on-shelf fill rate for both lead times. Bootstrap iterations $B = 1,000$, with empirical resolution limit $\le 1/B = 0.001$. Raw and Holm-adjusted p-values are reported as $\le \text{value}$ (bootstrap resolution $1/B$). Multiple testing is controlled family-wise using the step-down Holm-Bonferroni procedure at $\text{FWER} \alpha = 0.05$. A family is classified as a **Primary Finding** only if its Holm-adjusted p-value is $\le 0.05$ and both Series and Time-Block 95% bootstrap confidence intervals strictly exclude 0.
 
 ### Lead Time $L = 3$ Days (Target 99.0% Fill Rate, $m = 13$ Pre-Specified Families)
 | Family | Status | Diff vs S.Naive (%) | Series 95% CI | Time-Block 95% CI | Raw p | Holm-Adj p | Finding Label |

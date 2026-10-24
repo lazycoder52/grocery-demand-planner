@@ -98,7 +98,7 @@ To prevent false discovery from multiple comparisons, one primary comparison was
 * **Treatment Arm:** Weekly replenishment quantities generated via LightGBM Point forecasts with out-of-sample safety stock ($R=7, L=3$).
 * **Control Arm:** Existing 7-day seasonal naive heuristic replenishment schedule.
 * **On-Hand Inventory Requirement:** In-store pilot evaluation of true fill rate strictly requires physical on-hand inventory counts and out-of-stock tracking, rather than POS transaction records alone (which cannot distinguish between zero consumer demand and unobserved stockouts).
-* **Statistical Power & Design Note:** With 5 treatment vs. 5 control stores observed over 6 weekly replenishment cycles, the cluster-randomized design operates with 8 cluster degrees of freedom. A basic power calculation indicates the pilot is powered to detect medium-to-large store-level inventory differences (minimum detectable effect size $\approx 10\text{--}12\%$ reduction at $\alpha=0.05$, $80\%$ power, assuming intra-cluster correlation $\rho \approx 0.05$).
+* **Design Degrees of Freedom:** With 5 treatment vs. 5 control stores observed over 6 weekly replenishment cycles, the cluster-randomized design operates with 8 cluster degrees of freedom.
 * **Proposed Pilot Hypothesis Thresholds:**
   1. $\ge 10\%$ reduction in average working capital tied to stock on shelf (primary working capital hypothesis).
   2. Non-inferior customer on-shelf availability ($\ge 99.0\%$ measured fill rate from daily physical on-shelf audits; non-inferiority margin 0.5 percentage points).

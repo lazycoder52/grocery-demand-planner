@@ -330,12 +330,14 @@ def run_promo_lift_analysis(
         c_high = float(np.percentile(boot_fam, 97.5)) if boot_fam else 0.0
         sig = c_low > 0 or c_high < 0
 
-        # Assess plausibility/reliability
-        if fam_promo_share < 0.5:
-            finding_status = "Unreliable (sparse promotion <0.5%)"
-            is_reliable = False
-        elif l_ym_fam > 150.0:
-            finding_status = "Unreliable (extreme seasonal elasticity spike)"
+        # Stated pre-specified support rule: minimum 1,000 promo days AND >= 2.0% promo share
+        min_promo_days = 1000
+        min_promo_share_pct = 2.0
+        if n_promo_days < min_promo_days or fam_promo_share < min_promo_share_pct:
+            finding_status = (
+                f"Unreliable (insufficient support: <{min_promo_days} promo days or "
+                f"<{min_promo_share_pct:.1f}% share)"
+            )
             is_reliable = False
         else:
             finding_status = "Exploratory"
