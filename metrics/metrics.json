@@ -8915,314 +8915,362 @@
       "start_date": "2014-04-01",
       "end_date": "2017-08-15",
       "n_days": 1233,
+      "sample_size_rows": 2191860,
       "note": "Promotion tracking in Corporaci\u00f3n Favorita began 2014-04-01; earlier dates excluded."
     },
-    "methodology": "Store-family fixed effects log-linear regression with day-of-week and month controls. Inference via 95% store-clustered bootstrap (54 clusters) with 500 resamples.",
-    "overall_lift_pct": 171.17,
-    "ci_95_overall_low": 117.76,
-    "ci_95_overall_high": 256.45,
+    "exact_regression_specification": {
+      "outcome": "log(sales + 1) in daily physical units",
+      "regressor": "I(onpromotion > 0), binary active promo indicator (units: 0 or 1)",
+      "fixed_effects": "Store x Family fixed effects (within-series demeaning, 1,782 series)",
+      "controls": "Day-of-week indicators (6 dummies) and Year-Month fixed effects (40 dummies)",
+      "clustering": "Clustered by store (54 clusters) via cluster bootstrap",
+      "sample_window": "2014-04-01 to 2017-08-15 (2,191,860 rows)",
+      "observational_note": "Observational statistical association; category managers scheduled promotions endogenously. The unadjusted +171.17% figure arose from omitting year-month FE, which caused the promotion dummy to absorb multi-year secular store/sales growth."
+    },
+    "overall_lift_pct": 107.68,
+    "ci_95_overall_low": 72.29,
+    "ci_95_overall_high": 155.26,
+    "unadjusted_overall_lift_pct_without_time_fe": 171.17,
     "top_5_promo_sensitive_families": [
       {
-        "family": "PRODUCE",
-        "lift_pct": 1505.29,
-        "ci_95_low": 1187.72,
-        "ci_95_high": 1958.27,
-        "promo_share_pct": 46.35,
-        "is_statistically_significant": true
-      },
-      {
         "family": "GROCERY I",
-        "lift_pct": 1137.42,
-        "ci_95_low": 308.25,
-        "ci_95_high": 3402.35,
+        "lift_pct": 1592.95,
+        "lift_before_time_fe_pct": 1137.42,
+        "ci_95_low": 391.69,
+        "ci_95_high": 4718.39,
         "promo_share_pct": 85.65,
         "is_statistically_significant": true
       },
       {
-        "family": "HOME CARE",
-        "lift_pct": 1023.12,
-        "ci_95_low": 853.79,
-        "ci_95_high": 1242.93,
-        "promo_share_pct": 48.99,
-        "is_statistically_significant": true
-      },
-      {
         "family": "SCHOOL AND OFFICE SUPPLIES",
-        "lift_pct": 803.05,
-        "ci_95_low": 649.48,
-        "ci_95_high": 941.32,
+        "lift_pct": 602.95,
+        "lift_before_time_fe_pct": 803.05,
+        "ci_95_low": 508.61,
+        "ci_95_high": 693.32,
         "promo_share_pct": 6.1,
         "is_statistically_significant": true
       },
       {
         "family": "BEVERAGES",
-        "lift_pct": 531.1,
-        "ci_95_low": 216.95,
-        "ci_95_high": 1285.84,
-        "promo_share_pct": 77.85,
-        "is_statistically_significant": true
-      }
-    ],
-    "by_family": [
-      {
-        "family": "PRODUCE",
-        "lift_pct": 1505.29,
-        "ci_95_low": 1187.72,
-        "ci_95_high": 1958.27,
-        "promo_share_pct": 46.35,
-        "is_statistically_significant": true
-      },
-      {
-        "family": "GROCERY I",
-        "lift_pct": 1137.42,
-        "ci_95_low": 308.25,
-        "ci_95_high": 3402.35,
-        "promo_share_pct": 85.65,
-        "is_statistically_significant": true
-      },
-      {
-        "family": "HOME CARE",
-        "lift_pct": 1023.12,
-        "ci_95_low": 853.79,
-        "ci_95_high": 1242.93,
-        "promo_share_pct": 48.99,
-        "is_statistically_significant": true
-      },
-      {
-        "family": "SCHOOL AND OFFICE SUPPLIES",
-        "lift_pct": 803.05,
-        "ci_95_low": 649.48,
-        "ci_95_high": 941.32,
-        "promo_share_pct": 6.1,
-        "is_statistically_significant": true
-      },
-      {
-        "family": "BEVERAGES",
-        "lift_pct": 531.1,
-        "ci_95_low": 216.95,
-        "ci_95_high": 1285.84,
+        "lift_pct": 365.68,
+        "lift_before_time_fe_pct": 531.1,
+        "ci_95_low": 140.93,
+        "ci_95_high": 890.79,
         "promo_share_pct": 77.85,
         "is_statistically_significant": true
       },
       {
         "family": "CLEANING",
-        "lift_pct": 218.57,
-        "ci_95_low": 94.58,
-        "ci_95_high": 506.24,
+        "lift_pct": 197.12,
+        "lift_before_time_fe_pct": 218.57,
+        "ci_95_low": 90.39,
+        "ci_95_high": 401.1,
         "promo_share_pct": 75.13,
         "is_statistically_significant": true
       },
       {
-        "family": "HOME AND KITCHEN II",
-        "lift_pct": 189.93,
-        "ci_95_low": 155.33,
-        "ci_95_high": 227.45,
-        "promo_share_pct": 28.58,
+        "family": "DAIRY",
+        "lift_pct": 133.52,
+        "lift_before_time_fe_pct": 161.31,
+        "ci_95_low": 62.46,
+        "ci_95_high": 249.17,
+        "promo_share_pct": 69.23,
+        "is_statistically_significant": true
+      }
+    ],
+    "by_family": [
+      {
+        "family": "GROCERY I",
+        "lift_pct": 1592.95,
+        "lift_before_time_fe_pct": 1137.42,
+        "ci_95_low": 391.69,
+        "ci_95_high": 4718.39,
+        "promo_share_pct": 85.65,
+        "is_statistically_significant": true
+      },
+      {
+        "family": "SCHOOL AND OFFICE SUPPLIES",
+        "lift_pct": 602.95,
+        "lift_before_time_fe_pct": 803.05,
+        "ci_95_low": 508.61,
+        "ci_95_high": 693.32,
+        "promo_share_pct": 6.1,
+        "is_statistically_significant": true
+      },
+      {
+        "family": "BEVERAGES",
+        "lift_pct": 365.68,
+        "lift_before_time_fe_pct": 531.1,
+        "ci_95_low": 140.93,
+        "ci_95_high": 890.79,
+        "promo_share_pct": 77.85,
+        "is_statistically_significant": true
+      },
+      {
+        "family": "CLEANING",
+        "lift_pct": 197.12,
+        "lift_before_time_fe_pct": 218.57,
+        "ci_95_low": 90.39,
+        "ci_95_high": 401.1,
+        "promo_share_pct": 75.13,
         "is_statistically_significant": true
       },
       {
         "family": "DAIRY",
-        "lift_pct": 161.31,
-        "ci_95_low": 72.4,
-        "ci_95_high": 335.72,
+        "lift_pct": 133.52,
+        "lift_before_time_fe_pct": 161.31,
+        "ci_95_low": 62.46,
+        "ci_95_high": 249.17,
         "promo_share_pct": 69.23,
         "is_statistically_significant": true
       },
       {
-        "family": "LADIESWEAR",
-        "lift_pct": 139.72,
-        "ci_95_low": 89.02,
-        "ci_95_high": 215.77,
-        "promo_share_pct": 0.69,
-        "is_statistically_significant": true
-      },
-      {
-        "family": "PLAYERS AND ELECTRONICS",
-        "lift_pct": 136.86,
-        "ci_95_low": 109.69,
-        "ci_95_high": 167.89,
-        "promo_share_pct": 1.28,
-        "is_statistically_significant": true
-      },
-      {
-        "family": "HOME AND KITCHEN I",
-        "lift_pct": 134.08,
-        "ci_95_low": 108.63,
-        "ci_95_high": 164.01,
-        "promo_share_pct": 21.98,
-        "is_statistically_significant": true
-      },
-      {
-        "family": "LIQUOR,WINE,BEER",
-        "lift_pct": 129.74,
-        "ci_95_low": 96.05,
-        "ci_95_high": 172.72,
-        "promo_share_pct": 26.98,
-        "is_statistically_significant": true
-      },
-      {
-        "family": "PET SUPPLIES",
-        "lift_pct": 127.88,
-        "ci_95_low": 113.73,
-        "ci_95_high": 143.47,
-        "promo_share_pct": 4.6,
+        "family": "PRODUCE",
+        "lift_pct": 111.58,
+        "lift_before_time_fe_pct": 1505.29,
+        "ci_95_low": 56.1,
+        "ci_95_high": 207.37,
+        "promo_share_pct": 46.35,
         "is_statistically_significant": true
       },
       {
         "family": "BABY CARE",
-        "lift_pct": 117.46,
-        "ci_95_low": 87.41,
-        "ci_95_high": 134.83,
+        "lift_pct": 102.72,
+        "lift_before_time_fe_pct": 117.46,
+        "ci_95_low": 74.43,
+        "ci_95_high": 122.12,
         "promo_share_pct": 0.08,
         "is_statistically_significant": true
       },
       {
-        "family": "BREAD/BAKERY",
-        "lift_pct": 92.88,
-        "ci_95_low": 42.53,
-        "ci_95_high": 185.41,
-        "promo_share_pct": 58.56,
+        "family": "HOME CARE",
+        "lift_pct": 93.61,
+        "lift_before_time_fe_pct": 1023.12,
+        "ci_95_low": 45.14,
+        "ci_95_high": 170.88,
+        "promo_share_pct": 48.99,
         "is_statistically_significant": true
       },
       {
-        "family": "LAWN AND GARDEN",
-        "lift_pct": 92.07,
-        "ci_95_low": 70.46,
-        "ci_95_high": 120.45,
-        "promo_share_pct": 6.37,
-        "is_statistically_significant": true
-      },
-      {
-        "family": "PERSONAL CARE",
-        "lift_pct": 88.02,
-        "ci_95_low": 37.28,
-        "ci_95_high": 162.53,
-        "promo_share_pct": 57.56,
+        "family": "LIQUOR,WINE,BEER",
+        "lift_pct": 86.38,
+        "lift_before_time_fe_pct": 129.74,
+        "ci_95_low": 67.66,
+        "ci_95_high": 111.64,
+        "promo_share_pct": 26.98,
         "is_statistically_significant": true
       },
       {
         "family": "DELI",
-        "lift_pct": 87.84,
-        "ci_95_low": 38.84,
-        "ci_95_high": 163.64,
+        "lift_pct": 79.08,
+        "lift_before_time_fe_pct": 87.84,
+        "ci_95_low": 36.67,
+        "ci_95_high": 139.95,
         "promo_share_pct": 59.44,
         "is_statistically_significant": true
       },
       {
-        "family": "MAGAZINES",
-        "lift_pct": 84.75,
-        "ci_95_low": 66.09,
-        "ci_95_high": 99.55,
-        "promo_share_pct": 0.24,
-        "is_statistically_significant": true
-      },
-      {
-        "family": "BEAUTY",
-        "lift_pct": 80.54,
-        "ci_95_low": 70.73,
-        "ci_95_high": 92.69,
-        "promo_share_pct": 16.74,
+        "family": "BREAD/BAKERY",
+        "lift_pct": 78.29,
+        "lift_before_time_fe_pct": 92.88,
+        "ci_95_low": 36.23,
+        "ci_95_high": 143.24,
+        "promo_share_pct": 58.56,
         "is_statistically_significant": true
       },
       {
         "family": "HARDWARE",
-        "lift_pct": 77.87,
-        "ci_95_low": 66.53,
-        "ci_95_high": 91.67,
+        "lift_pct": 75.73,
+        "lift_before_time_fe_pct": 77.87,
+        "ci_95_low": 63.86,
+        "ci_95_high": 88.55,
         "promo_share_pct": 0.2,
         "is_statistically_significant": true
       },
       {
-        "family": "FROZEN FOODS",
-        "lift_pct": 76.08,
-        "ci_95_low": 42.29,
-        "ci_95_high": 134.08,
-        "promo_share_pct": 53.93,
+        "family": "PERSONAL CARE",
+        "lift_pct": 73.15,
+        "lift_before_time_fe_pct": 88.02,
+        "ci_95_low": 36.19,
+        "ci_95_high": 124.17,
+        "promo_share_pct": 57.56,
         "is_statistically_significant": true
       },
       {
         "family": "HOME APPLIANCES",
-        "lift_pct": 75.55,
-        "ci_95_low": 61.83,
-        "ci_95_high": 87.65,
+        "lift_pct": 70.25,
+        "lift_before_time_fe_pct": 75.55,
+        "ci_95_low": 55.73,
+        "ci_95_high": 83.93,
         "promo_share_pct": 0.09,
         "is_statistically_significant": true
       },
       {
-        "family": "CELEBRATION",
-        "lift_pct": 74.05,
-        "ci_95_low": 64.98,
-        "ci_95_high": 85.27,
-        "promo_share_pct": 4.83,
+        "family": "HOME AND KITCHEN II",
+        "lift_pct": 67.16,
+        "lift_before_time_fe_pct": 189.93,
+        "ci_95_low": 51.85,
+        "ci_95_high": 84.28,
+        "promo_share_pct": 28.58,
+        "is_statistically_significant": true
+      },
+      {
+        "family": "FROZEN FOODS",
+        "lift_pct": 64.66,
+        "lift_before_time_fe_pct": 76.08,
+        "ci_95_low": 39.94,
+        "ci_95_high": 101.37,
+        "promo_share_pct": 53.93,
+        "is_statistically_significant": true
+      },
+      {
+        "family": "LAWN AND GARDEN",
+        "lift_pct": 64.62,
+        "lift_before_time_fe_pct": 92.07,
+        "ci_95_low": 51.61,
+        "ci_95_high": 79.89,
+        "promo_share_pct": 6.37,
+        "is_statistically_significant": true
+      },
+      {
+        "family": "LADIESWEAR",
+        "lift_pct": 63.48,
+        "lift_before_time_fe_pct": 139.72,
+        "ci_95_low": 39.32,
+        "ci_95_high": 101.59,
+        "promo_share_pct": 0.69,
+        "is_statistically_significant": true
+      },
+      {
+        "family": "BEAUTY",
+        "lift_pct": 57.16,
+        "lift_before_time_fe_pct": 80.54,
+        "ci_95_low": 49.05,
+        "ci_95_high": 66.03,
+        "promo_share_pct": 16.74,
         "is_statistically_significant": true
       },
       {
         "family": "MEATS",
-        "lift_pct": 59.82,
-        "ci_95_low": 36.46,
-        "ci_95_high": 93.95,
+        "lift_pct": 54.5,
+        "lift_before_time_fe_pct": 59.82,
+        "ci_95_low": 34.45,
+        "ci_95_high": 78.1,
         "promo_share_pct": 32.32,
         "is_statistically_significant": true
       },
       {
-        "family": "PREPARED FOODS",
-        "lift_pct": 59.7,
-        "ci_95_low": 31.48,
-        "ci_95_high": 99.68,
-        "promo_share_pct": 26.62,
-        "is_statistically_significant": true
-      },
-      {
-        "family": "EGGS",
-        "lift_pct": 53.17,
-        "ci_95_low": 29.56,
-        "ci_95_high": 87.46,
-        "promo_share_pct": 41.37,
-        "is_statistically_significant": true
-      },
-      {
         "family": "POULTRY",
-        "lift_pct": 51.99,
-        "ci_95_low": 28.33,
-        "ci_95_high": 90.66,
+        "lift_pct": 54.19,
+        "lift_before_time_fe_pct": 51.99,
+        "ci_95_low": 30.31,
+        "ci_95_high": 86.86,
         "promo_share_pct": 29.67,
         "is_statistically_significant": true
       },
       {
-        "family": "SEAFOOD",
-        "lift_pct": 47.66,
-        "ci_95_low": 32.85,
-        "ci_95_high": 66.01,
-        "promo_share_pct": 24.94,
+        "family": "HOME AND KITCHEN I",
+        "lift_pct": 50.77,
+        "lift_before_time_fe_pct": 134.08,
+        "ci_95_low": 39.7,
+        "ci_95_high": 64.85,
+        "promo_share_pct": 21.98,
+        "is_statistically_significant": true
+      },
+      {
+        "family": "PET SUPPLIES",
+        "lift_pct": 48.87,
+        "lift_before_time_fe_pct": 127.88,
+        "ci_95_low": 38.8,
+        "ci_95_high": 58.33,
+        "promo_share_pct": 4.6,
+        "is_statistically_significant": true
+      },
+      {
+        "family": "EGGS",
+        "lift_pct": 46.05,
+        "lift_before_time_fe_pct": 53.17,
+        "ci_95_low": 27.18,
+        "ci_95_high": 68.28,
+        "promo_share_pct": 41.37,
         "is_statistically_significant": true
       },
       {
         "family": "LINGERIE",
-        "lift_pct": 46.12,
-        "ci_95_low": 35.04,
-        "ci_95_high": 58.46,
+        "lift_pct": 42.64,
+        "lift_before_time_fe_pct": 46.12,
+        "ci_95_low": 33.98,
+        "ci_95_high": 51.92,
         "promo_share_pct": 3.2,
         "is_statistically_significant": true
       },
       {
-        "family": "GROCERY II",
-        "lift_pct": 45.87,
-        "ci_95_low": 30.95,
-        "ci_95_high": 65.06,
-        "promo_share_pct": 6.24,
+        "family": "PREPARED FOODS",
+        "lift_pct": 41.75,
+        "lift_before_time_fe_pct": 59.7,
+        "ci_95_low": 24.43,
+        "ci_95_high": 64.91,
+        "promo_share_pct": 26.62,
+        "is_statistically_significant": true
+      },
+      {
+        "family": "SEAFOOD",
+        "lift_pct": 39.07,
+        "lift_before_time_fe_pct": 47.66,
+        "ci_95_low": 28.34,
+        "ci_95_high": 50.92,
+        "promo_share_pct": 24.94,
+        "is_statistically_significant": true
+      },
+      {
+        "family": "PLAYERS AND ELECTRONICS",
+        "lift_pct": 34.92,
+        "lift_before_time_fe_pct": 136.86,
+        "ci_95_low": 23.66,
+        "ci_95_high": 49.67,
+        "promo_share_pct": 1.28,
         "is_statistically_significant": true
       },
       {
         "family": "AUTOMOTIVE",
-        "lift_pct": 40.79,
-        "ci_95_low": 30.36,
-        "ci_95_high": 54.71,
+        "lift_pct": 32.96,
+        "lift_before_time_fe_pct": 40.79,
+        "ci_95_low": 25.82,
+        "ci_95_high": 45.39,
         "promo_share_pct": 4.6,
+        "is_statistically_significant": true
+      },
+      {
+        "family": "GROCERY II",
+        "lift_pct": 30.13,
+        "lift_before_time_fe_pct": 45.87,
+        "ci_95_low": 20.59,
+        "ci_95_high": 43.1,
+        "promo_share_pct": 6.24,
+        "is_statistically_significant": true
+      },
+      {
+        "family": "CELEBRATION",
+        "lift_pct": 28.32,
+        "lift_before_time_fe_pct": 74.05,
+        "ci_95_low": 21.4,
+        "ci_95_high": 36.4,
+        "promo_share_pct": 4.83,
+        "is_statistically_significant": true
+      },
+      {
+        "family": "MAGAZINES",
+        "lift_pct": 20.68,
+        "lift_before_time_fe_pct": 84.75,
+        "ci_95_low": 10.8,
+        "ci_95_high": 32.67,
+        "promo_share_pct": 0.24,
         "is_statistically_significant": true
       },
       {
         "family": "BOOKS",
         "lift_pct": 0.0,
+        "lift_before_time_fe_pct": 0.0,
         "ci_95_low": 0.0,
         "ci_95_high": 0.0,
         "promo_share_pct": 0.0,
