@@ -1045,11 +1045,15 @@
         },
         "moving_average_28d": {
           "mean_wape": 23.6522,
-          "std_wape": 1.0258
+          "std_wape": 1.0258,
+          "mean_bias": 0.8049,
+          "mean_mae": 114.2649
         },
         "naive": {
           "mean_wape": 27.833,
-          "std_wape": 2.6697
+          "std_wape": 2.6697,
+          "mean_bias": -10.8106,
+          "mean_mae": 134.7287
         },
         "forecast_value_added_vs_seasonal_naive": {
           "mean_wape_reduction_pts": 2.8402,

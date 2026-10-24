@@ -17,8 +17,8 @@ Evaluated across **5 expanding-window folds** (16-day horizons; origins stepping
 | :--- | :---: | :---: | :---: | :---: | :--- |
 | **LightGBM Global Regressor** | **13.49%** | **±0.98%** | **-0.76%** | **65.21** | **Selected Model** |
 | Seasonal Naive (7-Day Lag) | 16.33% | ±1.29% | -1.58% | 78.99 | Retail Benchmark |
-| 28-Day Moving Average | 23.65% | ±1.03% | -0.89% | 114.12 | Moving Average Baseline |
-| Last-Value Naive | 27.83% | ±2.67% | -10.42% | 134.20 | Heuristic Benchmark |
+| 28-Day Moving Average | 23.65% | ±1.03% | +0.80% | 114.26 | Moving Average Baseline |
+| Last-Value Naive | 27.83% | ±2.67% | -10.81% | 134.73 | Heuristic Benchmark |
 
 > **Cross-Validation Forecast Value Added (FVA):** LightGBM consistently outperforms the strongest seasonal baseline across all 5 folds, delivering a mean **+2.84 percentage points** of WAPE reduction (**17.39% relative error reduction**).
 

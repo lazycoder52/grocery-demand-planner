@@ -1,0 +1,502 @@
+{
+  "metrics_json_claims": [
+    {
+      "claim_id": "cv_lightgbm_wape",
+      "json_path": "models.cv_5_fold.mean_metrics.lightgbm.mean_wape",
+      "format": "{:.2f}%",
+      "docs": ["README.md", "docs/PRODUCT_BRIEF.md"]
+    },
+    {
+      "claim_id": "cv_lightgbm_wape_std",
+      "json_path": "models.cv_5_fold.mean_metrics.lightgbm.std_wape",
+      "format": "{:.2f}%",
+      "docs": ["README.md"]
+    },
+    {
+      "claim_id": "cv_lightgbm_bias",
+      "json_path": "models.cv_5_fold.mean_metrics.lightgbm.mean_bias",
+      "format": "{:.2f}%",
+      "docs": ["README.md"]
+    },
+    {
+      "claim_id": "cv_lightgbm_mae",
+      "json_path": "models.cv_5_fold.mean_metrics.lightgbm.mean_mae",
+      "format": "{:.2f}",
+      "docs": ["README.md"]
+    },
+    {
+      "claim_id": "cv_snaive_wape",
+      "json_path": "models.cv_5_fold.mean_metrics.seasonal_naive_7d.mean_wape",
+      "format": "{:.2f}%",
+      "docs": ["README.md", "docs/PRODUCT_BRIEF.md"]
+    },
+    {
+      "claim_id": "cv_snaive_wape_std",
+      "json_path": "models.cv_5_fold.mean_metrics.seasonal_naive_7d.std_wape",
+      "format": "{:.2f}%",
+      "docs": ["README.md"]
+    },
+    {
+      "claim_id": "cv_snaive_bias",
+      "json_path": "models.cv_5_fold.mean_metrics.seasonal_naive_7d.mean_bias",
+      "format": "{:.2f}%",
+      "docs": ["README.md"]
+    },
+    {
+      "claim_id": "cv_snaive_mae",
+      "json_path": "models.cv_5_fold.mean_metrics.seasonal_naive_7d.mean_mae",
+      "format": "{:.2f}",
+      "docs": ["README.md"]
+    },
+    {
+      "claim_id": "cv_ma28_wape",
+      "json_path": "models.cv_5_fold.mean_metrics.moving_average_28d.mean_wape",
+      "format": "{:.2f}%",
+      "docs": ["README.md"]
+    },
+    {
+      "claim_id": "cv_ma28_wape_std",
+      "json_path": "models.cv_5_fold.mean_metrics.moving_average_28d.std_wape",
+      "format": "{:.2f}%",
+      "docs": ["README.md"]
+    },
+    {
+      "claim_id": "cv_ma28_bias",
+      "json_path": "models.cv_5_fold.mean_metrics.moving_average_28d.mean_bias",
+      "format": "{:+.2f}%",
+      "docs": ["README.md"]
+    },
+    {
+      "claim_id": "cv_ma28_mae",
+      "json_path": "models.cv_5_fold.mean_metrics.moving_average_28d.mean_mae",
+      "format": "{:.2f}",
+      "docs": ["README.md"]
+    },
+    {
+      "claim_id": "cv_naive_wape",
+      "json_path": "models.cv_5_fold.mean_metrics.naive.mean_wape",
+      "format": "{:.2f}%",
+      "docs": ["README.md"]
+    },
+    {
+      "claim_id": "cv_naive_wape_std",
+      "json_path": "models.cv_5_fold.mean_metrics.naive.std_wape",
+      "format": "{:.2f}%",
+      "docs": ["README.md"]
+    },
+    {
+      "claim_id": "cv_naive_bias",
+      "json_path": "models.cv_5_fold.mean_metrics.naive.mean_bias",
+      "format": "{:+.2f}%",
+      "docs": ["README.md"]
+    },
+    {
+      "claim_id": "cv_naive_mae",
+      "json_path": "models.cv_5_fold.mean_metrics.naive.mean_mae",
+      "format": "{:.2f}",
+      "docs": ["README.md"]
+    },
+    {
+      "claim_id": "cv_fva_wape_reduction_pts",
+      "json_path": "models.cv_5_fold.mean_metrics.forecast_value_added_vs_seasonal_naive.mean_wape_reduction_pts",
+      "format": "{:.2f}",
+      "docs": ["README.md", "docs/PRODUCT_BRIEF.md"]
+    },
+    {
+      "claim_id": "cv_fva_relative_reduction_pct",
+      "json_path": "models.cv_5_fold.mean_metrics.forecast_value_added_vs_seasonal_naive.relative_error_reduction_pct",
+      "format": "{:.2f}%",
+      "docs": ["README.md", "docs/PRODUCT_BRIEF.md"]
+    },
+    {
+      "claim_id": "holdout_lightgbm_wape",
+      "json_path": "models.holdout_confirmation.models.lightgbm.wape",
+      "format": "{:.2f}%",
+      "docs": ["README.md", "docs/PRODUCT_BRIEF.md"]
+    },
+    {
+      "claim_id": "holdout_lightgbm_bias",
+      "json_path": "models.holdout_confirmation.models.lightgbm.bias",
+      "format": "{:+.2f}%",
+      "docs": ["README.md"]
+    },
+    {
+      "claim_id": "holdout_lightgbm_mae",
+      "json_path": "models.holdout_confirmation.models.lightgbm.mae",
+      "format": "{:.2f}",
+      "docs": ["README.md"]
+    },
+    {
+      "claim_id": "holdout_lightgbm_rmsle",
+      "json_path": "models.holdout_confirmation.models.lightgbm.rmsle",
+      "format": "{:.4f}",
+      "docs": ["README.md"]
+    },
+    {
+      "claim_id": "holdout_snaive_wape",
+      "json_path": "models.holdout_confirmation.models.seasonal_naive_7d.wape",
+      "format": "{:.2f}%",
+      "docs": ["README.md", "docs/PRODUCT_BRIEF.md"]
+    },
+    {
+      "claim_id": "holdout_snaive_bias",
+      "json_path": "models.holdout_confirmation.models.seasonal_naive_7d.bias",
+      "format": "{:+.2f}%",
+      "docs": ["README.md"]
+    },
+    {
+      "claim_id": "holdout_snaive_mae",
+      "json_path": "models.holdout_confirmation.models.seasonal_naive_7d.mae",
+      "format": "{:.2f}",
+      "docs": ["README.md"]
+    },
+    {
+      "claim_id": "holdout_snaive_rmsle",
+      "json_path": "models.holdout_confirmation.models.seasonal_naive_7d.rmsle",
+      "format": "{:.4f}",
+      "docs": ["README.md"]
+    },
+    {
+      "claim_id": "holdout_ma28_wape",
+      "json_path": "models.holdout_confirmation.models.moving_average_28d.wape",
+      "format": "{:.2f}%",
+      "docs": ["README.md"]
+    },
+    {
+      "claim_id": "holdout_ma28_bias",
+      "json_path": "models.holdout_confirmation.models.moving_average_28d.bias",
+      "format": "{:+.2f}%",
+      "docs": ["README.md"]
+    },
+    {
+      "claim_id": "holdout_ma28_mae",
+      "json_path": "models.holdout_confirmation.models.moving_average_28d.mae",
+      "format": "{:.2f}",
+      "docs": ["README.md"]
+    },
+    {
+      "claim_id": "holdout_ma28_rmsle",
+      "json_path": "models.holdout_confirmation.models.moving_average_28d.rmsle",
+      "format": "{:.4f}",
+      "docs": ["README.md"]
+    },
+    {
+      "claim_id": "holdout_naive_wape",
+      "json_path": "models.holdout_confirmation.models.naive.wape",
+      "format": "{:.2f}%",
+      "docs": ["README.md"]
+    },
+    {
+      "claim_id": "holdout_naive_bias",
+      "json_path": "models.holdout_confirmation.models.naive.bias",
+      "format": "{:+.2f}%",
+      "docs": ["README.md"]
+    },
+    {
+      "claim_id": "holdout_naive_mae",
+      "json_path": "models.holdout_confirmation.models.naive.mae",
+      "format": "{:.2f}",
+      "docs": ["README.md"]
+    },
+    {
+      "claim_id": "holdout_naive_rmsle",
+      "json_path": "models.holdout_confirmation.models.naive.rmsle",
+      "format": "{:.4f}",
+      "docs": ["README.md"]
+    },
+    {
+      "claim_id": "holdout_fva_wape_reduction_pts",
+      "json_path": "models.holdout_confirmation.forecast_value_added_vs_seasonal_naive.wape_reduction_percentage_points",
+      "format": "{:.2f}",
+      "docs": ["README.md", "docs/PRODUCT_BRIEF.md"]
+    },
+    {
+      "claim_id": "holdout_fva_relative_reduction_pct",
+      "json_path": "models.holdout_confirmation.forecast_value_added_vs_seasonal_naive.relative_error_reduction_pct",
+      "format": "{:.2f}%",
+      "docs": ["README.md", "docs/PRODUCT_BRIEF.md"]
+    },
+    {
+      "claim_id": "holdout_total_predictions",
+      "json_path": "models.holdout_confirmation.test_n_rows",
+      "format": "{:,}",
+      "docs": ["README.md"]
+    },
+    {
+      "claim_id": "holdout_total_units_sold",
+      "json_path": "models.holdout_confirmation.models.lightgbm.total_actual_sales",
+      "format": "{:,.2f}",
+      "docs": ["README.md"]
+    },
+    {
+      "claim_id": "sim_l3_inventory_diff_pct",
+      "json_path": "replenishment_simulation.target_fill_rate_tradeoffs[lead_time_days=3,target_fill_rate_pct=99.0,Point].pct_difference",
+      "format": "{:.2f}%",
+      "docs": ["README.md", "docs/PRODUCT_BRIEF.md", "docs/INSIGHTS.md"]
+    },
+    {
+      "claim_id": "sim_l3_series_ci",
+      "json_path": "replenishment_simulation.target_fill_rate_tradeoffs[lead_time_days=3,target_fill_rate_pct=99.0,Point].ci_95_series",
+      "format": "[{:.2f}%, {:.2f}%]",
+      "docs": ["README.md", "docs/PRODUCT_BRIEF.md", "docs/INSIGHTS.md"]
+    },
+    {
+      "claim_id": "sim_l3_time_ci",
+      "json_path": "replenishment_simulation.target_fill_rate_tradeoffs[lead_time_days=3,target_fill_rate_pct=99.0,Point].ci_95_time_block",
+      "format": "[{:.2f}%, {:.2f}%]",
+      "docs": ["README.md", "docs/PRODUCT_BRIEF.md", "docs/INSIGHTS.md"]
+    },
+    {
+      "claim_id": "sim_l7_inventory_diff_pct",
+      "json_path": "replenishment_simulation.target_fill_rate_tradeoffs[lead_time_days=7,target_fill_rate_pct=99.0,Point].pct_difference",
+      "format": "{:.2f}%",
+      "docs": ["README.md", "docs/PRODUCT_BRIEF.md", "docs/INSIGHTS.md"]
+    },
+    {
+      "claim_id": "sim_l7_series_ci",
+      "json_path": "replenishment_simulation.target_fill_rate_tradeoffs[lead_time_days=7,target_fill_rate_pct=99.0,Point].ci_95_series",
+      "format": "[{:.2f}%, {:.2f}%]",
+      "docs": ["README.md", "docs/PRODUCT_BRIEF.md", "docs/INSIGHTS.md"]
+    },
+    {
+      "claim_id": "sim_l7_time_ci",
+      "json_path": "replenishment_simulation.target_fill_rate_tradeoffs[lead_time_days=7,target_fill_rate_pct=99.0,Point].ci_95_time_block",
+      "format": "[{:.2f}%, {:.2f}%]",
+      "docs": ["README.md", "docs/PRODUCT_BRIEF.md", "docs/INSIGHTS.md"]
+    },
+    {
+      "claim_id": "sim_window_sum_ratio_w10",
+      "json_path": "replenishment_simulation.empirical_window_sum_error_ratios.L3_W10_ratio_mean",
+      "format": "{:.3f}",
+      "docs": ["README.md", "docs/PRODUCT_BRIEF.md", "docs/INSIGHTS.md"]
+    },
+    {
+      "claim_id": "sim_window_sum_ratio_w14",
+      "json_path": "replenishment_simulation.empirical_window_sum_error_ratios.L7_W14_ratio_mean",
+      "format": "{:.3f}",
+      "docs": ["README.md", "docs/PRODUCT_BRIEF.md", "docs/INSIGHTS.md"]
+    },
+    {
+      "claim_id": "promo_active_series",
+      "json_path": "promo_lift_analysis.sample_size_arithmetic.n_active_series",
+      "format": "{:,}",
+      "docs": ["docs/INSIGHTS.md"]
+    },
+    {
+      "claim_id": "promo_calendar_days",
+      "json_path": "promo_lift_analysis.sample_size_arithmetic.n_calendar_days",
+      "format": "{:,}",
+      "docs": ["docs/INSIGHTS.md"]
+    },
+    {
+      "claim_id": "promo_positive_series_days",
+      "json_path": "promo_lift_analysis.sample_size_arithmetic.sample_size_positive_series_days",
+      "format": "{:,}",
+      "docs": ["docs/INSIGHTS.md"]
+    },
+    {
+      "claim_id": "promo_series_months",
+      "json_path": "promo_lift_analysis.sample_size_arithmetic.n_series_months",
+      "format": "{:,}",
+      "docs": ["docs/INSIGHTS.md"]
+    },
+    {
+      "claim_id": "primary_family_l3_lawn_and_garden_diff",
+      "json_path": "replenishment_simulation.per_family_matched_fill_rate[lead_time_days=3,target_fill_rate_pct=99.0,family=LAWN AND GARDEN].pct_diff_point_vs_snaive",
+      "format": "{:.2f}%",
+      "docs": ["docs/INSIGHTS.md"]
+    },
+    {
+      "claim_id": "primary_family_l7_lawn_and_garden_diff",
+      "json_path": "replenishment_simulation.per_family_matched_fill_rate[lead_time_days=7,target_fill_rate_pct=99.0,family=LAWN AND GARDEN].pct_diff_point_vs_snaive",
+      "format": "{:.2f}%",
+      "docs": ["docs/INSIGHTS.md"]
+    },
+    {
+      "claim_id": "primary_family_l7_deli_diff",
+      "json_path": "replenishment_simulation.per_family_matched_fill_rate[lead_time_days=7,target_fill_rate_pct=99.0,family=DELI].pct_diff_point_vs_snaive",
+      "format": "{:.2f}%",
+      "docs": ["docs/INSIGHTS.md"]
+    },
+    {
+      "claim_id": "primary_family_l7_grocery1_diff",
+      "json_path": "replenishment_simulation.per_family_matched_fill_rate[lead_time_days=7,target_fill_rate_pct=99.0,family=GROCERY I].pct_diff_point_vs_snaive",
+      "format": "{:.2f}%",
+      "docs": ["docs/INSIGHTS.md"]
+    },
+    {
+      "claim_id": "primary_family_l7_poultry_diff",
+      "json_path": "replenishment_simulation.per_family_matched_fill_rate[lead_time_days=7,target_fill_rate_pct=99.0,family=POULTRY].pct_diff_point_vs_snaive",
+      "format": "{:.2f}%",
+      "docs": ["docs/INSIGHTS.md"]
+    },
+    {
+      "claim_id": "primary_family_l7_bread_diff",
+      "json_path": "replenishment_simulation.per_family_matched_fill_rate[lead_time_days=7,target_fill_rate_pct=99.0,family=BREAD/BAKERY].pct_diff_point_vs_snaive",
+      "format": "{:.2f}%",
+      "docs": ["docs/INSIGHTS.md"]
+    },
+    {
+      "claim_id": "primary_family_l7_meats_diff",
+      "json_path": "replenishment_simulation.per_family_matched_fill_rate[lead_time_days=7,target_fill_rate_pct=99.0,family=MEATS].pct_diff_point_vs_snaive",
+      "format": "{:.2f}%",
+      "docs": ["docs/INSIGHTS.md"]
+    }
+  ],
+  "claims_without_json_path_sql_derived": [
+    {
+      "claim_id": "sql_promo_elasticity_evaluated_pairs",
+      "claim_text": "1,395 store-family pairs meet the minimum support thresholds",
+      "source_sql": "sql/promo_elasticity.sql",
+      "parquet_artifact": "outputs/promo_elasticity_summary.parquet",
+      "docs": ["docs/INSIGHTS.md"]
+    },
+    {
+      "claim_id": "sql_promo_elasticity_median_lift",
+      "claim_text": "+32.15%",
+      "source_sql": "sql/promo_elasticity.sql",
+      "parquet_artifact": "outputs/promo_elasticity_summary.parquet",
+      "docs": ["docs/INSIGHTS.md"]
+    },
+    {
+      "claim_id": "sql_promo_elasticity_mean_promo_share",
+      "claim_text": "36.98%",
+      "source_sql": "sql/promo_elasticity.sql",
+      "parquet_artifact": "outputs/promo_elasticity_summary.parquet",
+      "docs": ["docs/INSIGHTS.md"]
+    },
+    {
+      "claim_id": "sql_promo_elasticity_median_promo_share",
+      "claim_text": "32.36%",
+      "source_sql": "sql/promo_elasticity.sql",
+      "parquet_artifact": "outputs/promo_elasticity_summary.parquet",
+      "docs": ["docs/INSIGHTS.md"]
+    },
+    {
+      "claim_id": "sql_zero_sales_day_evaluated_series",
+      "claim_text": "1,782 series meet the 60-day filter",
+      "source_sql": "sql/zero_sales_day_proxy.sql",
+      "parquet_artifact": "outputs/zero_sales_day_proxy_summary.parquet",
+      "docs": ["docs/INSIGHTS.md"]
+    },
+    {
+      "claim_id": "sql_zero_sales_day_low_zero_days",
+      "claim_text": "1,289 series",
+      "source_sql": "sql/zero_sales_day_proxy.sql",
+      "parquet_artifact": "outputs/zero_sales_day_proxy_summary.parquet",
+      "docs": ["docs/INSIGHTS.md"]
+    },
+    {
+      "claim_id": "sql_zero_sales_day_slow_moving_tail",
+      "claim_text": "304 series",
+      "source_sql": "sql/zero_sales_day_proxy.sql",
+      "parquet_artifact": "outputs/zero_sales_day_proxy_summary.parquet",
+      "docs": ["docs/INSIGHTS.md"]
+    },
+    {
+      "claim_id": "sql_zero_sales_day_elevated_proxy",
+      "claim_text": "115 series",
+      "source_sql": "sql/zero_sales_day_proxy.sql",
+      "parquet_artifact": "outputs/zero_sales_day_proxy_summary.parquet",
+      "docs": ["docs/INSIGHTS.md"]
+    },
+    {
+      "claim_id": "sql_zero_sales_day_moderate_proxy",
+      "claim_text": "74 series",
+      "source_sql": "sql/zero_sales_day_proxy.sql",
+      "parquet_artifact": "outputs/zero_sales_day_proxy_summary.parquet",
+      "docs": ["docs/INSIGHTS.md"]
+    },
+    {
+      "claim_id": "sql_zero_sales_day_store8_produce_velocity",
+      "claim_text": "3,061.34 units/day",
+      "source_sql": "sql/zero_sales_day_proxy.sql",
+      "parquet_artifact": "outputs/zero_sales_day_proxy_summary.parquet",
+      "docs": ["docs/INSIGHTS.md"]
+    },
+    {
+      "claim_id": "sql_zero_sales_day_store8_produce_zero_rate",
+      "claim_text": "15.75%",
+      "source_sql": "sql/zero_sales_day_proxy.sql",
+      "parquet_artifact": "outputs/zero_sales_day_proxy_summary.parquet",
+      "docs": ["docs/INSIGHTS.md"]
+    },
+    {
+      "claim_id": "sql_zero_sales_day_store24_produce_velocity",
+      "claim_text": "2,267.36 units/day",
+      "source_sql": "sql/zero_sales_day_proxy.sql",
+      "parquet_artifact": "outputs/zero_sales_day_proxy_summary.parquet",
+      "docs": ["docs/INSIGHTS.md"]
+    },
+    {
+      "claim_id": "sql_zero_sales_day_store24_produce_zero_rate",
+      "claim_text": "13.25%",
+      "source_sql": "sql/zero_sales_day_proxy.sql",
+      "parquet_artifact": "outputs/zero_sales_day_proxy_summary.parquet",
+      "docs": ["docs/INSIGHTS.md"]
+    },
+    {
+      "claim_id": "sql_weekly_store_family_rows",
+      "claim_text": "431,244 store-family-week rows",
+      "source_sql": "sql/weekly_store_family.sql",
+      "parquet_artifact": "outputs/weekly_store_family_summary.parquet",
+      "docs": ["docs/INSIGHTS.md"]
+    },
+    {
+      "claim_id": "sql_weekly_store_family_weeks",
+      "claim_text": "242 continuous calendar weeks",
+      "source_sql": "sql/weekly_store_family.sql",
+      "parquet_artifact": "outputs/weekly_store_family_summary.parquet",
+      "docs": ["docs/INSIGHTS.md"]
+    },
+    {
+      "claim_id": "sql_weekly_store_family_total_units",
+      "claim_text": "1,073,644,970.12 total units",
+      "source_sql": "sql/weekly_store_family.sql",
+      "parquet_artifact": "outputs/weekly_store_family_summary.parquet",
+      "docs": ["docs/INSIGHTS.md"]
+    },
+    {
+      "claim_id": "sql_perishable_volatility_evaluated_series",
+      "claim_text": "1,503 series",
+      "source_sql": "sql/perishable_volatility_proxy.sql",
+      "parquet_artifact": "outputs/perishable_volatility_summary.parquet",
+      "docs": ["docs/INSIGHTS.md"]
+    },
+    {
+      "claim_id": "sql_perishable_volatility_non_perishable_count",
+      "claim_text": "1,073 series",
+      "source_sql": "sql/perishable_volatility_proxy.sql",
+      "parquet_artifact": "outputs/perishable_volatility_summary.parquet",
+      "docs": ["docs/INSIGHTS.md"]
+    },
+    {
+      "claim_id": "sql_perishable_volatility_moderate_count",
+      "claim_text": "349 series",
+      "source_sql": "sql/perishable_volatility_proxy.sql",
+      "parquet_artifact": "outputs/perishable_volatility_summary.parquet",
+      "docs": ["docs/INSIGHTS.md"]
+    },
+    {
+      "claim_id": "sql_perishable_volatility_high_count",
+      "claim_text": "81 series",
+      "source_sql": "sql/perishable_volatility_proxy.sql",
+      "parquet_artifact": "outputs/perishable_volatility_summary.parquet",
+      "docs": ["docs/INSIGHTS.md"]
+    },
+    {
+      "claim_id": "sql_perishable_volatility_store39_meats_cv",
+      "claim_text": "9.2585",
+      "source_sql": "sql/perishable_volatility_proxy.sql",
+      "parquet_artifact": "outputs/perishable_volatility_summary.parquet",
+      "docs": ["docs/INSIGHTS.md"]
+    },
+    {
+      "claim_id": "sql_perishable_volatility_store39_meats_anomaly_spike",
+      "claim_text": "89,576.36 units",
+      "source_sql": "sql/perishable_volatility_proxy.sql",
+      "parquet_artifact": "outputs/perishable_volatility_summary.parquet",
+      "docs": ["docs/INSIGHTS.md"]
+    }
+  ]
+}

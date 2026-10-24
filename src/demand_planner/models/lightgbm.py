@@ -436,10 +436,28 @@ def run_rolling_origin_cv(
             "moving_average_28d": {
                 "mean_wape": float(round(float(np.mean(ma28_wapes)), 4)),
                 "std_wape": float(round(float(np.std(ma28_wapes)), 4)),
+                "mean_bias": float(
+                    round(
+                        float(np.mean([r["moving_average_28d"]["bias"] for r in fold_records])),
+                        4,
+                    )
+                ),
+                "mean_mae": float(
+                    round(
+                        float(np.mean([r["moving_average_28d"]["mae"] for r in fold_records])),
+                        4,
+                    )
+                ),
             },
             "naive": {
                 "mean_wape": float(round(float(np.mean(naive_wapes)), 4)),
                 "std_wape": float(round(float(np.std(naive_wapes)), 4)),
+                "mean_bias": float(
+                    round(float(np.mean([r["naive"]["bias"] for r in fold_records])), 4)
+                ),
+                "mean_mae": float(
+                    round(float(np.mean([r["naive"]["mae"] for r in fold_records])), 4)
+                ),
             },
             "forecast_value_added_vs_seasonal_naive": {
                 "mean_wape_reduction_pts": mean_fva_pts,
