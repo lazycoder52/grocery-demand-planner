@@ -3,13 +3,14 @@
 -- IMPORTANT: Because on-hand inventory balances are unrecorded in the dataset,
 -- zero sales serves strictly as an empirical PROXY for stockout risk, not confirmed stockouts.
 
-WITH store_opening AS (
+WITH series_opening AS (
     SELECT
         store_nbr,
+        family,
         MIN(date) AS first_sale_date
     FROM train
     WHERE sales > 0
-    GROUP BY store_nbr
+    GROUP BY store_nbr, family
 ),
 
 series_stats AS (
@@ -28,8 +29,8 @@ series_stats AS (
     FROM train t
     JOIN stores s
         ON t.store_nbr = s.store_nbr
-    JOIN store_opening so
-        ON t.store_nbr = so.store_nbr
+    JOIN series_opening so
+        ON t.store_nbr = so.store_nbr AND t.family = so.family
     WHERE t.date >= so.first_sale_date
       AND NOT (EXTRACT(month FROM t.date) = 12 AND EXTRACT(day FROM t.date) = 25)
     GROUP BY

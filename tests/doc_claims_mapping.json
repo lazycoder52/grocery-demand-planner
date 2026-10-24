@@ -374,63 +374,63 @@
     },
     {
       "claim_id": "sql_zero_sales_day_evaluated_series",
-      "claim_text": "1,782 series meet the 60-day filter",
+      "claim_text": "1,728 series meet the 60-day filter",
       "source_sql": "sql/zero_sales_day_proxy.sql",
       "parquet_artifact": "outputs/zero_sales_day_proxy_summary.parquet",
       "docs": ["docs/INSIGHTS.md"]
     },
     {
       "claim_id": "sql_zero_sales_day_low_zero_days",
-      "claim_text": "1,289 series",
+      "claim_text": "1,386 series",
       "source_sql": "sql/zero_sales_day_proxy.sql",
       "parquet_artifact": "outputs/zero_sales_day_proxy_summary.parquet",
       "docs": ["docs/INSIGHTS.md"]
     },
     {
       "claim_id": "sql_zero_sales_day_slow_moving_tail",
-      "claim_text": "304 series",
+      "claim_text": "222 series",
       "source_sql": "sql/zero_sales_day_proxy.sql",
       "parquet_artifact": "outputs/zero_sales_day_proxy_summary.parquet",
       "docs": ["docs/INSIGHTS.md"]
     },
     {
       "claim_id": "sql_zero_sales_day_elevated_proxy",
-      "claim_text": "115 series",
+      "claim_text": "117 series",
       "source_sql": "sql/zero_sales_day_proxy.sql",
       "parquet_artifact": "outputs/zero_sales_day_proxy_summary.parquet",
       "docs": ["docs/INSIGHTS.md"]
     },
     {
       "claim_id": "sql_zero_sales_day_moderate_proxy",
-      "claim_text": "74 series",
+      "claim_text": "3 series",
       "source_sql": "sql/zero_sales_day_proxy.sql",
       "parquet_artifact": "outputs/zero_sales_day_proxy_summary.parquet",
       "docs": ["docs/INSIGHTS.md"]
     },
     {
       "claim_id": "sql_zero_sales_day_store8_produce_velocity",
-      "claim_text": "3,061.34 units/day",
+      "claim_text": "3,200.14 units/day",
       "source_sql": "sql/zero_sales_day_proxy.sql",
       "parquet_artifact": "outputs/zero_sales_day_proxy_summary.parquet",
       "docs": ["docs/INSIGHTS.md"]
     },
     {
       "claim_id": "sql_zero_sales_day_store8_produce_zero_rate",
-      "claim_text": "15.75%",
+      "claim_text": "11.93%",
       "source_sql": "sql/zero_sales_day_proxy.sql",
       "parquet_artifact": "outputs/zero_sales_day_proxy_summary.parquet",
       "docs": ["docs/INSIGHTS.md"]
     },
     {
-      "claim_id": "sql_zero_sales_day_store24_produce_velocity",
-      "claim_text": "2,267.36 units/day",
+      "claim_id": "sql_zero_sales_day_store39_produce_velocity",
+      "claim_text": "1,356.85 units/day",
       "source_sql": "sql/zero_sales_day_proxy.sql",
       "parquet_artifact": "outputs/zero_sales_day_proxy_summary.parquet",
       "docs": ["docs/INSIGHTS.md"]
     },
     {
-      "claim_id": "sql_zero_sales_day_store24_produce_zero_rate",
-      "claim_text": "13.25%",
+      "claim_id": "sql_zero_sales_day_store39_produce_zero_rate",
+      "claim_text": "22.97%",
       "source_sql": "sql/zero_sales_day_proxy.sql",
       "parquet_artifact": "outputs/zero_sales_day_proxy_summary.parquet",
       "docs": ["docs/INSIGHTS.md"]
@@ -458,28 +458,28 @@
     },
     {
       "claim_id": "sql_perishable_volatility_evaluated_series",
-      "claim_text": "1,503 series",
+      "claim_text": "1,525 series",
       "source_sql": "sql/perishable_volatility_proxy.sql",
       "parquet_artifact": "outputs/perishable_volatility_summary.parquet",
       "docs": ["docs/INSIGHTS.md"]
     },
     {
       "claim_id": "sql_perishable_volatility_non_perishable_count",
-      "claim_text": "1,073 series",
+      "claim_text": "1,095 series",
       "source_sql": "sql/perishable_volatility_proxy.sql",
       "parquet_artifact": "outputs/perishable_volatility_summary.parquet",
       "docs": ["docs/INSIGHTS.md"]
     },
     {
       "claim_id": "sql_perishable_volatility_moderate_count",
-      "claim_text": "349 series",
+      "claim_text": "369 series",
       "source_sql": "sql/perishable_volatility_proxy.sql",
       "parquet_artifact": "outputs/perishable_volatility_summary.parquet",
       "docs": ["docs/INSIGHTS.md"]
     },
     {
       "claim_id": "sql_perishable_volatility_high_count",
-      "claim_text": "81 series",
+      "claim_text": "61 series",
       "source_sql": "sql/perishable_volatility_proxy.sql",
       "parquet_artifact": "outputs/perishable_volatility_summary.parquet",
       "docs": ["docs/INSIGHTS.md"]
