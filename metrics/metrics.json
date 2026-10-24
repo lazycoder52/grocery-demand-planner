@@ -2712,11 +2712,11 @@
   },
   "replenishment_simulation": {
     "run_metadata": {
-      "git_commit": "55be16491b0e7c9d0bbc5faf059eb7a36b96107c",
+      "git_commit": "917836aa9a6218aed8542f33b367179d420ecd44",
       "git_dirty": true,
       "config_hash_sha256": "ae742de9659e2e8eee12c6c52d46f1d046cd80d85b0ed22af2c41a23bea8cf05",
       "seed": 42,
-      "timestamp_utc": "2026-10-24T15:52:45.484327+00:00"
+      "timestamp_utc": "2026-10-24T18:10:13.036227+00:00"
     },
     "stitching_rule": "reforecast",
     "empirical_window_sum_error_ratios": {
@@ -9362,6 +9362,20 @@
     "unadjusted_overall_lift_pct_without_time_fe": 28.37,
     "top_5_promo_sensitive_families": [
       {
+        "family": "SCHOOL AND OFFICE SUPPLIES",
+        "lift_pct": 270.37,
+        "lift_before_time_fe_pct": 254.1,
+        "ci_95_low": 209.05,
+        "ci_95_high": 326.0,
+        "promo_share_pct": 17.77,
+        "promo_positive_days": 4054,
+        "total_positive_days": 22818,
+        "is_statistically_significant": true,
+        "is_reliable": true,
+        "status": "Exploratory",
+        "comparison_type": "exploratory"
+      },
+      {
         "family": "HOME AND KITCHEN II",
         "lift_pct": 48.56,
         "lift_before_time_fe_pct": 62.57,
@@ -9416,20 +9430,6 @@
         "is_reliable": true,
         "status": "Exploratory",
         "comparison_type": "exploratory"
-      },
-      {
-        "family": "LINGERIE",
-        "lift_pct": 27.95,
-        "lift_before_time_fe_pct": 23.05,
-        "ci_95_low": 22.38,
-        "ci_95_high": 33.93,
-        "promo_share_pct": 3.77,
-        "promo_positive_days": 2127,
-        "total_positive_days": 56387,
-        "is_statistically_significant": true,
-        "is_reliable": true,
-        "status": "Exploratory",
-        "comparison_type": "exploratory"
       }
     ],
     "by_family": [
@@ -9443,8 +9443,8 @@
         "promo_positive_days": 4054,
         "total_positive_days": 22818,
         "is_statistically_significant": true,
-        "is_reliable": false,
-        "status": "Unreliable (extreme seasonal elasticity spike)",
+        "is_reliable": true,
+        "status": "Exploratory",
         "comparison_type": "exploratory"
       },
       {
@@ -9583,8 +9583,8 @@
         "promo_positive_days": 848,
         "total_positive_days": 47367,
         "is_statistically_significant": true,
-        "is_reliable": true,
-        "status": "Exploratory",
+        "is_reliable": false,
+        "status": "Unreliable (insufficient support: <1000 promo days or <2.0% share)",
         "comparison_type": "exploratory"
       },
       {
@@ -9597,8 +9597,8 @@
         "promo_positive_days": 460,
         "total_positive_days": 34406,
         "is_statistically_significant": true,
-        "is_reliable": true,
-        "status": "Exploratory",
+        "is_reliable": false,
+        "status": "Unreliable (insufficient support: <1000 promo days or <2.0% share)",
         "comparison_type": "exploratory"
       },
       {
@@ -9654,7 +9654,7 @@
         "total_positive_days": 36200,
         "is_statistically_significant": true,
         "is_reliable": false,
-        "status": "Unreliable (sparse promotion <0.5%)",
+        "status": "Unreliable (insufficient support: <1000 promo days or <2.0% share)",
         "comparison_type": "exploratory"
       },
       {
@@ -9850,7 +9850,7 @@
         "total_positive_days": 38382,
         "is_statistically_significant": false,
         "is_reliable": false,
-        "status": "Unreliable (sparse promotion <0.5%)",
+        "status": "Unreliable (insufficient support: <1000 promo days or <2.0% share)",
         "comparison_type": "exploratory"
       },
       {
@@ -9878,7 +9878,7 @@
         "total_positive_days": 16947,
         "is_statistically_significant": false,
         "is_reliable": false,
-        "status": "Unreliable (sparse promotion <0.5%)",
+        "status": "Unreliable (insufficient support: <1000 promo days or <2.0% share)",
         "comparison_type": "exploratory"
       },
       {
@@ -9891,8 +9891,8 @@
         "promo_positive_days": 53,
         "total_positive_days": 5294,
         "is_statistically_significant": false,
-        "is_reliable": true,
-        "status": "Exploratory",
+        "is_reliable": false,
+        "status": "Unreliable (insufficient support: <1000 promo days or <2.0% share)",
         "comparison_type": "exploratory"
       }
     ]
