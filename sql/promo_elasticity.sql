@@ -2,7 +2,16 @@
 -- Filters data to post 2014-04-01 when promotion tracking began in Corporación Favorita.
 -- Compares sales velocity on promotional days vs non-promotional baseline days.
 
-WITH base_data AS (
+WITH store_opening AS (
+    SELECT
+        store_nbr,
+        MIN(date) AS first_sale_date
+    FROM train
+    WHERE sales > 0
+    GROUP BY store_nbr
+),
+
+base_data AS (
     SELECT
         t.store_nbr,
         s.city,
@@ -17,7 +26,11 @@ WITH base_data AS (
     FROM train t
     JOIN stores s
         ON t.store_nbr = s.store_nbr
+    JOIN store_opening so
+        ON t.store_nbr = so.store_nbr
     WHERE t.date >= DATE '2014-04-01'
+      AND t.date >= so.first_sale_date
+      AND NOT (EXTRACT(month FROM t.date) = 12 AND EXTRACT(day FROM t.date) = 25)
 ),
 
 store_family_agg AS (

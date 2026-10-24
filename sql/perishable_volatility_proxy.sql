@@ -4,7 +4,16 @@
 -- High coefficient of variation in perishables serves as an empirical proxy for inventory volatility exposure,
 -- not an audit of confirmed physical shrinkage.
 
-WITH daily_stats AS (
+WITH store_opening AS (
+    SELECT
+        store_nbr,
+        MIN(date) AS first_sale_date
+    FROM train
+    WHERE sales > 0
+    GROUP BY store_nbr
+),
+
+daily_stats AS (
     SELECT
         t.store_nbr,
         s.city,
@@ -25,6 +34,10 @@ WITH daily_stats AS (
     FROM train t
     JOIN stores s
         ON t.store_nbr = s.store_nbr
+    JOIN store_opening so
+        ON t.store_nbr = so.store_nbr
+    WHERE t.date >= so.first_sale_date
+      AND NOT (EXTRACT(month FROM t.date) = 12 AND EXTRACT(day FROM t.date) = 25)
     GROUP BY
         t.store_nbr,
         s.city,

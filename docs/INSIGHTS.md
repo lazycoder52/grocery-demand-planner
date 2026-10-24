@@ -59,25 +59,23 @@ Under rigorous walk-forward backtesting with out-of-sample residual safety stock
 * Enforces minimum support thresholds ($\ge 30$ baseline days, $\ge 10$ promotional days) to suppress sparse outlier ratios.
 
 ### Exact Computed Query Findings (`sql/promo_elasticity.sql`)
-* **Evaluated Series:** 1,412 store-family pairs meet the minimum support thresholds.
-* **Mean Promotional Day Share:** 35.13% of days in evaluated series have active promotions.
+* **Evaluated Series:** 1,395 store-family pairs meet the minimum support thresholds (excluding dates prior to each store's first positive-sales date and Dec 25 closures).
+* **Promotional Day Share:** Mean promotional day share is **36.98%** (median: **32.36%**).
 * **Empirical Lift Distribution:**
-  * Median empirical sales lift across store-families is **+42.34%** (mean: **+769.73%**).
-  * Outlier: Store 52 `BEVERAGES` exhibits an empirical lift of **+125,576.31%** (117 promo days vs 1,113 non-promo days, reflecting Store 52 opening on 2017-04-20 and pre-opening zero-sales days).
+  * Median empirical sales lift across store-families is **+32.15%**. (Following conservative reporting standards, only medians are reported for lift to avoid skewness from promotional base distortions).
 * **Controlled Econometric Association (`metrics.json` `promo_lift_analysis`):**
-  * When evaluated with store-family and year-month fixed effects over 33,264 series-month observations, the overall sales association with promotion is **+107.68%** (95% CI: [+72.29%, +155.26%]).
-  * By-family ranked associations: `GROCERY I` (+1592.95%), `SCHOOL AND OFFICE SUPPLIES` (+602.95%), `BEVERAGES` (+365.68%), `CLEANING` (+197.12%), `DAIRY` (+133.52%), `PRODUCE` (+111.60%).
+  * Evaluated excluding zero-sales days, pre-opening periods, and store closures (see Section 5 below for full methodology and exploratory family estimates).
 
 ---
 
 ## 2. Zero-Sales-Day Risk Proxy (`sql/zero_sales_day_proxy.sql`)
 
 ### Operational Decision Driven
-* **On-Shelf Availability Audits & Phantom Inventory Detection:** Flags fast-moving store departments experiencing intermittent zero-sales streaks.
+* **On-Shelf Availability Audits & Unobserved Stockout Detection:** Flags fast-moving store departments experiencing intermittent zero-sales streaks.
 * **Proxy Warning:** Because on-hand inventory balances are unrecorded in the dataset, zero-sales days serve strictly as an empirical PROXY for potential stockouts or delayed openings, not confirmed out-of-stock events.
 
 ### Query Logic
-* Measures zero-sales frequency against mean daily volume across 54 stores and 33 families for series with $\ge 60$ days.
+* Measures zero-sales frequency against mean daily volume across 54 stores and 33 families for series with $\ge 60$ days post store opening date (excluding Dec 25 closures).
 * Categorizes series into 4 empirical proxy segments:
   1. `HIGH_VELOCITY_ELEVATED_ZERO_SALES_DAYS_PROXY`: Mean sales $\ge 50$ units/day and $\ge 10\%$ zero-sales days.
   2. `MODERATE_ZERO_SALES_DAYS_PROXY`: Mean sales $\ge 15$ units/day and $\ge 25\%$ zero-sales days.
@@ -87,14 +85,14 @@ Under rigorous walk-forward backtesting with out-of-sample residual safety stock
 ### Exact Computed Query Findings (`sql/zero_sales_day_proxy.sql`)
 * **Evaluated Series:** 1,782 series meet the 60-day filter.
 * **Tier Distribution:**
-  * `LOW_ZERO_SALES_DAYS`: **1,121 series** (62.91%)
-  * `SLOW_MOVING_INTERMITTENT_TAIL`: **370 series** (20.76%)
-  * `HIGH_VELOCITY_ELEVATED_ZERO_SALES_DAYS_PROXY`: **195 series** (10.94%)
-  * `MODERATE_ZERO_SALES_DAYS_PROXY`: **96 series** (5.39%)
+  * `LOW_ZERO_SALES_DAYS`: **1,289 series** (72.33%)
+  * `SLOW_MOVING_INTERMITTENT_TAIL`: **304 series** (17.06%)
+  * `HIGH_VELOCITY_ELEVATED_ZERO_SALES_DAYS_PROXY`: **115 series** (6.45%)
+  * `MODERATE_ZERO_SALES_DAYS_PROXY`: **74 series** (4.15%)
 * **Top Velocity Elevated Zero-Sales Series:**
-  1. Store 8 `PRODUCE`: Mean daily sales **3,059.52 units/day**, **266 zero-sales days** out of 1,684 total days (**15.80%** zero-sales rate).
-  2. Store 20 `GROCERY I`: Mean daily sales **2,841.46 units/day**, **773 zero-sales days** out of 1,684 total days (**45.90%** zero-sales rate, driven by pre-opening / relocation periods).
-  3. Store 24 `PRODUCE`: Mean daily sales **2,266.02 units/day**, **224 zero-sales days** out of 1,684 total days (**13.30%** zero-sales rate).
+  1. Store 8 `PRODUCE`: Mean daily sales **3,061.34 units/day**, **265 zero-sales days** out of 1,683 total days (**15.75%** zero-sales rate).
+  2. Store 24 `PRODUCE`: Mean daily sales **2,267.36 units/day**, **223 zero-sales days** out of 1,683 total days (**13.25%** zero-sales rate).
+  3. Store 1 `PRODUCE`: Mean daily sales **1,846.59 units/day**, **174 zero-sales days** out of 1,683 total days (**10.34%** zero-sales rate).
 
 ---
 
@@ -122,6 +120,7 @@ Under rigorous walk-forward backtesting with out-of-sample residual safety stock
 
 ### Query Logic
 * Isolates perishable departments (`DAIRY`, `MEATS`, `POULTRY`, `PRODUCE`, `SEAFOOD`, `BREAD/BAKERY`, `DELI`, `EGGS`).
+* Filters to post-store opening dates and excludes Dec 25 closures.
 * Computes demand coefficient of variation:
   $$\text{CV} = \frac{\sigma_{\text{daily}}}{\mu_{\text{daily}}}$$
 * Computes composite volatility exposure index: $\mu \times \text{CV} = \sigma_{\text{daily}}$.
@@ -131,10 +130,11 @@ Under rigorous walk-forward backtesting with out-of-sample residual safety stock
   3. `NON_PERISHABLE_OR_LOW_VOLATILITY`: Shelf-stable categories.
 
 ### Exact Computed Query Findings (`sql/perishable_volatility_proxy.sql`)
-* **Evaluated Series:** 1,483 series with $\ge 60$ total days and mean daily sales $\ge 1.0$ unit.
+* **Evaluated Series:** 1,503 series with $\ge 60$ total days and mean daily sales $\ge 1.0$ unit.
 * **Tier Distribution:**
-  * `NON_PERISHABLE_OR_LOW_VOLATILITY`: **1,056 series** (71.21%)
-  * `MODERATE_VOLATILITY_PERISHABLE_PROXY`: **297 series** (20.03%)
-  * `HIGH_VOLATILITY_PERISHABLE_PROXY`: **130 series** (8.77%)
-* **Highest Volatility Series:**
-  * Store 39 `MEATS`: Mean daily sales **239.97 units/day**, daily sales standard deviation **2,222.50 units**, resulting in $\text{CV} = \mathbf{9.2616}$ and volatility exposure index of **2,222.50**.
+  * `NON_PERISHABLE_OR_LOW_VOLATILITY`: **1,073 series** (71.39%)
+  * `MODERATE_VOLATILITY_PERISHABLE_PROXY`: **349 series** (23.22%)
+  * `HIGH_VOLATILITY_PERISHABLE_PROXY`: **81 series** (5.39%)
+* **Highest Volatility Series & Anomaly Investigation:**
+  * Store 39 `MEATS`: Mean daily sales **240.11 units/day**, daily sales standard deviation **2,223.16 units**, resulting in $\text{CV} = \mathbf{9.2585}$ and volatility exposure index of **2,223.16**.
+  * **Investigation of Store 39 MEATS:** Deep-dive analysis confirms this extreme volatility is driven by an isolated **single-day data entry / recording anomaly** on **2016-10-07**, where recorded meat sales spiked to **89,576.36 units** (accounting for 22.2% of the store's entire 4.5-year cumulative meat sales in a single day; the 2nd highest day was 5,519 units). Store 39 has traded continuously since 2013-01-02 (the second day of the entire dataset), confirming that this is an anomalous recording spike, not a store opening effect.
