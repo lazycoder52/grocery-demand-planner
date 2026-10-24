@@ -156,7 +156,7 @@ Under rigorous walk-forward backtesting with out-of-sample residual safety stock
 | `BABY CARE` | -6.86% | [-13.23%, +0.30%] | 53 | 1.00% | Exploratory (Fails Support Rule: < 1,000 days, < 2.0%) |
 | `BEAUTY` | +29.55% | [+27.14%, +31.89%] | 11,116 | 21.86% | Exploratory (Meets Support Rule) |
 | `BEVERAGES` | +2.44% | [+0.38%, +4.30%] | 51,705 | 82.72% | Exploratory (Meets Support Rule) |
-| `BOOKS` | +0.00% | [+0.00%, +0.00%] | 0 | 0.00% | Exploratory (Fails Support Rule: 0 promo days) |
+| `BOOKS` | N/A | N/A | 0 | 0.00% | Exploratory (Fails Support Rule: 0 promo days) |
 | `BREAD/BAKERY` | +2.14% | [+0.36%, +4.31%] | 38,896 | 62.22% | Exploratory (Meets Support Rule) |
 | `CELEBRATION` | +9.70% | [+5.91%, +13.93%] | 3,211 | 6.63% | Exploratory (Meets Support Rule) |
 | `CLEANING` | +0.95% | [-0.08%, +1.96%] | 49,899 | 79.83% | Exploratory (Meets Support Rule) |
@@ -183,7 +183,7 @@ Under rigorous walk-forward backtesting with out-of-sample residual safety stock
 | `POULTRY` | +9.55% | [+7.52%, +11.29%] | 19,704 | 31.52% | Exploratory (Meets Support Rule) |
 | `PREPARED FOODS` | +10.38% | [+7.56%, +12.84%] | 17,678 | 28.29% | Exploratory (Meets Support Rule) |
 | `PRODUCE` | +14.35% | [+11.11%, +16.69%] | 30,784 | 55.54% | Exploratory (Meets Support Rule) |
-| `SCHOOL AND OFFICE SUPPLIES` | +270.37% | [+209.05%, +326.00%] | 4,054 | 17.77% | Exploratory (Meets Support Rule; Confounded by Seasonality) |
+| `SCHOOL AND OFFICE SUPPLIES` | +270.37% | [+209.05%, +326.00%] | 4,054 | 17.77% | Exploratory (Meets Support Rule; do not interpret, confounded by seasonality) |
 | `SEAFOOD` | +15.34% | [+11.76%, +18.71%] | 16,566 | 30.06% | Exploratory (Meets Support Rule) |
 
 ---
