@@ -131,6 +131,13 @@ The recording of promotional activity (`onpromotion` column) evolved over time:
 - **99.9th Percentile (P99.9):** 12,076.23 units
 - **Max Single Record:** 124,717.0 units (relief distribution during earthquake aftermath)
 
+### 3.8 Store 39 MEATS Recording Anomaly & Model Sensitivity
+- **Single-Day Spike:** On `2016-10-07`, recorded meat sales for Store 39 spiked to **89,576.36 units** (accounting for 22.2% of the store's entire 4.5-year cumulative meat sales in a single day, compared to its non-spike median of 136.94 units and 2nd highest day of 5,519 units). Store 39 has traded continuously since 2013-01-02, confirming this is an isolated data entry / recording anomaly rather than a store opening effect.
+- **Model Sensitivity Analysis:**
+  - *Holdout (2017-07-31 to 2017-08-15):* Replacing the 2016-10-07 spike with the non-spike series median (136.94 units) shifts Global Holdout WAPE from **15.29%** (15.2888%) with the spike to **15.15%** (15.1547%) without the spike ($-0.13$ percentage points), and Store 39 MEATS holdout WAPE from **17.12%** (17.1183%) with the spike to **17.26%** (17.2644%) without the spike ($+0.15$ percentage points, holdout only).
+  - *5-Fold Rolling Cross-Validation:* LightGBM 5-fold mean WAPE is **13.49%** (13.4880%) with the spike vs. **13.54%** (13.5368%) without the spike ($+0.05$ percentage points). Seasonal Naive (7-day) 5-fold mean WAPE is unchanged at **16.33%** (16.3282%) with and without the spike ($+0.00$ percentage points), because the October 2016 spike is more than 215 days prior to the first CV fold origin (2017-05-11).
+  - *Headline Policy:* All reported headline metrics in the repository are unchanged and retain the spike as an audited historical dataset artifact.
+
 ## 4. Cleaning Decisions & Modeling Assumptions
 
 1. **Sales Are Not True Demand (Censoring):**
