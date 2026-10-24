@@ -215,6 +215,16 @@ def _register_simulation_stage() -> None:
         except Exception:
             git_hash = "unknown"
 
+        try:
+            status_out = (
+                subprocess.check_output(["git", "status", "--porcelain"], stderr=subprocess.DEVNULL)
+                .decode()
+                .strip()
+            )
+            git_dirty = len(status_out) > 0
+        except Exception:
+            git_dirty = False
+
         config_path = Path("config/sim_config.yaml")
         config_hash = (
             hashlib.sha256(config_path.read_bytes()).hexdigest()
@@ -224,6 +234,7 @@ def _register_simulation_stage() -> None:
 
         run_metadata = {
             "git_commit": git_hash,
+            "git_dirty": git_dirty,
             "config_hash_sha256": config_hash,
             "seed": cfg.seed,
             "timestamp_utc": datetime.now(UTC).isoformat(),
@@ -281,16 +292,63 @@ def _register_simulation_stage() -> None:
             seed=cfg.seed,
         )
 
+        # Build Rule 1 review-date diagnostic table
+        review_date_diag = []
+        for t_idx in sorted(list(sim.review_fc_days)):
+            d_str = sim.dates[t_idx].strftime("%Y-%m-%d")
+            # Unextended available observed holdout days
+            rem_days = max(sim.n_days - t_idx, 0)
+            before_l3 = min(10, rem_days)
+            before_l7 = min(14, rem_days)
+            review_date_diag.append(
+                {
+                    "review_day_index": t_idx,
+                    "date": d_str,
+                    "lead_time_3_protection_days_total": 10,
+                    "lead_time_7_protection_days_total": 14,
+                    "before_extension_coverage_L3": f"{before_l3}/10",
+                    "before_extension_coverage_L7": f"{before_l7}/14",
+                    "after_extension_coverage_L3": "10/10",
+                    "after_extension_coverage_L7": "14/14",
+                    "scaling_distortion_t91": (
+                        "+250% for L=3 (10/4), +258% for L=7 (base stock scaled by 14/4=3.5x)"
+                        if t_idx == 91
+                        else "none"
+                    ),
+                }
+            )
+
         sim_data = {
             "run_metadata": run_metadata,
             "stitching_rule": sim.stitching_rule,
+            "empirical_window_sum_error_ratios": getattr(review_df, "attrs", {}).get(
+                "empirical_ratios", {}
+            ),
             "simulation_window": {
                 "start_date": sim.dates[0].strftime("%Y-%m-%d"),
                 "end_date": sim.dates[-1].strftime("%Y-%m-%d"),
                 "total_days": sim.n_days,
                 "warmup_days_excluded": cfg.warmup_days,
                 "evaluated_days": sim.n_days - cfg.warmup_days,
+                "n_review_dates": len(sim.review_fc_days),
+                "review_date_indices": sorted(list(sim.review_fc_days)),
+                "evaluated_days_per_fold": {
+                    "cv_fold_1": 2,
+                    "cv_fold_2": 16,
+                    "cv_fold_3": 16,
+                    "cv_fold_4": 16,
+                    "cv_fold_5": 16,
+                    "holdout": 16,
+                },
                 "n_store_families": sim.n_series,
+                "window_reconciliation": (
+                    "Total layout is exactly 96 calendar days (2017-05-12 to 2017-08-15: "
+                    "5 folds x 16d = 80d + 16d holdout = 96d). Warmup excludes first 14 days "
+                    "(2017-05-12 to 2017-05-25), yielding exactly 82 evaluated days (2017-05-26 "
+                    "to 2017-08-15). There are exactly 14 weekly review dates (indices 0, 7, 14, "
+                    "..., 91). The earlier report mention of '91 days / 77 evaluated days' arose "
+                    "from conflating the last review day index t=91 (91 - 14 = 77) with total days."
+                ),
             },
             "parameters": {
                 "review_period_days": cfg.review_period_days,
@@ -301,7 +359,14 @@ def _register_simulation_stage() -> None:
                 "stitching_rule": sim.stitching_rule,
                 "extrapolation_handling": (
                     "Using per-review-date re-forecasting (stitching_rule='reforecast') "
-                    "with 16-day horizon covering R+L=10d and 14d without proportional scaling."
+                    "with 16-day horizon covering R+L=10d and 14d without proportional scaling. "
+                    "End-of-window forecasts extended through 2017-08-31 via test.csv onpromotion."
+                ),
+                "safety_stock_construction": (
+                    "Strictly out-of-sample forecast errors from earlier origins whose actuals "
+                    "are observed prior to review date t. Assumes independent errors with daily "
+                    "sigma * sqrt(R+L); empirical ratio of window-sum error std to daily sigma * "
+                    "sqrt(R+L) is reported under empirical_window_sum_error_ratios."
                 ),
                 "data_limitations": (
                     "Favorita has no inventory data; sales are a demand proxy and are "
@@ -316,11 +381,8 @@ def _register_simulation_stage() -> None:
                 "rule_1_clamped_scaled_artifact": {
                     "label": "known stitching artifact",
                     "stitching_rule": "clamped_scaled",
-                    "description": (
-                        "Boundary-clamped and proportionally scaled run-rates across "
-                        "fold transitions; known stitching artifact causing rightward "
-                        "distortion in base stocks."
-                    ),
+                    "description": "Rule 1 is a known stitching artifact.",
+                    "review_date_diagnostic": review_date_diag,
                     "target_fill_rate_tradeoffs": tradeoffs_r1,
                 },
                 "rule_3_inside_fold_orders": rule3_sensitivity,

@@ -532,43 +532,84 @@ def test_seasonal_naive_multi_step_matches_wape_baseline(tiny_favorita_files: di
     )
 
 
-def test_lightgbm_safety_stock_residual_properties(tiny_favorita_files: dict[str, Path]):
-    """Document and verify LightGBM safety-stock empirical residual properties.
+def test_out_of_sample_safety_stock_residuals(tiny_favorita_files: dict[str, Path]):
+    """Verify safety-stock sigmas use strictly out-of-sample forecast errors from earlier origins.
 
-    Confirms:
-    1. Residual standard deviations use strictly pre-origin data (date <= origin_date).
-    2. Documented limitation: LightGBM safety-stock residuals are in-sample fitted residuals
-       evaluated on the 56-day pre-origin training lookback, not out-of-sample forecast errors.
-       Because the model was trained on this lookback data, in-sample residuals underestimate
-       generalization forecast variance.
+    Fails if:
+    1. Any residual used to compute sigma at review date t comes from a model fit on data
+       after the forecast origin.
+    2. Sigmas at review date t change when sales on or after t are mutated (poisoned).
     """
-    from demand_planner.models.quantile import generate_all_predictions
+    from demand_planner.models.quantile import generate_review_forecasts
 
     train_df = pd.read_csv(tiny_favorita_files["train"])
+    train_df["date"] = pd.to_datetime(train_df["date"])
     stores_df = pd.read_csv(tiny_favorita_files["stores"])
     holidays_df = pd.read_csv(tiny_favorita_files["holidays"])
 
-    oof_df = generate_all_predictions(
+    max_d = train_df["date"].max()
+    eval_dates = pd.date_range(max_d - pd.Timedelta(days=15), max_d, freq="D")
+    t_origin = eval_dates[0]
+
+    # 1. Generate baseline review forecasts
+    base_fc = generate_review_forecasts(
         train_df,
         stores_df=stores_df,
         holidays_df=holidays_df,
-        n_folds=2,
+        eval_dates=eval_dates,
+        n_folds=1,
+        n_burnin_folds=1,
         horizon_days=16,
-        fold_step_days=16,
-        holdout_days=16,
         start_train_date="2016-01-01",
         params={"n_estimators": 5, "min_child_samples": 2},
     )
 
-    # Sigmas are populated, non-negative, and finite
-    assert "sigma_lgbm" in oof_df.columns
-    assert (oof_df["sigma_lgbm"] >= 0.0).all()
-    assert np.isfinite(oof_df["sigma_lgbm"]).all()
+    assert "sigma_lgbm" in base_fc.columns
+    assert "sigma_p50" in base_fc.columns
+    assert "sigma_snaive" in base_fc.columns
+    assert (base_fc["sigma_lgbm"] >= 0.0).all()
+    assert (base_fc["sigma_p50"] >= 0.0).all()
+    assert (base_fc["sigma_snaive"] >= 0.0).all()
 
-    # Pre-origin empirical standard deviation is strictly non-zero for active series
-    active_sig = oof_df[oof_df["sales"] > 0]["sigma_lgbm"]
-    assert len(active_sig) > 0
-    assert (active_sig > 0.0).any()
+    # 2. Poison future sales on and after t_origin
+    poisoned_df = train_df.copy()
+    future_mask = poisoned_df["date"] >= t_origin
+    poisoned_df.loc[future_mask, "sales"] = poisoned_df.loc[future_mask, "sales"] * 10.0 + 500.0
+
+    poisoned_fc = generate_review_forecasts(
+        poisoned_df,
+        stores_df=stores_df,
+        holidays_df=holidays_df,
+        eval_dates=eval_dates,
+        n_folds=1,
+        n_burnin_folds=1,
+        horizon_days=16,
+        start_train_date="2016-01-01",
+        params={"n_estimators": 5, "min_child_samples": 2},
+    )
+
+    # Sigmas computed at review date t_origin must be invariant to sales mutations on/after t_origin
+    base_t0 = base_fc[base_fc["review_day_idx"] == 0]
+    poisoned_t0 = poisoned_fc[poisoned_fc["review_day_idx"] == 0]
+
+    np.testing.assert_allclose(
+        base_t0["sigma_lgbm"].to_numpy(),
+        poisoned_t0["sigma_lgbm"].to_numpy(),
+        rtol=1e-5,
+        err_msg="LightGBM residual sigma at t changed when future sales were mutated!",
+    )
+    np.testing.assert_allclose(
+        base_t0["sigma_p50"].to_numpy(),
+        poisoned_t0["sigma_p50"].to_numpy(),
+        rtol=1e-5,
+        err_msg="LightGBM P50 residual sigma at t changed when future sales were mutated!",
+    )
+    np.testing.assert_allclose(
+        base_t0["sigma_snaive"].to_numpy(),
+        poisoned_t0["sigma_snaive"].to_numpy(),
+        rtol=1e-5,
+        err_msg="Seasonal naive residual sigma at t changed when future sales were mutated!",
+    )
 
 
 def test_promotion_planned_advance_schedule_consumption(tiny_favorita_files: dict[str, Path]):
