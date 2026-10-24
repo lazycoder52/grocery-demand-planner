@@ -25,7 +25,7 @@ def test_app_smoke_default_page():
 def test_app_smoke_navigation_pages():
     """Verify that all 4 navigation pages render cleanly without exceptions."""
     pages = [
-        "Executive Summary",
+        "Summary Overview",
         "Forecast Explorer",
         "Replenishment Simulator",
         "Business Insights & SQL",

@@ -37,7 +37,7 @@ def assert_no_temporal_leakage(
     feature_cols: list[str] | None = None,
     date_col: str = "date",
 ) -> None:
-    """Verify that train and test splits satisfy strict causal temporal boundaries.
+    """Verify that train and test splits satisfy strict temporal boundaries.
 
     Raises
     ------

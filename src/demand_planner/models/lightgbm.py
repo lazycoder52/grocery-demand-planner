@@ -155,7 +155,7 @@ def evaluate_model_vs_baselines(
     df_raw = sales_df.copy()
     df_raw["date"] = pd.to_datetime(df_raw["date"])
 
-    log.info("Building causal features...")
+    log.info("Building features...")
     df_feat, feature_names = build_features(
         df_raw, stores_df=stores_df, holidays_df=holidays_df, target_col=target_col
     )
@@ -313,7 +313,7 @@ def run_rolling_origin_cv(
     df_raw = sales_df.copy()
     df_raw["date"] = pd.to_datetime(df_raw["date"])
 
-    log.info("Building causal features for rolling-origin CV...")
+    log.info("Building features for rolling-origin CV...")
     df_feat, feature_names = build_features(
         df_raw, stores_df=stores_df, holidays_df=holidays_df, target_col=target_col
     )

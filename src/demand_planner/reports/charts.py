@@ -1,4 +1,4 @@
-"""Generate visual artifacts for documentation and executive product reporting.
+"""Generate visual artifacts for documentation and portfolio product reporting.
 
 Charts produced:
 1. docs/img/wape_by_family_vs_baseline.png: Comparison of LightGBM vs Seasonal Naive WAPE.
@@ -17,7 +17,7 @@ import pandas as pd
 
 from demand_planner.config import DOCS, METRICS_FILE, OUTPUTS
 
-# Executive visualization styling
+# Report visualization styling
 _style = "seaborn-v0_8-whitegrid" if "seaborn-v0_8-whitegrid" in plt.style.available else "default"
 plt.style.use(_style)
 plt.rcParams["font.sans-serif"] = ["Segoe UI", "DejaVu Sans", "Arial"]
@@ -229,7 +229,7 @@ def plot_zero_rate_by_family(
 
 
 def generate_all_charts() -> list[Path]:
-    """Generate all 3 executive report charts."""
+    """Generate all 3 report charts."""
     p1 = plot_wape_by_family()
     p2 = plot_actual_vs_forecast_stores()
     p3 = plot_zero_rate_by_family()

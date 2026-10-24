@@ -396,7 +396,7 @@ The recording of promotional activity (`onpromotion` column) evolved over time:
 2. **Observational Nature of Promotions & Assortment Whitespace:**
    Promotional assignments are not randomized A/B tests; marketing teams selectively discount
    high-velocity items or distressed inventory. All uplift and assortment-gap models are
-   observational associations, not causal guarantees.
+   observational associations, not experimental treatment effects.
 
 3. **Information Leakage Prevention (Forecast Origin Cutoff):**
    Same-day transactions and same-day oil prices are NEVER permitted as features for predicting

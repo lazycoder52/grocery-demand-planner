@@ -1,6 +1,7 @@
 """Feature engineering for grocery store-family demand forecasting.
 
-Strictly causal feature pipeline ensuring ZERO temporal leakage over a 16-day forecast horizon:
+Strictly non-anticipating feature pipeline ensuring ZERO temporal leakage
+over a 16-day forecast horizon:
 - Lagged sales: lag 16, lag 21, lag 28 (all known at forecast origin t_0 for all h in 1..16)
 - Rolling aggregations over lag 16: 7-day and 28-day window means
 - Calendar features: day of week, day of month, month, weekend flag, bi-weekly payday flags
@@ -44,7 +45,7 @@ def build_features(
     date_col: str = "date",
     target_col: str = "sales",
 ) -> tuple[pd.DataFrame, list[str]]:
-    """Build causal tabular features for tree-based forecasting models.
+    """Build lagged and calendar tabular features for tree-based forecasting models.
 
     Parameters
     ----------
@@ -68,7 +69,7 @@ def build_features(
     df[date_col] = pd.to_datetime(df[date_col])
     df = df.sort_values(["store_nbr", "family", date_col]).reset_index(drop=True)
 
-    # 1. Strictly causal lagged sales features (min lag = 16 days for 16-day horizon)
+    # 1. Strictly lagged sales features (min lag = 16 days for 16-day horizon)
     grouped = df.groupby(["store_nbr", "family"])[target_col]
     df["lag_16"] = grouped.shift(16)
     df["lag_21"] = grouped.shift(21)

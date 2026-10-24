@@ -15,7 +15,7 @@ Across **54 supermarket stores** and **33 product families** in Ecuador (3,000,8
 
 Under walk-forward evaluation, static heuristics prove inadequate:
 * **7-Day Seasonal Naive:** **16.33% Mean WAPE** across 5 backtest folds; **20.67% WAPE** on the final 16-day holdout.
-* **Selected LightGBM Model:** **13.49% Mean WAPE** across 5 backtest folds (**+2.84 pts FVA**, 17.39% relative error reduction); **15.29% WAPE** on the untouched 16-day holdout (2017-07-31 to 2017-08-15, **13,319,179.78 units sold**, **+5.51 pts FVA**, 26.66% relative error reduction).
+* **Selected LightGBM Model:** **13.49% Mean WAPE** across 5 backtest folds (**+2.84 pts FVA**, 17.39% relative error reduction); **15.29% WAPE** on the untouched 16-day holdout (2017-07-31 to 2017-08-15, **13,319,179.78 units sold**, **+5.38 percentage points FVA**, 26.02% relative error reduction).
 
 ### Business Impact: Working Capital Optimization
 Under periodic $(R, S)$ inventory control with out-of-sample error safety stock:
@@ -23,6 +23,9 @@ Under periodic $(R, S)$ inventory control with out-of-sample error safety stock:
   * **$L = 3$ days:** **-12.27%** inventory [95% Series Bootstrap CI: -14.59% to -10.05%; 95% Time-Block Bootstrap CI: -19.97% to -2.25%].
   * **$L = 7$ days:** **-14.51%** inventory [95% Series Bootstrap CI: -17.53% to -11.37%; 95% Time-Block Bootstrap CI: -21.22% to -7.31%].
   * Both series and time-block 95% bootstrap confidence intervals strictly exclude 0 across both operational lead times.
+* **Why Compare at Matched Fill Rate?** Comparing policies at an identical safety multiplier $z$ conflates forecast accuracy with customer service: an over-forecasting model holds more inventory while achieving higher fill, whereas an under-forecaster appears lean while causing stockouts. Matching policies at target on-shelf availability (e.g. 99.0% fill rate) controls for service level, providing an apples-to-apples working capital comparison.
+* **Lead-Time Error Autocorrelation:** The empirical ratio of multi-day window-sum error standard deviation to theoretical independent $\sigma_{\text{oos}} \sqrt{R+L}$ is **1.436 at $W=10$ days** ($L=3$) and **1.522 at $W=14$ days** ($L=7$).
+* **Conservative Temporal Uncertainty:** At 99.5% target fill rate ($L=3$), LightGBM Point reduces inventory by **-10.13%** with Series CI [-12.65%, -6.99%], but the conservative Time-Block CI spans **[-16.28%, +0.88%]**, crossing 0 due to temporal cluster variance during holiday/payday weeks.
 
 ---
 
@@ -32,7 +35,7 @@ Under periodic $(R, S)$ inventory control with out-of-sample error safety stock:
 | :--- | :--- | :--- |
 | **Category Demand Planner** | Weekly replenishment review | Sets order-up-to level $S = \hat{D}_{R+L} + z \cdot \sigma_{\text{oos}}$ by store-family. |
 | **Store Operations Manager** | Daily receiving & stockroom staging | Anticipates high-volume delivery days and balances floor shelf labor. |
-| **Category Merchant** | Promotional campaign design | Sizes supplier buy-in orders using empirical promo lift (+171.2% chain average). |
+| **Category Merchant** | Promotional campaign design | Sizes supplier buy-in orders using controlled observational promo lift (+107.7% overall association, 95% CI: [+72.3%, +155.3%]). |
 
 ---
 
@@ -55,20 +58,29 @@ graph TD
 
 ## 4. Pre-Specified Primary Family Results
 
-To prevent false discovery from multiple comparisons, one primary comparison was pre-specified per family: **Target Fill Rate = 99.0%, LightGBM Point vs Seasonal Naive, evaluated at both $L=3$ and $L=7$**, with statistical significance requiring both 95% Series and Time-Block CIs to exclude 0 under Holm-Bonferroni correction ($\alpha = 0.05$ across 13 families).
+To prevent false discovery from multiple comparisons, one primary comparison was pre-specified per family: **Target Fill Rate = 99.0%, LightGBM Point vs Seasonal Naive, evaluated at both $L=3$ and $L=7$** ($m = 13$ hypotheses per lead time). A family is designated as a finding **only if its Holm-adjusted p-value is below 0.05 AND both Series and Time-Block bootstrap CIs strictly exclude 0**:
 
-* **$L=3$ Primary Win:**
-  * `LAWN AND GARDEN`: **-32.25%** inventory (absolute diff: **-2,780.66 units**, Series CI: [-41.50%, -23.58%], Time CI: [-45.14%, -20.01%], $p < 0.001$).
+* **$L=3$ Primary Win (1 family):**
+  * `LAWN AND GARDEN`: **-32.25%** inventory (absolute diff: **-2,780.66 units**, Series CI: [-41.50%, -23.58%], Time CI: [-45.14%, -20.01%], $p_{\text{raw}} < 0.001$, $p_{\text{adj}} < 0.001$).
+* **$L=3$ Exploratory Rows (Not Significant after Holm adjustment):**
+  * `GROCERY I`: **-18.51%** (Series CI: [-23.26%, -13.84%], Time CI: [-27.42%, -3.20%]). Although both CIs exclude 0, raw p-value is $p_{\text{raw}} = 0.016$, exceeding rank-5 Holm threshold ($\alpha_5 = 0.00556$, $p_{\text{adj}} = 0.144 \ge 0.05$); correctly labeled **Exploratory (Holm-adj p >= 0.05)**.
+  * `DELI`: **-17.63%** ($p_{\text{raw}} = 0.008$, $\alpha_2 = 0.00417$, $p_{\text{adj}} = 0.096 \ge 0.05$).
+  * `MEATS`: **-9.23%** ($p_{\text{raw}} = 0.008$, $\alpha_3 = 0.00455$, $p_{\text{adj}} = 0.096 \ge 0.05$).
+  * `POULTRY`: **-9.91%** ($p_{\text{raw}} = 0.030$, $\alpha_6 = 0.00625$, $p_{\text{adj}} = 0.240 \ge 0.05$).
+  * `BREAD/BAKERY`: **-7.52%** (Time CI: [-14.26%, +0.95%], crosses 0).
 * **$L=7$ Primary Wins (6 families):**
-  1. `GROCERY I`: **-19.57%** ($p < 0.001$, Series CI: [-26.68%, -12.58%], Time CI: [-30.60%, -7.83%])
-  2. `BREAD/BAKERY`: **-10.02%** ($p < 0.001$, Series CI: [-14.58%, -5.14%], Time CI: [-13.48%, -5.24%])
-  3. `POULTRY`: **-14.75%** ($p < 0.001$, Series CI: [-21.47%, -8.68%], Time CI: [-22.29%, -6.45%])
-  4. `DELI`: **-22.73%** ($p < 0.001$, Series CI: [-26.00%, -18.61%], Time CI: [-31.03%, -13.70%])
-  5. `LAWN AND GARDEN`: **-38.02%** ($p < 0.001$, absolute diff: **-3,652.14 units**, Series CI: [-44.13%, -30.82%], Time CI: [-48.07%, -24.10%])
-  6. `MEATS`: **-9.71%** ($p = 0.004 \le 0.00625$, Series CI: [-17.07%, -4.18%], Time CI: [-16.66%, -2.63%])
-* **Boundary & Exploratory Cases:**
-  * `BABY CARE`: Status is *target above frontier maximum* (frontier max fill rate is 92.65% for Point, 94.38% for Seasonal Naive due to low-volume sparsity).
-  * `BOOKS`: Reachable at 99.0% fill rate; $L=3$ uses -13.23% (-26.46 units, Series CI: [-23.59%, +16.50%]), $L=7$ uses +18.44% (+30.19 units, Series CI: [-21.00%, +47.65%]). Both differences are within noise (CIs cross 0).
+  1. `LAWN AND GARDEN`: **-38.02%** ($p_{\text{adj}} < 0.001$, absolute diff: **-3,652.14 units**, Series CI: [-44.13%, -30.82%], Time CI: [-48.07%, -24.10%])
+  2. `DELI`: **-22.73%** ($p_{\text{adj}} < 0.001$, Series CI: [-26.00%, -18.61%], Time CI: [-31.03%, -13.70%])
+  3. `GROCERY I`: **-19.57%** ($p_{\text{adj}} < 0.001$, Series CI: [-26.68%, -12.58%], Time CI: [-30.60%, -7.83%])
+  4. `POULTRY`: **-14.75%** ($p_{\text{adj}} < 0.001$, Series CI: [-21.47%, -8.68%], Time CI: [-22.29%, -6.45%])
+  5. `BREAD/BAKERY`: **-10.02%** ($p_{\text{adj}} < 0.001$, Series CI: [-14.58%, -5.14%], Time CI: [-13.48%, -5.24%])
+  6. `MEATS`: **-9.71%** ($p_{\text{raw}} = 0.004$, $\alpha_6 = 0.00625$, $p_{\text{adj}} = 0.032 < 0.05$, Series CI: [-17.07%, -4.18%], Time CI: [-16.66%, -2.63%])
+* **Boundary Cases:**
+  * `DAIRY`: Exceeds 99% fill rate across all tested safety factors even at negative safety stock ($z=-1.5$, min fill rate: 99.38% at $L=3$, 99.16% at $L=7$) under the sales-as-demand proxy. Target 99.0% is *target below frontier minimum*.
+  * `BABY CARE`: Low-volume sparsity caps the maximum reachable fill rate at 92.65% (Point) / 94.38% (S. Naive) at $L=3$, and 91.80% (Point) / 94.32% (S. Naive) at $L=7$. Target 99.0% is *target above frontier maximum*.
+  * `BOOKS`: Reachable at 99.0% fill rate; $L=3$ Point uses -13.23% (Series CI: [-23.59%, +16.50%]), $L=7$ Point uses +18.44% (Series CI: [-21.00%, +47.65%]). Both differences are within noise (CIs cross 0).
+
+> **Untraceable Figures Explanation:** Earlier exploratory runs reported -12.05% ($L=3$) and -14.54% ($L=7$) inventory reductions. These figures were generated using in-sample residual $\sigma$ before the simulator was frozen with strictly out-of-sample forecast error buffers. Because they cannot be reproduced from any commit, they are declared invalid and are not used anywhere.
 
 ---
 
@@ -101,5 +113,5 @@ To prevent false discovery from multiple comparisons, one primary comparison was
 | **Forecasting Engine** | Global LightGBM point model with recursive multi-step lags | Direct multi-quantile forecasting (P10/P50/P90) & deep learning (TFT) |
 | **Replenishment Logic** | Periodic $(R, S)$ order-up-to policy with out-of-sample safety stock | Multi-echelon distribution center to store joint optimization |
 | **Service Level Targets** | Frontier service-level tuning grid ($z \in [-1.5, 2.5]$) | Category-specific dynamic service-level optimization based on margins |
-| **User Interface** | Interactive Streamlit executive dashboard & SQL analytical exports | Enterprise ERP / SAP automated purchase order write-back integration |
-| **Causal Controls** | Store-family fixed effects log-linear regression for promotional lift | Real-time cross-elasticity pricing engine and markdown planner |
+| **User Interface** | Interactive Streamlit dashboard & SQL analytical exports | Enterprise ERP / SAP automated purchase order write-back integration |
+| **Econometric Controls** | Store-family and year-month fixed effects log-linear regression for promotional lift | Real-time cross-elasticity pricing engine and markdown planner |

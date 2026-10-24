@@ -25,7 +25,7 @@ def test_build_features_schema_and_types(tiny_favorita_files: dict[str, Path]):
 
     feat_df, cols = build_features(train_df, stores_df=stores_df, holidays_df=holidays_df)
 
-    # Core causal columns
+    # Core temporal feature columns
     assert "lag_16" in cols
     assert "lag_21" in cols
     assert "lag_28" in cols
@@ -308,12 +308,12 @@ def test_generate_all_predictions_and_oof_export(tiny_favorita_files: dict[str, 
     assert (oof_df["pred_p50"] <= oof_df["pred_p90"]).all()
     assert set(oof_df["split"].unique()) == {"fold_1", "fold_2", "holdout"}
 
-    # If the production file exists, verify CI constraints (< 5 MB)
-    prod_file = Path("outputs/oof_and_holdout_predictions.parquet")
-    if prod_file.exists():
-        size_mb = prod_file.stat().st_size / (1024 * 1024)
+    # If the output file exists, verify CI constraints (< 5 MB)
+    output_file = Path("outputs/oof_and_holdout_predictions.parquet")
+    if output_file.exists():
+        size_mb = output_file.stat().st_size / (1024 * 1024)
         assert size_mb < 5.0, f"oof_and_holdout_predictions.parquet exceeds 5 MB: {size_mb:.2f} MB"
-        prod_df = pd.read_parquet(prod_file)
-        assert len(prod_df) == 171072
-        assert (prod_df["pred_p10"] <= prod_df["pred_p50"]).all()
-        assert (prod_df["pred_p50"] <= prod_df["pred_p90"]).all()
+        output_df = pd.read_parquet(output_file)
+        assert len(output_df) == 171072
+        assert (output_df["pred_p10"] <= output_df["pred_p50"]).all()
+        assert (output_df["pred_p50"] <= output_df["pred_p90"]).all()

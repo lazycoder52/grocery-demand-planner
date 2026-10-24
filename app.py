@@ -1,4 +1,4 @@
-"""Grocery Demand Planner - Executive Portfolio Streamlit Application.
+"""Grocery Demand Planner - Interactive Portfolio Streamlit Application.
 
 Interactive multi-page dashboard for inventory replenishment, forecast exploration,
 and operational supply-chain insights.
@@ -71,8 +71,8 @@ def load_sql_summary(filename: str) -> pd.DataFrame:
     return pd.DataFrame()
 
 
-def render_executive_summary(metrics: dict[str, Any]):
-    """Page 1: Executive summary of backtest, holdout, replenishment, and promo lift."""
+def render_summary_overview(metrics: dict[str, Any]):
+    """Page 1: Portfolio summary of backtest, holdout, replenishment, and promo lift."""
     st.title("📦 Corporación Favorita Demand Planner & Inventory Replenishment")
     st.markdown(
         "**Target Persona:** Retail Product Manager & Senior Product Analyst  \n"
@@ -189,51 +189,58 @@ def render_executive_summary(metrics: dict[str, Any]):
         {
             "Family": "LAWN AND GARDEN",
             "L=3 Diff": "-32.25%",
-            "L=3 Status": "Win (p < 0.001)",
+            "L=3 Status": "Win (p_adj < 0.001)",
             "L=7 Diff": "-38.02%",
-            "L=7 Status": "Win (p < 0.001)",
+            "L=7 Status": "Win (p_adj < 0.001)",
         },
         {
             "Family": "GROCERY I",
-            "L=3 Diff": "-8.26%",
-            "L=3 Status": "Time CI crosses 0",
+            "L=3 Diff": "-18.51%",
+            "L=3 Status": "Exploratory (Holm-adj p >= 0.05)",
             "L=7 Diff": "-19.57%",
-            "L=7 Status": "Win (p < 0.001)",
-        },
-        {
-            "Family": "BREAD/BAKERY",
-            "L=3 Diff": "-6.12%",
-            "L=3 Status": "Time CI crosses 0",
-            "L=7 Diff": "-10.02%",
-            "L=7 Status": "Win (p < 0.001)",
-        },
-        {
-            "Family": "POULTRY",
-            "L=3 Diff": "-9.45%",
-            "L=3 Status": "Time CI crosses 0",
-            "L=7 Diff": "-14.75%",
-            "L=7 Status": "Win (p < 0.001)",
+            "L=7 Status": "Win (p_adj < 0.001)",
         },
         {
             "Family": "DELI",
-            "L=3 Diff": "-11.80%",
-            "L=3 Status": "Time CI crosses 0",
+            "L=3 Diff": "-17.63%",
+            "L=3 Status": "Exploratory (Holm-adj p >= 0.05)",
             "L=7 Diff": "-22.73%",
-            "L=7 Status": "Win (p < 0.001)",
+            "L=7 Status": "Win (p_adj < 0.001)",
+        },
+        {
+            "Family": "POULTRY",
+            "L=3 Diff": "-9.91%",
+            "L=3 Status": "Exploratory (Holm-adj p >= 0.05)",
+            "L=7 Diff": "-14.75%",
+            "L=7 Status": "Win (p_adj < 0.001)",
+        },
+        {
+            "Family": "BREAD/BAKERY",
+            "L=3 Diff": "-7.52%",
+            "L=3 Status": "Exploratory (Time CI crosses 0)",
+            "L=7 Diff": "-10.02%",
+            "L=7 Status": "Win (p_adj < 0.001)",
         },
         {
             "Family": "MEATS",
-            "L=3 Diff": "-5.80%",
-            "L=3 Status": "Time CI crosses 0",
+            "L=3 Diff": "-9.23%",
+            "L=3 Status": "Exploratory (Holm-adj p >= 0.05)",
             "L=7 Diff": "-9.71%",
-            "L=7 Status": "Win (p = 0.004)",
+            "L=7 Status": "Win (p_adj = 0.032)",
+        },
+        {
+            "Family": "DAIRY",
+            "L=3 Diff": "N/A",
+            "L=3 Status": "Target below frontier min (>99% at z=-1.5)",
+            "L=7 Diff": "N/A",
+            "L=7 Status": "Target below frontier min (>99% at z=-1.5)",
         },
         {
             "Family": "BABY CARE",
             "L=3 Diff": "N/A",
-            "L=3 Status": "Target above frontier max",
+            "L=3 Status": "Target above frontier max (max 92.7%)",
             "L=7 Diff": "N/A",
-            "L=7 Status": "Target above frontier max",
+            "L=7 Status": "Target above frontier max (max 91.8%)",
         },
         {
             "Family": "BOOKS",
@@ -254,7 +261,10 @@ def render_executive_summary(metrics: dict[str, Any]):
     with col_img2:
         promo_img = DOCS_IMG_DIR / "promo_lift_by_family.png"
         if promo_img.exists():
-            st.image(str(promo_img), caption="Figure 2: Causal Promotional Lift by Product Family")
+            st.image(
+                str(promo_img),
+                caption="Figure 2: Promotional Lift Associations by Product Family",
+            )
 
     # Critical Methodological Assumptions & Limitations
     st.info(
@@ -408,10 +418,10 @@ def render_replenishment_simulator(sim_df: pd.DataFrame):
 
 
 def render_business_insights():
-    """Page 4: Production SQL views, operational decisions, and CSV downloads."""
-    st.title("📊 Business Insights & Production SQL Queries")
+    """Page 4: Analytical SQL views, operational decisions, and CSV downloads."""
+    st.title("📊 Business Insights & Analytical SQL Queries")
     st.markdown(
-        "Explore production SQL queries designed for supply chain managers and category buyers."
+        "Explore analytical SQL queries designed for supply chain managers and category buyers."
     )
 
     queries = {
@@ -488,7 +498,7 @@ def main():
     page = st.sidebar.radio(
         "Go to",
         [
-            "Executive Summary",
+            "Summary Overview",
             "Forecast Explorer",
             "Replenishment Simulator",
             "Business Insights & SQL",
@@ -499,8 +509,8 @@ def main():
     sim_df = load_sim_summary()
     preds_df = load_predictions()
 
-    if page == "Executive Summary":
-        render_executive_summary(metrics)
+    if page == "Summary Overview":
+        render_summary_overview(metrics)
     elif page == "Forecast Explorer":
         render_forecast_explorer(preds_df)
     elif page == "Replenishment Simulator":

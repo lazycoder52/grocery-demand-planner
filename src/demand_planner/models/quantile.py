@@ -1,7 +1,7 @@
 """Quantile regression modeling using LightGBM for grocery demand uncertainty estimation.
 
-Trains models for specified quantiles (default P10, P50, P90) using the same strictly
-causal feature pipeline as the point forecasting model. Evaluates pinball loss
+Trains models for specified quantiles (default P10, P50, P90) using the same non-anticipating
+feature pipeline as the point forecasting model. Evaluates pinball loss
 and empirical interval coverage across rolling-origin backtest folds and holdout.
 
 Empirical Coverage & Uncertainty Observations (Measured):
@@ -216,7 +216,7 @@ def run_quantile_cv(
     df_raw = sales_df.copy()
     df_raw["date"] = pd.to_datetime(df_raw["date"])
 
-    log.info("Building causal features for quantile CV backtest...")
+    log.info("Building features for quantile CV backtest...")
     df_feat, feature_names = build_features(
         df_raw, stores_df=stores_df, holidays_df=holidays_df, target_col=target_col
     )
@@ -359,7 +359,7 @@ def evaluate_quantile_holdout(
     df_raw = sales_df.copy()
     df_raw["date"] = pd.to_datetime(df_raw["date"])
 
-    log.info("Building causal features for quantile holdout...")
+    log.info("Building features for quantile holdout...")
     df_feat, feature_names = build_features(
         df_raw, stores_df=stores_df, holidays_df=holidays_df, target_col=target_col
     )
