@@ -6,15 +6,15 @@ This document connects the SQL analytical queries in `sql/` to concrete inventor
 
 ## Summary: Replenishment Benchmark
 
-Under rigorous walk-forward backtesting with out-of-sample residual safety stock and Rule 2 boundary extension, the simulated machine learning replenishment policy achieves:
+Under walk-forward backtesting with out-of-sample residual safety stock, the simulated machine learning replenishment policy achieves:
 
 * **Chain-Level Simulated Inventory Reduction:** **-12.27% to -14.51%** average simulated inventory reduction compared to Seasonal Naive at a matched 99.0% target fill rate.
   * **$L=3$ days:** **-12.27%** simulated inventory [95% Series Bootstrap CI: [-14.59%, -10.05%]; 95% Time-Block Bootstrap CI: [-19.97%, -2.25%]].
   * **$L=7$ days:** **-14.51%** simulated inventory [95% Series Bootstrap CI: [-17.53%, -11.37%]; 95% Time-Block Bootstrap CI: [-21.22%, -7.31%]].
   * Both series and time-block 95% bootstrap confidence intervals strictly exclude 0 across both operational lead times.
-* **Why Compare at Matched Fill Rate?** Evaluating policies at an identical safety multiplier $z$ conflates forecast accuracy with customer service: an over-forecasting model holds more inventory while achieving higher fill, whereas an under-forecaster appears lean while inducing stockouts. Matching policies at target on-shelf availability (e.g., 99.0% fill rate) controls for service level, providing an apples-to-apples working capital comparison.
+* **Why Compare at Matched Fill Rate?** Evaluating policies at an identical safety multiplier $z$ conflates forecast accuracy with customer service: an over-forecasting model holds more inventory while achieving higher fill, whereas an under-forecaster appears lean while inducing stockouts. Matching policies at target on-shelf availability (e.g., 99.0% fill rate) controls for service level, providing an apples-to-apples average inventory units (simulated, not value-weighted) comparison.
 * **Lead-Time Error Autocorrelation:** The empirical ratio of multi-day window-sum error standard deviation to theoretical independent $\sigma_{\text{oos}} \sqrt{R+L}$ is **1.436 at $W=10$ days** ($L=3$) and **1.522 at $W=14$ days** ($L=7$).
-* **Conservative Temporal Uncertainty:** At 99.5% target fill rate ($L=3$), LightGBM Point reduces simulated inventory by **-10.13%** with Series CI [-12.65%, -6.99%], but the conservative Time-Block CI spans **[-16.28%, +0.88%]**, crossing 0 due to temporal cluster variance during holiday/payday weeks.
+* **Conservative Temporal Uncertainty:** At 99.5% target fill rate ($L=3$), LightGBM Point reduces simulated inventory by **-10.13%** with Series CI [-12.65%, -6.99%], but the conservative Time-Block CI spans **[-16.28%, +0.88%]**, crossing 0 under temporal block bootstrap.
 
 * **Primary Pre-Specified Family Results (Matched 99.0% Fill Rate, Holm-Bonferroni FWER $\alpha = 0.05$):**
   To prevent false discovery, one primary comparison was pre-specified per family across $m = 13$ hypotheses per lead time. Two-sided bootstrap p-values are computed with +1 smoothing ($p = 2 \cdot \frac{\min(c_{\ge 0}, c_{\le 0}) + 1}{B + 1}$) directly from the store-series bootstrap draws ($B = 1,000$), with family-wise error rate controlled across the 13 pre-specified families using step-down Holm-Bonferroni adjustment. A family is designated as a finding **only if its Holm-adjusted p-value is below 0.05 AND both Series and Time-Block bootstrap CIs strictly exclude 0**. Across the 13 pre-specified families, LightGBM yields 7 findings at $L=3$ (`LAWN AND GARDEN`, `GROCERY I`, `DELI`, `PERSONAL CARE`, `POULTRY`, `MEATS`, `CLEANING`) and 6 findings at $L=7$ (`LAWN AND GARDEN`, `DELI`, `GROCERY I`, `POULTRY`, `BREAD/BAKERY`, `MEATS`). See [Section 6](#6-pre-specified-primary-family-comparison-tables-metricsjson-replenishment_simulation) for full tables.
@@ -34,7 +34,7 @@ Under rigorous walk-forward backtesting with out-of-sample residual safety stock
 ## 1. Promotional Elasticity & Sales Lift (`sql/promo_elasticity.sql`)
 
 ### Operational Decision Driven
-* **Promotional Stock Allocation & Vendor Co-Op Negotiation:** Identifies store-family pairs exhibiting high empirical sales responsiveness during promotional periods to guide safety stock adjustments, while flagging low-elasticity categories where price promotions dilute gross margin without driving volume.
+* **Promotional Stock Allocation & Vendor Co-Op Negotiation:** Identifies store-family pairs exhibiting high empirical sales responsiveness during promotional periods to guide safety stock adjustments, while flagging low-elasticity categories where promotions do not drive volume.
 
 ### Query Logic
 * Evaluates store-family sales post **2014-04-01** (when promotional tracking commenced across Corporación Favorita).
@@ -47,7 +47,7 @@ Under rigorous walk-forward backtesting with out-of-sample residual safety stock
 * **Evaluated Series:** 1,395 store-family pairs meet the minimum support thresholds (excluding dates prior to each store's first positive-sales date and Dec 25 closures).
 * **Promotional Day Share:** Mean promotional day share is **36.98%** (median: **32.36%**).
 * **Empirical Lift Distribution:**
-  * Median empirical sales lift across store-families is **+32.15%**. (Following conservative reporting standards, only medians are reported for lift to avoid skewness from promotional base distortions).
+  * Median empirical sales lift across store-families is **+32.15%**. (Medians are reported for lift to avoid skewness from promotional base distortions).
 * **Controlled Econometric Association (`metrics.json` `promo_lift_analysis`):**
   * Evaluated excluding zero-sales days, pre-opening periods, and store closures (see Section 5 below for full methodology and exploratory family estimates).
 
@@ -122,7 +122,7 @@ Under rigorous walk-forward backtesting with out-of-sample residual safety stock
   * `HIGH_VOLATILITY_PERISHABLE_PROXY`: **61 series** (4.00%)
 * **Highest Volatility Series & Anomaly Investigation:**
   * Store 39 `MEATS`: Mean daily sales **240.12 units/day**, daily sales standard deviation **2,223.16 units**, resulting in $\text{CV} = \mathbf{9.2585}$ and volatility exposure index of **2,223.16**.
-  * **Investigation of Store 39 MEATS:** Deep-dive analysis confirms this extreme volatility is driven by an isolated **single-day data entry / recording anomaly** on **2016-10-07**, where recorded meat sales spiked to **89,576.36 units** (accounting for 22.2% of the store's entire 4.5-year cumulative meat sales in a single day; the 2nd highest day was 5,519 units). Store 39 has traded continuously since 2013-01-02 (the second day of the entire dataset), confirming that this is an anomalous recording spike, not a store opening effect.
+  * **Investigation of Store 39 MEATS:** Deep-dive analysis is consistent with a recording error: this extreme volatility is driven by an isolated **single-day data entry / recording anomaly** on **2016-10-07**, where recorded meat sales spiked to **89,576.36 units** (accounting for 22.2% of the store's entire 4.5-year cumulative meat sales in a single day; the 2nd highest day was 5,519 units). Store 39 has traded continuously since 2013-01-02 (the second day of the entire dataset), confirming that this is an anomalous recording spike, not a store opening effect.
   * **Sensitivity & Impact on Pipeline:**
     - *Safety Stock Estimation:* Zero effect. Out-of-sample safety stock residual standard deviation ($\sigma$) is computed over a 56-day lookback window strictly before each forecast origin. For CV Fold 1 (origin 2017-05-11), the lookback window begins 2017-03-16—more than 215 days after the 2016-10-07 spike. The anomaly is completely outside the safety stock estimation window.
     - *Model Training & Sensitivity Analysis:*
