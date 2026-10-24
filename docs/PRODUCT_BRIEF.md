@@ -9,7 +9,7 @@
 
 ## 1. Problem Statement & Business Opportunity
 
-Grocery supply chains operate under an unforgiving trade-off: over-replenishing inventory triggers margin-eroding spoilage and capital holding costs, while under-replenishing leads to phantom stockouts, lost sales, and degraded customer loyalty.
+Grocery supply chains operate under an unforgiving trade-off: over-replenishing inventory triggers margin-eroding spoilage and capital holding costs, while under-replenishing leads to unobserved stockouts, lost sales, and degraded customer loyalty.
 
 Across **54 supermarket stores** and **33 product families** in Ecuador (3,000,888 historical daily POS records), store inventory replenishment has historically relied on static heuristic ordering rules—predominantly 7-day seasonal naive repeating and 28-day moving averages.
 
