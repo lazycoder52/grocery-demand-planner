@@ -38,11 +38,11 @@ Evaluated as a single-window out-of-time confirmation on the final unseen 16-day
 
 ## 2. Replenishment Policy Benchmark
 
-Under periodic $(R, S)$ replenishment ($R=7, L \in \{3, 7\}$) with strictly out-of-sample forecast error safety stock, LightGBM delivers a **-12.27% to -14.51% average simulated inventory reduction** compared to Seasonal Naive at a matched 99.0% target fill rate:
+Under periodic $(R, S)$ replenishment ($R=7, L \in \{3, 7\}$) with strictly out-of-sample forecast error safety stock, the LightGBM point model delivers a **-12.27% to -14.51% average simulated inventory reduction** compared to Seasonal Naive at a matched 99.0% target fill rate:
 * **$L = 3$ days:** **-12.27%** [95% Series CI: [-14.59%, -10.05%]; 95% Time-Block CI: [-19.97%, -2.25%]].
 * **$L = 7$ days:** **-14.51%** [95% Series CI: [-17.53%, -11.37%]; 95% Time-Block CI: [-21.22%, -7.31%]].
 
-Full benchmark trade-off curves, lead-time autocorrelation ratios (**1.436** at $L=3$, **1.522** at $L=7$), boundary cases (`DAIRY` below frontier, `BABY CARE` above frontier), and the complete 13-family Holm-Bonferroni significance table are detailed in [docs/INSIGHTS.md](docs/INSIGHTS.md#summary-replenishment-benchmark).
+Full benchmark trade-off curves, lead-time autocorrelation ratios (**1.436** at $L=3$, **1.522** at $L=7$), boundary cases (`DAIRY` below frontier, `BABY CARE` above frontier), and the complete 13-family Holm-Bonferroni significance table are detailed in [docs/INSIGHTS.md](docs/INSIGHTS.md#summary-replenishment-benchmark). The simulation headline uses the point model.
 
 ---
 
@@ -57,9 +57,12 @@ Full benchmark trade-off curves, lead-time autocorrelation ratios (**1.436** at 
 
 | Architectural Approach | Walk-Forward WAPE | Operational Pros | Operational Cons | Pipeline Decision |
 | :--- | :---: | :--- | :--- | :--- |
-| **Global LightGBM Regressor** | **13.49%** | Fast training, natively handles non-linear paydays, oil interactions, and promotional counters. | Direct forecasting requires lags of at least 16 days. | **Selected Regressor** |
+| **Global LightGBM Regressor** | **13.49%** | Handles non-linear paydays and promotional counters. | Direct forecasting requires lags of at least 16 days. | **Selected Regressor** |
 | **Seasonal Naive (7-Day Lag)** | 16.33% | Zero compute, deterministic, robust on stable weekday patterns. | Blind to bi-weekly paydays (15th / month-end) and holiday calendar shifts. | **Baseline Benchmark** |
-| **28-Day Moving Average** | 23.65% | Smooths out extreme noise in low-volume stores. | High lag latency; severely suppresses peak promotions. | Deprecated |
+| **28-Day Moving Average** | 23.65% | Smooths out extreme noise in low-volume stores. | High lag latency. | Baseline |
+
+* **Hyperparameters:** Global LightGBM uses untuned defaults: `objective='regression'`, `n_estimators=200`, `learning_rate=0.08`, `num_leaves=63`, `random_state=42`, `n_jobs=-1`.
+* **Training Range:** Training starts on **2015-01-01** because promotion tracking began on 2014-04-01, allowing sufficient feature lag initialization.
 
 ---
 
@@ -75,6 +78,12 @@ pytest && ruff check .
 
 # 3. Launch interactive Streamlit application
 streamlit run app.py
+```
+
+### Reproduce Full Pipeline
+```bash
+# Full end-to-end pipeline run (~9 minutes; requires Kaggle CSVs in data/raw/)
+python -m demand_planner.pipeline
 ```
 
 ### Streamlit Community Cloud Deployment

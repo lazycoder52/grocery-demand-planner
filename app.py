@@ -76,7 +76,8 @@ def render_summary_overview(metrics: dict[str, Any]):
     st.title("📦 Corporación Favorita Demand Planner & Inventory Replenishment")
     st.markdown(
         "**Target Persona:** Retail Product Manager & Senior Product Analyst  \n"
-        "**Core Business Impact:** Quantifying working capital reduction from ML forecasting "
+        "**Core Business Impact:** Quantifying average inventory units "
+        "(simulated, not value-weighted) reduction from ML forecasting "
         "at matched on-shelf customer service levels."
     )
 
@@ -415,7 +416,8 @@ def render_replenishment_simulator(sim_df: pd.DataFrame):
         f"**Key Operational Takeaway:** For lead time $L={lead_time}$, reaching high service "
         "levels with Seasonal Naive demands substantial safety stock buffers due to high "
         "forecast uncertainty. LightGBM compresses residual variance, allowing the store "
-        "to hit target availability while freeing working capital."
+        "to hit target availability with less average inventory units "
+        "(simulated, not value-weighted)."
     )
 
 
