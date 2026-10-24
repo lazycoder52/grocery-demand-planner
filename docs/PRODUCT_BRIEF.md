@@ -60,6 +60,10 @@ graph TD
 
 See [docs/INSIGHTS.md](INSIGHTS.md#6-pre-specified-primary-family-comparison-tables-metricsjson-replenishment_simulation) for pre-specified per-family comparison tables and multiple-testing corrections.
 
+* **Boundary Reachability Caveats:**
+  * `DAIRY`: Target 99.0% fill rate is *target below frontier minimum* (exceeds 99% fill rate across all tested safety factors even at negative safety stock under the sales-as-demand proxy).
+  * `BABY CARE`: Target 99.0% fill rate is *target above frontier maximum* (low-volume sparsity caps maximum reachable fill rate at ~92-94%).
+
 ---
 
 ## 5. Critical Assumptions & Methodological Limitations
