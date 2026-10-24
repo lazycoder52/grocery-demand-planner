@@ -96,14 +96,21 @@ Due to competition licensing terms, the raw Kaggle Corporación Favorita dataset
 
 ## 7. Operational Assumptions & Limitations
 
-1. **Out-of-Sample Safety Stock Construction:**
+1. **Evaluation Window Restrictions:**
+   Model evaluation covers only **2017-05-12 to 2017-08-15** (CV Fold 1 test start through holdout test end). This backtest window excludes December holiday surges, annual peak seasons, and the April 2016 Manabi earthquake emergency relief period.
+2. **Sales as Demand Proxy & Simulated Fill Rates:**
+   The inventory replenishment simulator uses historical sales as a demand proxy rather than unconstrained customer demand. All reported on-shelf fill rates and inventory reductions are simulated under periodic review policies rather than observed from live physical store shelves. When an item stocks out, true unfulfilled consumer demand is censored.
+3. **Out-of-Sample Safety Stock Construction:**
    Safety stock buffers $\sigma_{\text{oos}}$ are strictly calculated from out-of-sample forecast errors from earlier walk-forward origins whose actual sales were fully completed prior to review date $t$.
-2. **Demand Censoring Caveat:**
-   Historical point-of-sale data captures fulfilled transactions, not unconstrained consumer demand. When an item stocks out, sales register as zero. Without lost-demand records, empirical fill rates represent upper bounds and naive baselines are biased downward during replenishment recovery.
-3. **Observational Promotions:**
+4. **Observational Promotions:**
    Promotional tracking commenced across Favorita on **2014-04-01**. Promotional lifts reflect observational historical associations on positive-sales days (intensive margin) rather than randomized A/B pricing experiments.
-4. **Institutional Calendar Shocks:**
+5. **Institutional Calendar Shocks:**
    December 25 is a deterministic chain-wide holiday closure (sales = 0). Demand for Christmas is treated as zero.
+
+### What I Would Do Next
+1. **Longer Backtest History (Including December):** Extend rolling-origin backtesting across multiple calendar years to evaluate model robustness during December holiday volume peaks and annual seasonal surges.
+2. **Real On-Hand Inventory Data:** Connect actual ERP/WMS stock records, store inventory receipts, and recorded stockout incident logs to measure physical shelf availability and unfulfilled demand directly.
+3. **Promotional Effects Controlling for Targeting:** Model promotional response with an econometric design that explicitly controls for marketing targeting and selective discounting (e.g. staggered store rollouts, panel fixed-effects instrumented designs).
 
 ---
 
