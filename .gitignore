@@ -27,6 +27,9 @@ data/processed/
 !outputs/*_summary.parquet
 !outputs/summary_*.parquet
 
+# --- Local notes (never published) ---
+docs/INTERVIEW_PREP.md
+
 # --- Legacy local code (never published) ---
 _legacy_local/
 
