@@ -1215,26 +1215,16 @@ class PeriodicReviewSimulator:
                         excl_pt_time = ci_pt_time_low > 0 or ci_pt_time_high < 0
                         is_win_pt = excl_pt_ser and excl_pt_time and pct_diff_pt < 0
 
-                        p_ser = (
-                            2.0
-                            * min(
-                                float(np.mean(np.array(b_diffs_pt_ser) >= 0)),
-                                float(np.mean(np.array(b_diffs_pt_ser) <= 0)),
+                        b_ser_arr = np.array(b_diffs_pt_ser)
+                        b_ser_len = len(b_ser_arr)
+                        if b_ser_len >= 20:
+                            c_pos = int(np.sum(b_ser_arr >= 0))
+                            c_neg = int(np.sum(b_ser_arr <= 0))
+                            p_val_pt = float(
+                                min(1.0, 2.0 * (min(c_pos, c_neg) + 1.0) / (b_ser_len + 1.0))
                             )
-                            if len(b_diffs_pt_ser) >= 20
-                            else 1.0
-                        )
-                        p_time = (
-                            2.0
-                            * min(
-                                float(np.mean(np.array(b_diffs_pt_time) >= 0)),
-                                float(np.mean(np.array(b_diffs_pt_time) <= 0)),
-                            )
-                            if len(b_diffs_pt_time) >= 20
-                            else 1.0
-                        )
-                        p_val_pt = float(max(p_ser, p_time))
-                        p_val_pt = max(p_val_pt, 1.0 / n_bootstrap)
+                        else:
+                            p_val_pt = 1.0
 
                         entry.update(
                             {
@@ -1290,7 +1280,6 @@ class PeriodicReviewSimulator:
                 )
             )
 
-            prior_passed = True
             cum_max_p = 0.0
             for rank_idx, e in enumerate(primary_entries):
                 k = rank_idx + 1
@@ -1304,27 +1293,13 @@ class PeriodicReviewSimulator:
                 e["p_value_resolution"] = round(1.0 / n_bootstrap, 4)
                 e["p_value_raw"] = p_raw
                 e["p_value_adjusted"] = round(p_adj, 4)
-                e["p_value_raw_formatted"] = (
-                    f"<= {1.0 / n_bootstrap:.3f}"
-                    if p_raw <= (1.0 / n_bootstrap)
-                    else f"{p_raw:.4f}"
-                )
-                e["p_value_adjusted_formatted"] = (
-                    f"<= {1.0 / n_bootstrap:.3f}"
-                    if p_adj <= (1.0 / n_bootstrap)
-                    else f"{p_adj:.4f}"
-                )
+                e["p_value_raw_formatted"] = f"{p_raw:.4f}"
+                e["p_value_adjusted_formatted"] = f"{p_adj:.4f}"
                 e["comparison_type"] = "primary"
                 e["holm_rank"] = k
                 e["holm_alpha_threshold"] = round(alpha_holm, 5)
 
-                is_win = (
-                    e.get("is_statistically_significant_win_point", False)
-                    and p_adj <= 0.05
-                    and prior_passed
-                )
-                if not is_win:
-                    prior_passed = False
+                is_win = e.get("is_statistically_significant_win_point", False) and p_adj <= 0.05
 
                 e["is_finding"] = is_win
                 e["finding_label"] = (
@@ -1341,11 +1316,7 @@ class PeriodicReviewSimulator:
                 e["p_value_resolution"] = round(1.0 / n_bootstrap, 4)
                 e["p_value_raw"] = p_raw
                 e["p_value_adjusted"] = None
-                e["p_value_raw_formatted"] = (
-                    f"<= {1.0 / n_bootstrap:.3f}"
-                    if p_raw <= (1.0 / n_bootstrap)
-                    else f"{p_raw:.4f}"
-                )
+                e["p_value_raw_formatted"] = f"{p_raw:.4f}"
                 e["comparison_type"] = "exploratory"
                 e["is_finding"] = False
                 e["finding_label"] = "Exploratory"

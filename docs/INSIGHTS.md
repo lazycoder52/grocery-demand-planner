@@ -17,25 +17,7 @@ Under rigorous walk-forward backtesting with out-of-sample residual safety stock
 * **Conservative Temporal Uncertainty:** At 99.5% target fill rate ($L=3$), LightGBM Point reduces simulated inventory by **-10.13%** with Series CI [-12.65%, -6.99%], but the conservative Time-Block CI spans **[-16.28%, +0.88%]**, crossing 0 due to temporal cluster variance during holiday/payday weeks.
 
 * **Primary Pre-Specified Family Results (Matched 99.0% Fill Rate, Holm-Bonferroni FWER $\alpha = 0.05$):**
-  To prevent false discovery, one primary comparison was pre-specified per family across $m = 13$ hypotheses per lead time. Bootstrap iterations: $B = 1,000$ with empirical resolution limit $\le 1/B = 0.001$; empirical p-values bounded at the resolution limit are reported as $p \le 0.001$. A family is designated as a finding **only if its Holm-adjusted p-value is below 0.05 AND both Series and Time-Block bootstrap CIs strictly exclude 0**:
-  * **$L=3$ Primary Win (1 family):**
-    * `LAWN AND GARDEN`: **-32.25%** simulated inventory (absolute diff: **-2,780.66 units**, Series CI: [-41.50%, -23.58%], Time CI: [-45.14%, -20.01%], $p_{\text{raw}} \le 0.001$, $p_{\text{adj}} = 0.0130$).
-  * **$L=3$ Exploratory Rows (Not Significant after Holm adjustment):**
-    * `DELI`: **-17.63%** ($p_{\text{raw}} = 0.0080$, $\alpha_2 = 0.00417$, $p_{\text{adj}} = 0.0960 \ge 0.05$).
-    * `MEATS`: **-9.23%** ($p_{\text{raw}} = 0.0080$, $\alpha_3 = 0.00455$, $p_{\text{adj}} = 0.0960 \ge 0.05$).
-    * `CLEANING`: **-14.06%** ($p_{\text{raw}} = 0.0105$, $\alpha_4 = 0.00500$, $p_{\text{adj}} = 0.1050 \ge 0.05$).
-    * `GROCERY I`: **-18.51%** (Series CI: [-23.26%, -13.84%], Time CI: [-27.42%, -3.20%]). Although both CIs exclude 0, raw p-value is $p_{\text{raw}} = 0.0160$, exceeding rank-5 Holm threshold ($\alpha_5 = 0.00556$, $p_{\text{adj}} = 0.1440 \ge 0.05$); correctly labeled **Primary Comparison (Not Significant after Holm adjustment)**.
-    * `POULTRY`: **-9.91%** ($p_{\text{raw}} = 0.0300$, $\alpha_6 = 0.00625$, $p_{\text{adj}} = 0.2400 \ge 0.05$).
-    * `PERSONAL CARE`: **-16.83%** ($p_{\text{raw}} = 0.0320$, $p_{\text{adj}} = 0.2400 \ge 0.05$).
-    * `BEVERAGES`: **-9.33%** ($p_{\text{raw}} = 0.0800$, $p_{\text{adj}} = 0.4800 \ge 0.05$).
-    * `BREAD/BAKERY`: **-7.52%** ($p_{\text{raw}} = 0.0880$, $p_{\text{adj}} = 0.4800 \ge 0.05$, Time CI: [-14.26%, +0.95%], crosses 0).
-  * **$L=7$ Primary Wins (6 families):**
-    1. `LAWN AND GARDEN`: **-38.02%** ($p_{\text{raw}} \le 0.001$, $p_{\text{adj}} = 0.0130$, absolute diff: **-3,652.14 units**, Series CI: [-44.13%, -30.82%], Time CI: [-48.07%, -24.10%])
-    2. `DELI`: **-22.73%** ($p_{\text{raw}} \le 0.001$, $p_{\text{adj}} = 0.0130$, Series CI: [-26.00%, -18.61%], Time CI: [-31.03%, -13.70%])
-    3. `GROCERY I`: **-19.57%** ($p_{\text{raw}} \le 0.001$, $p_{\text{adj}} = 0.0130$, Series CI: [-26.68%, -12.58%], Time CI: [-30.60%, -7.83%])
-    4. `POULTRY`: **-14.75%** ($p_{\text{raw}} \le 0.001$, $p_{\text{adj}} = 0.0130$, Series CI: [-21.47%, -8.68%], Time CI: [-22.29%, -6.45%])
-    5. `BREAD/BAKERY`: **-10.02%** ($p_{\text{raw}} \le 0.001$, $p_{\text{adj}} = 0.0130$, Series CI: [-14.58%, -5.14%], Time CI: [-13.48%, -5.24%])
-    6. `MEATS`: **-9.71%** ($p_{\text{raw}} = 0.0040$, $\alpha_6 = 0.00625$, $p_{\text{adj}} = 0.0320 < 0.05$, Series CI: [-17.07%, -4.18%], Time CI: [-16.66%, -2.63%])
+  To prevent false discovery, one primary comparison was pre-specified per family across $m = 13$ hypotheses per lead time. Two-sided bootstrap p-values are computed with +1 smoothing ($p = 2 \cdot \frac{\min(c_{\ge 0}, c_{\le 0}) + 1}{B + 1}$) directly from the store-series bootstrap draws ($B = 1,000$), with family-wise error rate controlled across the 13 pre-specified families using step-down Holm-Bonferroni adjustment. A family is designated as a finding **only if its Holm-adjusted p-value is below 0.05 AND both Series and Time-Block bootstrap CIs strictly exclude 0**. Across the 13 pre-specified families, LightGBM yields 7 findings at $L=3$ (`LAWN AND GARDEN`, `GROCERY I`, `DELI`, `PERSONAL CARE`, `POULTRY`, `MEATS`, `CLEANING`) and 6 findings at $L=7$ (`LAWN AND GARDEN`, `DELI`, `GROCERY I`, `POULTRY`, `BREAD/BAKERY`, `MEATS`). See [Section 6](#6-pre-specified-primary-family-comparison-tables-metricsjson-replenishment_simulation) for full tables.
   * **Reachability & Boundary Cases:**
     * `DAIRY`: Exceeds 99% fill rate across all tested safety factors even at negative safety stock ($z=-1.5$, min fill rate: 99.38% at $L=3$, 99.16% at $L=7$) under the sales-as-demand proxy. Target 99.0% is *target below frontier minimum*.
     * `BABY CARE`: Status is *target above frontier maximum* (maximum reachable fill rate is 92.65% for LightGBM Point and 94.38% for Seasonal Naive due to low-volume sparsity).
@@ -208,38 +190,38 @@ Under rigorous walk-forward backtesting with out-of-sample residual safety stock
 
 ## 6. Pre-Specified Primary Family Comparison Tables (`metrics.json` `replenishment_simulation`)
 
-The benchmark pre-specified $m = 13$ primary family comparisons at target 99.0% on-shelf fill rate for both lead times. Bootstrap iterations $B = 1,000$, with empirical resolution limit $\le 1/B = 0.001$. Raw and Holm-adjusted p-values are reported as $\le \text{value}$ (bootstrap resolution $1/B$). Multiple testing is controlled family-wise using the step-down Holm-Bonferroni procedure at $\text{FWER} \alpha = 0.05$. A family is classified as a **Primary Finding** only if its Holm-adjusted p-value is $\le 0.05$ and both Series and Time-Block 95% bootstrap confidence intervals strictly exclude 0.
+The benchmark pre-specified $m = 13$ primary family comparisons at target 99.0% on-shelf fill rate for both lead times. Two-sided bootstrap p-values are computed with +1 smoothing ($p = 2 \cdot \frac{\min(c_{\ge 0}, c_{\le 0}) + 1}{B + 1}$) directly from the store-series bootstrap draws ($B = 1,000$), with family-wise error rate controlled across the 13 pre-specified families using the step-down Holm-Bonferroni procedure at $\text{FWER} \alpha = 0.05$. A family is classified as a **Primary Finding** only if its Holm-adjusted p-value is $\le 0.05$ and both Series and Time-Block 95% bootstrap confidence intervals strictly exclude 0.
 
 ### Lead Time $L = 3$ Days (Target 99.0% Fill Rate, $m = 13$ Pre-Specified Families)
 | Family | Status | Diff vs S.Naive (%) | Series 95% CI | Time-Block 95% CI | Raw p | Holm-Adj p | Finding Label |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| `LAWN AND GARDEN` | reachable | -32.25% | [-41.50%, -23.58%] | [-45.14%, -20.01%] | <= 0.001 | 0.0130 | Primary Finding (Statistically Significant Win after Holm adjustment) |
-| `DELI` | reachable | -17.63% | [-20.88%, -14.72%] | [-28.49%, -5.05%] | 0.0080 | 0.0960 | Primary Comparison (Not Significant after Holm adjustment) |
-| `MEATS` | reachable | -9.23% | [-13.06%, -5.94%] | [-16.75%, -1.56%] | 0.0080 | 0.0960 | Primary Comparison (Not Significant after Holm adjustment) |
-| `CLEANING` | reachable | -14.06% | [-23.71%, -6.23%] | [-26.61%, -3.03%] | 0.0105 | 0.1050 | Primary Comparison (Not Significant after Holm adjustment) |
-| `GROCERY I` | reachable | -18.51% | [-23.26%, -13.84%] | [-27.42%, -3.20%] | 0.0160 | 0.1440 | Primary Comparison (Not Significant after Holm adjustment) |
-| `PERSONAL CARE` | reachable | -16.83% | [-24.66%, -10.09%] | [-31.32%, -2.62%] | 0.0320 | 0.2400 | Primary Comparison (Not Significant after Holm adjustment) |
-| `POULTRY` | reachable | -9.91% | [-14.61%, -5.98%] | [-19.08%, -0.88%] | 0.0300 | 0.2400 | Primary Comparison (Not Significant after Holm adjustment) |
-| `BEVERAGES` | reachable | -9.33% | [-12.66%, -5.26%] | [-18.97%, 1.21%] | 0.0800 | 0.4800 | Primary Comparison (Not Significant after Holm adjustment) |
-| `BREAD/BAKERY` | reachable | -7.52% | [-10.55%, -4.90%] | [-14.26%, 0.95%] | 0.0880 | 0.4800 | Primary Comparison (Not Significant after Holm adjustment) |
-| `BABY CARE` | target above frontier maximum | N/A | N/A | N/A | 1.0000 | 1.0000 | Primary Comparison (Not Significant after Holm adjustment) |
-| `BOOKS` | reachable | -13.23% | [-23.59%, 16.50%] | [-23.61%, -4.09%] | 0.2980 | 1.0000 | Primary Comparison (Not Significant after Holm adjustment) |
+| `LAWN AND GARDEN` | reachable | -32.25% | [-41.50%, -23.58%] | [-45.14%, -20.01%] | 0.0020 | 0.0260 | Primary Finding (Statistically Significant Win after Holm adjustment) |
+| `GROCERY I` | reachable | -18.51% | [-23.26%, -13.84%] | [-27.42%, -3.20%] | 0.0020 | 0.0260 | Primary Finding (Statistically Significant Win after Holm adjustment) |
+| `DELI` | reachable | -17.63% | [-20.88%, -14.72%] | [-28.49%, -5.05%] | 0.0020 | 0.0260 | Primary Finding (Statistically Significant Win after Holm adjustment) |
+| `PERSONAL CARE` | reachable | -16.83% | [-24.66%, -10.09%] | [-31.32%, -2.62%] | 0.0020 | 0.0260 | Primary Finding (Statistically Significant Win after Holm adjustment) |
+| `POULTRY` | reachable | -9.91% | [-14.61%, -5.98%] | [-19.08%, -0.88%] | 0.0020 | 0.0260 | Primary Finding (Statistically Significant Win after Holm adjustment) |
+| `BEVERAGES` | reachable | -9.33% | [-12.66%, -5.26%] | [-18.97%, +1.21%] | 0.0020 | 0.0260 | Primary Comparison (Not Significant after Holm adjustment) |
+| `MEATS` | reachable | -9.23% | [-13.06%, -5.94%] | [-16.75%, -1.56%] | 0.0020 | 0.0260 | Primary Finding (Statistically Significant Win after Holm adjustment) |
+| `BREAD/BAKERY` | reachable | -7.52% | [-10.55%, -4.90%] | [-14.26%, +0.95%] | 0.0020 | 0.0260 | Primary Comparison (Not Significant after Holm adjustment) |
+| `CLEANING` | reachable | -14.06% | [-23.71%, -6.23%] | [-26.61%, -3.03%] | 0.0050 | 0.0260 | Primary Finding (Statistically Significant Win after Holm adjustment) |
+| `PRODUCE` | reachable | -2.77% | [-4.90%, -0.57%] | [-8.93%, +4.67%] | 0.0271 | 0.1084 | Primary Comparison (Not Significant after Holm adjustment) |
+| `BOOKS` | reachable | -13.23% | [-23.59%, +16.50%] | [-23.61%, -4.09%] | 0.2997 | 0.8991 | Primary Comparison (Not Significant after Holm adjustment) |
 | `DAIRY` | target below frontier minimum | N/A | N/A | N/A | 1.0000 | 1.0000 | Primary Comparison (Not Significant after Holm adjustment) |
-| `PRODUCE` | reachable | -2.77% | [-4.90%, -0.57%] | [-8.93%, 4.67%] | 0.5464 | 1.0000 | Primary Comparison (Not Significant after Holm adjustment) |
+| `BABY CARE` | target above frontier maximum | N/A | N/A | N/A | 1.0000 | 1.0000 | Primary Comparison (Not Significant after Holm adjustment) |
 
 ### Lead Time $L = 7$ Days (Target 99.0% Fill Rate, $m = 13$ Pre-Specified Families)
 | Family | Status | Diff vs S.Naive (%) | Series 95% CI | Time-Block 95% CI | Raw p | Holm-Adj p | Finding Label |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| `BREAD/BAKERY` | reachable | -10.02% | [-14.58%, -5.14%] | [-13.48%, -5.24%] | <= 0.001 | 0.0130 | Primary Finding (Statistically Significant Win after Holm adjustment) |
-| `DELI` | reachable | -22.73% | [-26.00%, -18.61%] | [-31.03%, -13.70%] | <= 0.001 | 0.0130 | Primary Finding (Statistically Significant Win after Holm adjustment) |
-| `GROCERY I` | reachable | -19.57% | [-26.68%, -12.58%] | [-30.60%, -7.83%] | <= 0.001 | 0.0130 | Primary Finding (Statistically Significant Win after Holm adjustment) |
-| `LAWN AND GARDEN` | reachable | -38.02% | [-44.13%, -30.82%] | [-48.07%, -24.10%] | <= 0.001 | 0.0130 | Primary Finding (Statistically Significant Win after Holm adjustment) |
-| `POULTRY` | reachable | -14.75% | [-21.47%, -8.68%] | [-22.29%, -6.45%] | <= 0.001 | 0.0130 | Primary Finding (Statistically Significant Win after Holm adjustment) |
-| `MEATS` | reachable | -9.71% | [-17.07%, -4.18%] | [-16.66%, -2.63%] | 0.0040 | 0.0320 | Primary Finding (Statistically Significant Win after Holm adjustment) |
-| `BEVERAGES` | reachable | -9.77% | [-14.40%, -3.83%] | [-20.65%, 2.66%] | 0.1380 | 0.9660 | Primary Comparison (Not Significant after Holm adjustment) |
-| `PERSONAL CARE` | reachable | -15.09% | [-25.90%, -4.05%] | [-35.91%, 4.72%] | 0.1503 | 0.9660 | Primary Comparison (Not Significant after Holm adjustment) |
-| `BABY CARE` | target above frontier maximum | N/A | N/A | N/A | 1.0000 | 1.0000 | Primary Comparison (Not Significant after Holm adjustment) |
-| `BOOKS` | reachable | +18.44% | [-21.00%, 47.65%] | [-24.52%, 32.50%] | 0.7520 | 1.0000 | Primary Comparison (Not Significant after Holm adjustment) |
+| `LAWN AND GARDEN` | reachable | -38.02% | [-44.13%, -30.82%] | [-48.07%, -24.10%] | 0.0020 | 0.0260 | Primary Finding (Statistically Significant Win after Holm adjustment) |
+| `DELI` | reachable | -22.73% | [-26.00%, -18.61%] | [-31.03%, -13.70%] | 0.0020 | 0.0260 | Primary Finding (Statistically Significant Win after Holm adjustment) |
+| `GROCERY I` | reachable | -19.57% | [-26.68%, -12.58%] | [-30.60%, -7.83%] | 0.0020 | 0.0260 | Primary Finding (Statistically Significant Win after Holm adjustment) |
+| `POULTRY` | reachable | -14.75% | [-21.47%, -8.68%] | [-22.29%, -6.45%] | 0.0020 | 0.0260 | Primary Finding (Statistically Significant Win after Holm adjustment) |
+| `BREAD/BAKERY` | reachable | -10.02% | [-14.58%, -5.14%] | [-13.48%, -5.24%] | 0.0020 | 0.0260 | Primary Finding (Statistically Significant Win after Holm adjustment) |
+| `BEVERAGES` | reachable | -9.77% | [-14.40%, -3.83%] | [-20.65%, +2.66%] | 0.0020 | 0.0260 | Primary Comparison (Not Significant after Holm adjustment) |
+| `MEATS` | reachable | -9.71% | [-17.07%, -4.18%] | [-16.66%, -2.63%] | 0.0020 | 0.0260 | Primary Finding (Statistically Significant Win after Holm adjustment) |
+| `PERSONAL CARE` | reachable | -15.09% | [-25.90%, -4.05%] | [-35.91%, +4.72%] | 0.0061 | 0.0366 | Primary Comparison (Not Significant after Holm adjustment) |
+| `PRODUCE` | reachable | -1.12% | [-4.82%, +1.54%] | [-7.56%, +5.43%] | 0.3836 | 1.0000 | Primary Comparison (Not Significant after Holm adjustment) |
+| `BOOKS` | reachable | +18.44% | [-21.00%, +47.65%] | [-24.52%, +32.50%] | 0.4915 | 1.0000 | Primary Comparison (Not Significant after Holm adjustment) |
 | `CLEANING` | target above frontier maximum | N/A | N/A | N/A | 1.0000 | 1.0000 | Primary Comparison (Not Significant after Holm adjustment) |
 | `DAIRY` | target below frontier minimum | N/A | N/A | N/A | 1.0000 | 1.0000 | Primary Comparison (Not Significant after Holm adjustment) |
-| `PRODUCE` | reachable | -1.12% | [-4.82%, 1.54%] | [-7.56%, 5.43%] | 0.6387 | 1.0000 | Primary Comparison (Not Significant after Holm adjustment) |
+| `BABY CARE` | target above frontier maximum | N/A | N/A | N/A | 1.0000 | 1.0000 | Primary Comparison (Not Significant after Holm adjustment) |
