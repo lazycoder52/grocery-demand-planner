@@ -563,6 +563,7 @@ def generate_review_forecasts(
     sales_df: pd.DataFrame,
     stores_df: pd.DataFrame | None = None,
     holidays_df: pd.DataFrame | None = None,
+    test_df: pd.DataFrame | None = None,
     eval_dates: list[pd.Timestamp] | pd.DatetimeIndex | None = None,
     review_period_days: int = 7,
     horizon_days: int = 16,
@@ -570,23 +571,30 @@ def generate_review_forecasts(
     target_col: str = "sales",
     exclude_preopening: bool = True,
     n_folds: int = 5,
+    n_burnin_folds: int = 3,
     fold_step_days: int = 16,
     holdout_days: int = 16,
     lookback_days: int = 56,
     params: dict[str, Any] | None = None,
 ) -> pd.DataFrame:
-    """Generate per-review-date 16-day forecasts and pre-origin residual sigmas for all forecasters.
+    """Generate per-review-date 16-day forecasts and out-of-sample residual sigmas.
 
     For each weekly review date t (origin = t), generates 16-day forecasts for:
     - Seasonal Naive (7-day pattern repeated over 16 days)
     - LightGBM Point (L2 conditional mean model from latest fold origin <= t)
     - LightGBM P50 (pinball alpha=0.5 model from latest fold origin <= t)
 
-    Features and lags are strictly built using data <= t.
-    Pre-origin empirical residual standard deviations (sigma) are computed using only data
-    in the 56-day lookback window <= t.
+    Features and lags are strictly built using data <= t (with planned promotions from test.csv
+    extending through 2017-08-31 to eliminate end-of-window forecast truncation).
+
+    Safety-stock residual standard deviations (sigma) for LightGBM (point and P50) and
+    Seasonal Naive are computed strictly from out-of-sample forecast errors from earlier origins
+    whose actuals are known by review date t (using burn-in folds to initialize out-of-sample
+    error history). Zero in-sample fitted residuals and zero future data are accessed.
     """
+    from demand_planner.config import DATA_RAW
     from demand_planner.evaluation.backtest import generate_rolling_folds
+    from demand_planner.evaluation.baselines import predict_seasonal_naive
     from demand_planner.models.lightgbm import (
         get_store_opening_dates,
         predict_lightgbm,
@@ -596,18 +604,53 @@ def generate_review_forecasts(
     df_raw = sales_df.copy()
     df_raw["date"] = pd.to_datetime(df_raw["date"])
 
+    # If test_df is not supplied, check if raw test.csv exists to extend forecast horizon
+    if test_df is None:
+        raw_test_file = DATA_RAW / "test.csv"
+        if raw_test_file.exists():
+            try:
+                test_df = pd.read_csv(raw_test_file)
+            except Exception:
+                test_df = None
+
+    if test_df is not None and len(test_df) > 0:
+        test_sub = test_df[["date", "store_nbr", "family"]].copy()
+        test_sub["date"] = pd.to_datetime(test_sub["date"])
+        if "onpromotion" in test_df.columns:
+            test_sub["onpromotion"] = test_df["onpromotion"]
+        else:
+            test_sub["onpromotion"] = 0
+        test_sub[target_col] = np.nan
+        max_sales_date = df_raw["date"].max()
+        test_sub = test_sub[test_sub["date"] > max_sales_date]
+        if len(test_sub) > 0:
+            combined_raw = pd.concat([df_raw, test_sub], ignore_index=True)
+        else:
+            combined_raw = df_raw.copy()
+    else:
+        combined_raw = df_raw.copy()
+
     df_feat, feature_names = build_features(
-        df_raw, stores_df=stores_df, holidays_df=holidays_df, target_col=target_col
+        combined_raw, stores_df=stores_df, holidays_df=holidays_df, target_col=target_col
     )
 
+    burnin_k = n_burnin_folds if n_burnin_folds > 0 else 0
+    total_folds = n_folds + burnin_k
     cv_folds, holdout = generate_rolling_folds(
         df_raw,
-        n_folds=n_folds,
+        n_folds=total_folds,
         horizon_days=horizon_days,
         fold_step_days=fold_step_days,
         holdout_days=holdout_days,
     )
-    all_splits = [(f"fold_{f.fold_idx}", f) for f in cv_folds] + [("holdout", holdout)]
+
+    # Earliest burnin_k folds serve as burn-in for out-of-sample error collection
+    burnin_splits = [(f"burnin_{f.fold_idx}", f) for f in cv_folds[:burnin_k]]
+    eval_folds = cv_folds[burnin_k:] if burnin_k < len(cv_folds) else cv_folds
+    eval_splits = [(f"fold_{idx + 1}", f) for idx, f in enumerate(eval_folds)] + [
+        ("holdout", holdout)
+    ]
+    all_splits = burnin_splits + eval_splits
     fold_origins = [s[1].origin_date for s in all_splits]
 
     start_date = pd.to_datetime(start_train_date)
@@ -616,10 +659,12 @@ def generate_review_forecasts(
     )
     is_open = df_feat["store_nbr"].map(opening_dates) if opening_dates else None
 
-    # Train point and P50 models once per fold origin
+    # Train models once per split origin and record out-of-sample test predictions
     trained_point = {}
     trained_p50 = {}
-    for _, split in all_splits:
+    oos_records: list[pd.DataFrame] = []
+
+    for split_name, split in all_splits:
         train_mask = (df_feat["date"] <= split.origin_date) & (df_feat["date"] >= start_date)
         if is_open is not None:
             train_mask = train_mask & (df_feat["date"] >= is_open)
@@ -627,13 +672,54 @@ def generate_review_forecasts(
         X_train = df_feat.loc[train_mask, feature_names]
         y_train = np.log1p(df_feat.loc[train_mask, target_col])
 
-        trained_point[split.origin_date] = train_lightgbm(X_train, y_train, params=params)
+        pt_mod = train_lightgbm(X_train, y_train, params=params)
         q_mods = train_lightgbm_quantiles(X_train, y_train, alphas=(0.5,), params=params)
+        trained_point[split.origin_date] = pt_mod
         trained_p50[split.origin_date] = q_mods[0.5]
+
+        # Generate out-of-sample predictions on split's test window
+        test_mask = (df_feat["date"] > split.origin_date) & (
+            df_feat["date"] <= split.origin_date + pd.Timedelta(days=horizon_days)
+        )
+        te_sub = df_feat.loc[test_mask].copy()
+        if len(te_sub) > 0 and target_col in te_sub.columns and te_sub[target_col].notna().any():
+            te_sub["pred_lgbm"] = predict_lightgbm(pt_mod, te_sub[feature_names]).astype(np.float32)
+            te_sub["pred_p50"] = predict_lightgbm(q_mods[0.5], te_sub[feature_names]).astype(
+                np.float32
+            )
+
+            hist_raw = df_raw[df_raw["date"] <= split.origin_date]
+            sn_df = predict_seasonal_naive(
+                hist_raw,
+                te_sub[["date", "store_nbr", "family"]],
+                group_cols=("store_nbr", "family"),
+                target_col=target_col,
+                pred_col="pred_snaive",
+            )
+            te_sub["pred_snaive"] = sn_df["pred_snaive"].to_numpy().astype(np.float32)
+            te_sub["origin_date"] = split.origin_date
+            te_sub["split"] = split_name
+            oos_records.append(
+                te_sub[
+                    [
+                        "date",
+                        "origin_date",
+                        "split",
+                        "store_nbr",
+                        "family",
+                        target_col,
+                        "pred_lgbm",
+                        "pred_p50",
+                        "pred_snaive",
+                    ]
+                ]
+            )
+
+    oos_history_df = pd.concat(oos_records, ignore_index=True) if oos_records else pd.DataFrame()
 
     # Evaluation dates
     if eval_dates is None:
-        start_eval = cv_folds[0].origin_date + pd.Timedelta(days=1)
+        start_eval = eval_folds[0].origin_date + pd.Timedelta(days=1)
         end_eval = holdout.origin_date + pd.Timedelta(days=holdout_days)
         eval_dates_list = pd.date_range(start_eval, end_eval, freq="D")
     else:
@@ -645,11 +731,12 @@ def generate_review_forecasts(
         .sort_values(["store_nbr", "family"])
         .reset_index(drop=True)
     )
+    multi_idx = pd.MultiIndex.from_frame(series_keys)
 
     # Pivot raw sales for fast lookup
     sales_by_date = df_raw.pivot(
         index=["store_nbr", "family"], columns="date", values=target_col
-    ).reindex(index=pd.MultiIndex.from_frame(series_keys))
+    ).reindex(index=multi_idx)
 
     review_day_indices = [t for t in range(len(eval_dates_list)) if t % review_period_days == 0]
 
@@ -672,43 +759,64 @@ def generate_review_forecasts(
         # Seasonal naive: repeat last 7 observed days [d_t - 6 .. d_t]
         last_7_dates = pd.date_range(d_t - pd.Timedelta(days=6), d_t, freq="D")
 
-        # Compute pre-origin residual sigmas on lookback window <= d_t
-        lb_dates = pd.date_range(d_t - pd.Timedelta(days=lookback_days - 1), d_t, freq="D")
-
-        # 1. Seasonal Naive sigma
-        avail_lb = [
-            d
-            for d in pd.date_range(d_t - pd.Timedelta(days=lookback_days + 6), d_t, freq="D")
-            if d in sales_by_date.columns
-        ]
-        if len(avail_lb) > 7:
-            lb_mat = sales_by_date[avail_lb].to_numpy(dtype=np.float32)
-            res_sn = lb_mat[:, 7:] - lb_mat[:, :-7]
-            sig_sn = np.nanstd(res_sn, axis=1)
-            sig_sn = np.nan_to_num(sig_sn, nan=0.0).astype(np.float32)
+        # Compute out-of-sample residual sigmas from earlier origins with actuals known by d_t
+        if len(oos_history_df) > 0:
+            known_mask = (
+                (oos_history_df["origin_date"] < d_t)
+                & (oos_history_df["date"] < d_t)
+                & (oos_history_df["date"] >= d_t - pd.Timedelta(days=lookback_days))
+            )
+            known_oos = oos_history_df.loc[known_mask].copy()
         else:
-            sig_sn = np.zeros(len(series_keys), dtype=np.float32)
+            known_oos = pd.DataFrame()
 
-        # 2. LightGBM sigma
-        sub_lb = df_feat[df_feat["date"].isin(lb_dates)].copy()
-        if len(sub_lb) > 0:
-            lb_preds = predict_lightgbm(pt_mod, sub_lb[feature_names])
-            sub_lb["res"] = sub_lb[target_col] - lb_preds
-            sig_lgbm_df = (
-                sub_lb.groupby(["store_nbr", "family"], observed=False)["res"]
+        if len(known_oos) > 0:
+            known_oos["err_lgbm"] = known_oos[target_col] - known_oos["pred_lgbm"]
+            known_oos["err_p50"] = known_oos[target_col] - known_oos["pred_p50"]
+            known_oos["err_sn"] = known_oos[target_col] - known_oos["pred_snaive"]
+
+            sig_l_df = (
+                known_oos.groupby(["store_nbr", "family"], observed=False)["err_lgbm"]
                 .std()
                 .fillna(0.0)
-                .reindex(pd.MultiIndex.from_frame(series_keys))
+                .reindex(multi_idx)
                 .to_numpy(dtype=np.float32)
             )
-            sig_lgbm = np.nan_to_num(sig_lgbm_df, nan=0.0).astype(np.float32)
+            sig_p_df = (
+                known_oos.groupby(["store_nbr", "family"], observed=False)["err_p50"]
+                .std()
+                .fillna(0.0)
+                .reindex(multi_idx)
+                .to_numpy(dtype=np.float32)
+            )
+            sig_sn_df = (
+                known_oos.groupby(["store_nbr", "family"], observed=False)["err_sn"]
+                .std()
+                .fillna(0.0)
+                .reindex(multi_idx)
+                .to_numpy(dtype=np.float32)
+            )
+
+            sig_lgbm = np.nan_to_num(sig_l_df, nan=0.0).astype(np.float32)
+            sig_p50 = np.nan_to_num(sig_p_df, nan=0.0).astype(np.float32)
+            sig_sn = np.nan_to_num(sig_sn_df, nan=0.0).astype(np.float32)
         else:
+            # Fallback for unit tests without prior burnin folds
             sig_lgbm = np.zeros(len(series_keys), dtype=np.float32)
+            sig_p50 = np.zeros(len(series_keys), dtype=np.float32)
+            sig_sn = np.zeros(len(series_keys), dtype=np.float32)
 
         sig_lgbm_dict = dict(
             zip(
                 zip(series_keys["store_nbr"], series_keys["family"], strict=False),
                 sig_lgbm,
+                strict=False,
+            )
+        )
+        sig_p50_dict = dict(
+            zip(
+                zip(series_keys["store_nbr"], series_keys["family"], strict=False),
+                sig_p50,
                 strict=False,
             )
         )
@@ -743,6 +851,10 @@ def generate_review_forecasts(
                 sig_lgbm_dict.get((s, f), 0.0)
                 for s, f in zip(sub_step["store_nbr"], sub_step["family"], strict=False)
             ]
+            sub_step["sigma_p50"] = [
+                sig_p50_dict.get((s, f), 0.0)
+                for s, f in zip(sub_step["store_nbr"], sub_step["family"], strict=False)
+            ]
             sub_step["sigma_snaive"] = [
                 sig_sn_dict.get((s, f), 0.0)
                 for s, f in zip(sub_step["store_nbr"], sub_step["family"], strict=False)
@@ -761,9 +873,45 @@ def generate_review_forecasts(
                         "pred_p50",
                         "pred_snaive",
                         "sigma_lgbm",
+                        "sigma_p50",
                         "sigma_snaive",
                     ]
                 ]
             )
 
-    return pd.concat(records, ignore_index=True)
+    result_df = pd.concat(records, ignore_index=True)
+
+    # Compute empirical ratio of window-sum error std to daily-sigma * sqrt(R+L)
+    empirical_ratios = {}
+    if len(oos_history_df) > 0:
+        oos_history_df["err_lgbm"] = oos_history_df[target_col] - oos_history_df["pred_lgbm"]
+        oos_history_df["err_p50"] = oos_history_df[target_col] - oos_history_df["pred_p50"]
+        oos_history_df["err_sn"] = oos_history_df[target_col] - oos_history_df["pred_snaive"]
+
+        for W, L_label in [(10, "L3_W10"), (14, "L7_W14")]:
+            w_mask = oos_history_df["date"] <= oos_history_df["origin_date"] + pd.Timedelta(days=W)
+            w_df = oos_history_df.loc[w_mask]
+            if len(w_df) > 0:
+                w_sum = (
+                    w_df.groupby(["split", "store_nbr", "family"], observed=False)["err_lgbm"]
+                    .sum()
+                    .reset_index()
+                )
+                w_std_lgbm = w_sum.groupby(["store_nbr", "family"], observed=False)[
+                    "err_lgbm"
+                ].std()
+                daily_std = oos_history_df.groupby(["store_nbr", "family"], observed=False)[
+                    "err_lgbm"
+                ].std()
+                ratio_s = (w_std_lgbm / (daily_std * np.sqrt(W))).dropna()
+                ratio_s = ratio_s[np.isfinite(ratio_s) & (ratio_s > 0)]
+
+                empirical_ratios[f"{L_label}_ratio_mean"] = (
+                    round(float(ratio_s.mean()), 3) if len(ratio_s) > 0 else 1.0
+                )
+                empirical_ratios[f"{L_label}_ratio_median"] = (
+                    round(float(ratio_s.median()), 3) if len(ratio_s) > 0 else 1.0
+                )
+
+    result_df.attrs["empirical_ratios"] = empirical_ratios
+    return result_df

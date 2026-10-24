@@ -241,6 +241,13 @@ class PeriodicReviewSimulator:
                     .fillna(0.0)
                     .to_numpy(dtype=np.float32)
                 )
+                sig_p50_val = (
+                    sub_t.groupby(["store_nbr", "family"], observed=False)["sigma_p50"]
+                    .first()
+                    .reindex(multi_idx)
+                    .fillna(0.0)
+                    .to_numpy(dtype=np.float32)
+                )
                 sig_sn_val = (
                     sub_t.groupby(["store_nbr", "family"], observed=False)["sigma_snaive"]
                     .first()
@@ -249,6 +256,7 @@ class PeriodicReviewSimulator:
                     .to_numpy(dtype=np.float32)
                 )
                 self.review_sig[(int(t_val), "lgbm")] = sig_l_val
+                self.review_sig[(int(t_val), "p50")] = sig_p50_val
                 self.review_sig[(int(t_val), "snaive")] = sig_sn_val
 
     def _get_forecast(
@@ -321,18 +329,22 @@ class PeriodicReviewSimulator:
                 if "seasonal_naive" in policy
                 else ("point" if "point" in policy or "pred_lgbm" in policy else "p50")
             )
-            sig_key = "snaive" if "seasonal_naive" in policy else "lgbm"
+            sig_key = (
+                "snaive" if "seasonal_naive" in policy else ("p50" if "p50" in policy else "lgbm")
+            )
             D_0 = self.review_fc[(0, pol_key)][:, :protection_days].sum(axis=1)
             sig_0 = (
-                self.review_sig[(0, sig_key)]
+                self.review_sig.get((0, sig_key), self.review_sig.get((0, "lgbm")))
                 if "safety_stock" in policy
                 else np.zeros(self.n_series, dtype=np.float32)
             )
-            SS_0 = np.maximum(0.0, z * sig_0 * np.sqrt(protection_days)).astype(np.float32)
-            S_0 = D_0 + SS_0
+            SS_0 = (z * sig_0 * np.sqrt(protection_days)).astype(np.float32)
+            S_0 = np.maximum(0.0, D_0 + SS_0).astype(np.float32)
         else:
-            SS_0 = np.maximum(0.0, z * sig_mat[:, 0] * np.sqrt(protection_days)).astype(np.float32)
-            S_0 = self._get_forecast(policy, 0, protection_days) + SS_0
+            SS_0 = (z * sig_mat[:, 0] * np.sqrt(protection_days)).astype(np.float32)
+            S_0 = np.maximum(0.0, self._get_forecast(policy, 0, protection_days) + SS_0).astype(
+                np.float32
+            )
         on_hand = S_0.copy()
 
         # Inflow pipeline dictionary: arrival_day -> order_quantities_array
@@ -421,22 +433,24 @@ class PeriodicReviewSimulator:
                             if "seasonal_naive" in policy
                             else ("point" if "point" in policy or "pred_lgbm" in policy else "p50")
                         )
-                        sig_key = "snaive" if "seasonal_naive" in policy else "lgbm"
+                        sig_key = (
+                            "snaive"
+                            if "seasonal_naive" in policy
+                            else ("p50" if "p50" in policy else "lgbm")
+                        )
                         fc_t = self.review_fc[(t, pol_key)][:, :protection_days].sum(axis=1)
                         sig_t = (
-                            self.review_sig[(t, sig_key)]
+                            self.review_sig.get((t, sig_key), self.review_sig.get((t, "lgbm")))
                             if "safety_stock" in policy
                             else np.zeros(self.n_series, dtype=np.float32)
                         )
-                        SS_t = np.maximum(0.0, z * sig_t * np.sqrt(protection_days)).astype(
-                            np.float32
-                        )
-                        S_t = fc_t + SS_t
+                        SS_t = (z * sig_t * np.sqrt(protection_days)).astype(np.float32)
+                        S_t = np.maximum(0.0, fc_t + SS_t).astype(np.float32)
                     else:
-                        SS_t = np.maximum(0.0, z * sig_mat[:, t] * np.sqrt(protection_days)).astype(
-                            np.float32
-                        )
-                        S_t = self._get_forecast(policy, t, protection_days) + SS_t
+                        SS_t = (z * sig_mat[:, t] * np.sqrt(protection_days)).astype(np.float32)
+                        S_t = np.maximum(
+                            0.0, self._get_forecast(policy, t, protection_days) + SS_t
+                        ).astype(np.float32)
 
                     order_qty = np.maximum(0.0, S_t - inventory_position)
 
@@ -645,6 +659,11 @@ class PeriodicReviewSimulator:
                     is_reachable = is_reachable_model and is_reachable_sn
 
                     if not is_reachable:
+                        if target_fr < min_fr_model or target_fr < min_fr_sn:
+                            reach_label = "target below frontier minimum"
+                        else:
+                            reach_label = "target above frontier maximum"
+
                         results.append(
                             {
                                 "lead_time_days": L,
@@ -652,6 +671,11 @@ class PeriodicReviewSimulator:
                                 "forecaster": model_label,
                                 "target_fill_rate_pct": target_fr,
                                 "is_reachable": False,
+                                "status": reach_label,
+                                "lowest_fill_rate_pct_model": round(min_fr_model, 2),
+                                "highest_fill_rate_pct_model": round(max_fr_model, 2),
+                                "lowest_fill_rate_pct_snaive": round(min_fr_sn, 2),
+                                "highest_fill_rate_pct_snaive": round(max_fr_sn, 2),
                                 "required_inventory_lightgbm": None,
                                 "required_inventory_snaive": None,
                                 "pct_difference": None,
@@ -667,7 +691,7 @@ class PeriodicReviewSimulator:
                                 ),
                                 "snaive_grid_range_pct": (round(min_fr_sn, 2), round(max_fr_sn, 2)),
                                 "interpretation": (
-                                    f"Target {target_fr}% unreachable on empirical grid "
+                                    f"Target {target_fr}% {reach_label} "
                                     f"({model_label} [{min_fr_model:.2f}%, {max_fr_model:.2f}%], "
                                     f"S.Naive [{min_fr_sn:.2f}%, {max_fr_sn:.2f}%])"
                                 ),
@@ -774,6 +798,11 @@ class PeriodicReviewSimulator:
                             "forecaster": model_label,
                             "target_fill_rate_pct": target_fr,
                             "is_reachable": True,
+                            "status": "reachable",
+                            "lowest_fill_rate_pct_model": round(min_fr_model, 2),
+                            "highest_fill_rate_pct_model": round(max_fr_model, 2),
+                            "lowest_fill_rate_pct_snaive": round(min_fr_sn, 2),
+                            "highest_fill_rate_pct_snaive": round(max_fr_sn, 2),
                             "required_inventory_lightgbm": float(round(req_inv_m, 2)),
                             "required_inventory_snaive": float(round(req_inv_sn, 2)),
                             "pct_difference": float(round(pct_diff, 2)),
@@ -900,12 +929,31 @@ class PeriodicReviewSimulator:
                     reach_pt = c_pt["min_fr"] <= target_fr <= c_pt["max_fr"]
                     reach_sn = c_sn["min_fr"] <= target_fr <= c_sn["max_fr"]
 
+                    if reach_pt and reach_sn:
+                        status_pt = "reachable"
+                    elif target_fr < c_pt["min_fr"] or target_fr < c_sn["min_fr"]:
+                        status_pt = "target below frontier minimum"
+                    else:
+                        status_pt = "target above frontier maximum"
+
+                    if reach_p50 and reach_sn:
+                        status_p50 = "reachable"
+                    elif target_fr < c_p50["min_fr"] or target_fr < c_sn["min_fr"]:
+                        status_p50 = "target below frontier minimum"
+                    else:
+                        status_p50 = "target above frontier maximum"
+
                     entry: dict[str, Any] = {
                         "family": fam,
                         "lead_time_days": L,
                         "target_fill_rate_pct": target_fr,
+                        "status_point": status_pt,
+                        "status_p50": status_p50,
+                        "min_fill_rate_p50": round(c_p50["min_fr"], 2),
                         "max_fill_rate_p50": round(c_p50["max_fr"], 2),
+                        "min_fill_rate_point": round(c_pt["min_fr"], 2),
                         "max_fill_rate_point": round(c_pt["max_fr"], 2),
+                        "min_fill_rate_snaive": round(c_sn["min_fr"], 2),
                         "max_fill_rate_snaive": round(c_sn["max_fr"], 2),
                         "is_reachable_p50": reach_p50 and reach_sn,
                         "is_reachable_point": reach_pt and reach_sn,
@@ -1032,6 +1080,9 @@ class PeriodicReviewSimulator:
                             {
                                 "required_inventory_lightgbm_p50": float(round(req_p50, 2)),
                                 "required_inventory_snaive": float(round(req_sn, 2)),
+                                "absolute_inventory_diff_p50_units": float(
+                                    round(req_p50 - req_sn, 2)
+                                ),
                                 "pct_diff_p50_vs_snaive": float(round(pct_diff_p50, 2)),
                                 "ci_95_p50_low": float(round(ci_ser_low, 2)),
                                 "ci_95_p50_high": float(round(ci_ser_high, 2)),
@@ -1052,6 +1103,7 @@ class PeriodicReviewSimulator:
                                 "required_inventory_snaive": (
                                     float(round(req_sn, 2)) if req_sn is not None else None
                                 ),
+                                "absolute_inventory_diff_p50_units": None,
                                 "pct_diff_p50_vs_snaive": None,
                                 "ci_95_p50_low": None,
                                 "ci_95_p50_high": None,
@@ -1163,9 +1215,32 @@ class PeriodicReviewSimulator:
                         excl_pt_time = ci_pt_time_low > 0 or ci_pt_time_high < 0
                         is_win_pt = excl_pt_ser and excl_pt_time and pct_diff_pt < 0
 
+                        p_ser = (
+                            2.0
+                            * min(
+                                float(np.mean(np.array(b_diffs_pt_ser) >= 0)),
+                                float(np.mean(np.array(b_diffs_pt_ser) <= 0)),
+                            )
+                            if len(b_diffs_pt_ser) >= 20
+                            else 1.0
+                        )
+                        p_time = (
+                            2.0
+                            * min(
+                                float(np.mean(np.array(b_diffs_pt_time) >= 0)),
+                                float(np.mean(np.array(b_diffs_pt_time) <= 0)),
+                            )
+                            if len(b_diffs_pt_time) >= 20
+                            else 1.0
+                        )
+                        p_val_pt = float(max(p_ser, p_time))
+
                         entry.update(
                             {
                                 "required_inventory_lightgbm_point": float(round(req_pt, 2)),
+                                "absolute_inventory_diff_point_units": float(
+                                    round(req_pt - req_sn, 2)
+                                ),
                                 "pct_diff_point_vs_snaive": float(round(pct_diff_pt, 2)),
                                 "ci_95_series_point_low": float(round(ci_pt_ser_low, 2)),
                                 "ci_95_series_point_high": float(round(ci_pt_ser_high, 2)),
@@ -1175,12 +1250,14 @@ class PeriodicReviewSimulator:
                                 "is_within_noise_series_point": not excl_pt_ser,
                                 "is_within_noise_time_block_point": not excl_pt_time,
                                 "is_statistically_significant_win_point": is_win_pt,
+                                "p_value_point": round(p_val_pt, 4),
                             }
                         )
                     else:
                         entry.update(
                             {
                                 "required_inventory_lightgbm_point": None,
+                                "absolute_inventory_diff_point_units": None,
                                 "pct_diff_point_vs_snaive": None,
                                 "ci_95_series_point_low": None,
                                 "ci_95_series_point_high": None,
@@ -1190,10 +1267,57 @@ class PeriodicReviewSimulator:
                                 "is_within_noise_series_point": True,
                                 "is_within_noise_time_block_point": True,
                                 "is_statistically_significant_win_point": False,
+                                "p_value_point": 1.0,
                             }
                         )
 
                     results.append(entry)
+
+        # Multiple comparisons adjustment: Holm-Bonferroni across families for primary comparisons
+        # Primary: target_fill_rate_pct == 99.0, LightGBM Point vs Seasonal Naive (L=3, L=7)
+        for L in lead_times:
+            primary_entries = [
+                e
+                for e in results
+                if e["lead_time_days"] == L and abs(e["target_fill_rate_pct"] - 99.0) < 1e-4
+            ]
+            m_tests = len(primary_entries)
+            primary_entries.sort(
+                key=lambda x: (
+                    x.get("p_value_point", 1.0),
+                    x.get("pct_diff_point_vs_snaive") or 999.0,
+                )
+            )
+
+            prior_passed = True
+            for rank_idx, e in enumerate(primary_entries):
+                k = rank_idx + 1
+                alpha_holm = 0.05 / (m_tests - k + 1)
+                e["comparison_type"] = "primary"
+                e["holm_rank"] = k
+                e["holm_alpha_threshold"] = round(alpha_holm, 5)
+
+                is_win = (
+                    e.get("is_statistically_significant_win_point", False)
+                    and e.get("p_value_point", 1.0) <= alpha_holm
+                    and prior_passed
+                )
+                if not is_win:
+                    prior_passed = False
+
+                e["is_finding"] = is_win
+                e["finding_label"] = (
+                    "Primary Finding (Statistically Significant Win after Holm adjustment)"
+                    if is_win
+                    else "Primary Comparison (Not Significant after Holm adjustment)"
+                )
+
+        # Label all other entries exploratory
+        for e in results:
+            if "comparison_type" not in e:
+                e["comparison_type"] = "exploratory"
+                e["is_finding"] = False
+                e["finding_label"] = "Exploratory"
 
         return results
 
@@ -1586,13 +1710,21 @@ def compute_rule3_inside_fold_sensitivity(
                     }
                 )
 
+    reachable_cases = [r for r in results if r.get("is_reachable", False)]
+    n_reachable = len(reachable_cases)
+    n_crossing = sum(1 for r in reachable_cases if r.get("is_within_noise_fold", False))
+    pct_cross = (n_crossing / n_reachable * 100.0) if n_reachable > 0 else 0.0
+
     return {
         "label": "Sensitivity: Inside-Fold Orders",
         "stitching_rule": "inside_fold_only",
         "n_order_cycles": n_folds,
+        "n_reachable_targets": n_reachable,
+        "n_fold_ci_cross_zero": n_crossing,
         "sample_size_assessment": (
-            "The sample of n=6 order cycles is statistically underpowered. "
-            "Fold-level bootstrap CIs cross zero across almost all targets."
+            f"The sample of n={n_folds} order cycles is statistically underpowered. "
+            f"Exactly {n_crossing} of {n_reachable} reachable targets ({pct_cross:.0f}%) "
+            f"have fold-level 95% bootstrap CIs that cross zero."
         ),
         "tradeoffs": results,
     }
