@@ -4,7 +4,7 @@ This directory stores generated artifacts, forecasts, and simulation results.
 
 ## Regeneration Commands
 
-Large prediction parquet files (>1 MB) are excluded from git tracking to prevent repository bloat and maintain fast CI performance. Only small summary aggregates (`*_summary.parquet`) are committed.
+Large prediction parquet files (>1 MB, such as `holdout_predictions.parquet` and `oof_and_holdout_predictions.parquet`) are excluded from git tracking to prevent repository bloat, enforce the 5 MB CI limit on `outputs/`, and maintain fast CI performance. Only small summary aggregates (`*_summary.parquet`) are committed.
 
 To regenerate all out-of-fold predictions, holdout predictions, and replenishment simulation files:
 
