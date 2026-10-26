@@ -72,6 +72,7 @@ See [docs/INSIGHTS.md](INSIGHTS.md#6-pre-specified-primary-family-comparison-tab
 2. **Demand Proxy and Censoring Caveat:** Point-of-sale records capture fulfilled transactions, not unconstrained consumer demand. When a stockout occurs, unobserved demand is censored, which can bias naive baselines downward during replenishment recovery.
 3. **Observational Promotions:** Promotional tracking commenced on 2014-04-01; promotional lift reflects observational historical co-occurrence on positive-sales days (intensive margin) rather than randomized pricing trials.
 4. **Institutional Calendar Shocks:** December 25 is a deterministic chain-wide closure (sales = 0). Bi-weekly paydays (15th and month-end) create recurring non-linear demand spikes.
+5. **Excluded Data Sources (Oil & Transactions):** Oil prices and store transaction counts are ingested for analytical aggregation (weekly S&OP views in SQL) but are NOT features in the LightGBM forecasting model. Same-day transactions are simultaneous with sales (leakage risk), and oil prices add external forecasting dependencies without improving store-family walk-forward accuracy.
 
 ---
 

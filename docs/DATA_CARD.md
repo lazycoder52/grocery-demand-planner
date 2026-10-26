@@ -153,7 +153,11 @@ The recording of promotional activity (`onpromotion` column) evolved over time:
 3. **Information Leakage Prevention (Forecast Origin Cutoff):**
    Same-day transactions and same-day oil prices are NEVER permitted as features for predicting
    same-day sales. At forecast origin $t_0$, only strictly historical signals ($t \le t_0$)
-   and known calendar/promotional schedules ($t > t_0$) may be utilized.
+   and known calendar/promotional schedules ($t > t_0$) may be utilized. Furthermore, neither
+   oil prices nor transactions are used as features in the LightGBM forecasting model: same-day
+   transactions are simultaneous with sales (leakage), and oil prices introduce external forecasting
+   dependencies without improving store-family walk-forward accuracy. Both tables are used
+   exclusively in weekly analytical SQL views (`sql/weekly_store_family.sql`).
 
 4. **Missing Oil Price Imputation:**
    Missing weekday oil prices and weekend dates are filled via forward-fill (carrying forward

@@ -9,6 +9,12 @@ over a 16-day forecast horizon:
 - Promotions: promotional item counts (post April 2014); assumes planned marketing
   schedules and promotional circulars are known in advance on forecast dates
 - Store metadata: store type, store cluster, store number, and product family
+
+NOTE ON EXCLUDED DATA SOURCES:
+- Oil prices (oil.csv) and store transactions (transactions.csv) are NOT model features.
+  Same-day transactions are simultaneous with sales (leakage), and oil prices introduce
+  external forecast dependency without improving store-family walk-forward accuracy.
+  Both tables are utilized strictly in weekly SQL analytical views (sql/weekly_store_family.sql).
 """
 
 from __future__ import annotations

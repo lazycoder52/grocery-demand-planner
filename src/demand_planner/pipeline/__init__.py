@@ -250,16 +250,21 @@ def _register_simulation_stage() -> None:
         sim_df = sim.run_all_simulations()
 
         log.info("Tracing fill-rate vs inventory frontiers across fine z grid...")
-        frontier_df = sim.run_frontier(lead_times=(3, 7))
+        frontier_df = sim.run_frontier(lead_times=cfg.lead_times_days)
 
         log.info("Computing target fill rate trade-offs and bootstrap CIs...")
         tradeoffs = sim.compute_target_fill_rate_tradeoff(
-            frontier_df, target_fill_rates=(98.5, 99.0, 99.5), n_bootstrap=1000, seed=cfg.seed
+            frontier_df, target_fill_rates=cfg.target_fill_rates, n_bootstrap=1000, seed=cfg.seed
         )
 
-        log.info("Computing per-family matched fill-rate frontiers across L in {3, 7}...")
+        log.info(
+            "Computing per-family matched fill-rate frontiers across L in %s...",
+            cfg.lead_times_days,
+        )
         family_results = sim.simulate_by_family_matched_fill_rate(
-            frontier_df=frontier_df, lead_times=(3, 7), target_fill_rates=(98.5, 99.0, 99.5)
+            frontier_df=frontier_df,
+            lead_times=cfg.lead_times_days,
+            target_fill_rates=cfg.target_fill_rates,
         )
 
         tradeoff_chart = plot_replenishment_tradeoff(sim_df, frontier_df=frontier_df)
@@ -278,16 +283,16 @@ def _register_simulation_stage() -> None:
             config=cfg,
             stitching_rule="clamped_scaled",
         )
-        f_r1 = sim_r1.run_frontier(lead_times=(3, 7))
+        f_r1 = sim_r1.run_frontier(lead_times=cfg.lead_times_days)
         tradeoffs_r1 = sim_r1.compute_target_fill_rate_tradeoff(
-            f_r1, target_fill_rates=(98.5, 99.0, 99.5), n_bootstrap=1000, seed=cfg.seed
+            f_r1, target_fill_rates=cfg.target_fill_rates, n_bootstrap=1000, seed=cfg.seed
         )
 
         log.info("Computing Rule 3 sensitivity ('Sensitivity: Inside-Fold Orders')...")
         rule3_sensitivity = compute_rule3_inside_fold_sensitivity(
             df_preds,
-            lead_times=(3, 7),
-            target_fill_rates=(98.5, 99.0, 99.5),
+            lead_times=cfg.lead_times_days,
+            target_fill_rates=cfg.target_fill_rates,
             n_bootstrap=1000,
             seed=cfg.seed,
         )
