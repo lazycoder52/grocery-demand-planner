@@ -52,8 +52,9 @@ def test_sim_config_loading():
     """Verify SimConfig loads expected parameters from config/sim_config.yaml."""
     cfg = SimConfig.from_yaml("config/sim_config.yaml")
     assert cfg.review_period_days == 7
-    assert cfg.lead_times_days == (3, 7, 14)
+    assert cfg.lead_times_days == (3, 7)
     assert cfg.service_levels == (0.90, 0.95, 0.98)
+    assert cfg.target_fill_rates == (98.5, 99.0, 99.5)
     assert cfg.warmup_days == 14
     assert cfg.seed == 42
 

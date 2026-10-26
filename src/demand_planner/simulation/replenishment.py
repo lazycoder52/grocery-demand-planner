@@ -43,8 +43,9 @@ class SimConfig:
 
     seed: int = 42
     review_period_days: int = 7
-    lead_times_days: tuple[int, ...] = (3, 7, 14)
+    lead_times_days: tuple[int, ...] = (3, 7)
     service_levels: tuple[float, ...] = (0.90, 0.95, 0.98)
+    target_fill_rates: tuple[float, ...] = (98.5, 99.0, 99.5)
     warmup_days: int = 14
     z_grid: tuple[float, ...] = (
         0.0,
@@ -77,11 +78,14 @@ class SimConfig:
             raw = yaml.safe_load(f) or {}
         z_raw = raw.get("z_grid", None)
         z_grid_val = tuple(float(x) for x in z_raw) if z_raw is not None else cls.z_grid
+        tfr_raw = raw.get("target_fill_rates", None)
+        tfr_val = tuple(float(x) for x in tfr_raw) if tfr_raw is not None else cls.target_fill_rates
         return cls(
             seed=int(raw.get("seed", 42)),
             review_period_days=int(raw.get("review_period_days", 7)),
-            lead_times_days=tuple(int(x) for x in raw.get("lead_times_days", [3, 7, 14])),
+            lead_times_days=tuple(int(x) for x in raw.get("lead_times_days", [3, 7])),
             service_levels=tuple(float(x) for x in raw.get("service_levels", [0.90, 0.95, 0.98])),
+            target_fill_rates=tfr_val,
             warmup_days=int(raw.get("warmup_days", 14)),
             z_grid=z_grid_val,
             stitching_rule=str(raw.get("stitching_rule", "reforecast")),

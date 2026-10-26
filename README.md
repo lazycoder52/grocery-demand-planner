@@ -64,6 +64,7 @@ Full benchmark trade-off curves, lead-time autocorrelation ratios (**1.436** at 
 
 * **Hyperparameters:** Global LightGBM uses untuned defaults: `objective='regression'`, `n_estimators=200`, `learning_rate=0.08`, `num_leaves=63`, `random_state=42`, `n_jobs=-1`.
 * **Training Range:** Training starts on **2015-01-01** because promotion tracking began on 2014-04-01, allowing sufficient feature lag initialization.
+* **Excluded Data Sources (Oil & Transactions):** While `oil.csv` (WTI crude prices) and `transactions.csv` (daily store customer counts) are ingested by DuckDB and joined in weekly analytical views (`sql/weekly_store_family.sql`), they are **not model features**. Same-day transactions are unknown at forecast time (leakage), and oil prices add external forecasting dependencies without improving store-family walk-forward accuracy.
 
 ---
 

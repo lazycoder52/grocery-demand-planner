@@ -27,8 +27,9 @@ def test_model_config_has_seed_and_horizon():
 def test_sim_config_matches_plan():
     cfg = load_config("sim_config")
     assert cfg["review_period_days"] == 7
-    assert cfg["lead_times_days"] == [3, 7, 14]
+    assert cfg["lead_times_days"] == [3, 7]
     assert cfg["service_levels"] == [0.90, 0.95, 0.98]
+    assert cfg["target_fill_rates"] == [98.5, 99.0, 99.5]
 
 
 def test_rel_returns_repo_relative_posix_path():
@@ -56,13 +57,11 @@ def test_core_dependencies_importable():
 
     import duckdb
     import lightgbm
-    import optuna
     import pre_commit  # noqa: F401
     import streamlit
 
     assert duckdb.__version__
     assert lightgbm.__version__
-    assert optuna.__version__
     assert streamlit.__version__
     assert version("pre-commit")
 
