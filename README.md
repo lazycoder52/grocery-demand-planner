@@ -7,6 +7,14 @@
 [![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
 Live app: https://grocery-demand-planner-7xqsqdetuynw8druzhiswp.streamlit.app/#frontier-points-at-l-3-days-target-selected-99-7
+
+---
+
+## Overview
+
+- **What it does:** An end-to-end demand forecasting and inventory replenishment engine for an Ecuadorian supermarket chain across 54 stores and 33 product families. It replaces baseline heuristic ordering rules with a global LightGBM regressor and simulates periodic review inventory replenishment.
+- **Why:** Grocery supply chains face tight margins where over-ordering leads to perishable goods spoilage and holding costs, while under-ordering causes unobserved stockouts and lost revenue. By reducing walk-forward forecast error from **16.33% to 13.49% WAPE** (**17.39% relative error reduction**, +2.84 pts FVA), the system cuts required safety stock and yields a **-12.27% to -14.51% average simulated inventory reduction** while preserving target 99.0% on-shelf fill rates.
+
 ---
 
 ## 1. Headline Results
@@ -68,16 +76,23 @@ Full benchmark trade-off curves, lead-time autocorrelation ratios (**1.436** at 
 
 ---
 
-## 5. Quick Start (3 Commands)
+## 5. Quick Start
 
+### Installation
 ```bash
 # 1. Clone repository and install dependencies
 git clone https://github.com/lazycoder52/grocery-demand-planner.git && cd grocery-demand-planner
 pip install -r requirements-dev.txt && pip install -e . --no-deps
+```
 
+### Verification & Testing
+```bash
 # 2. Run test suite & verify code quality
 pytest && ruff check .
+```
 
+### Interactive Dashboard
+```bash
 # 3. Launch interactive Streamlit application
 streamlit run app.py
 ```
@@ -99,13 +114,42 @@ The dashboard is pre-configured for deployment to [Streamlit Community Cloud](ht
 
 ---
 
-## 6. Data
+## 6. Repository Structure
+
+```text
+grocery-demand-planner/
+├── app.py                     # Interactive Streamlit dashboard
+├── config/                    # Pipeline and model YAML configurations
+├── data/                      # Dataset documentation & local raw storage instructions
+├── docs/                      # Product brief, insights, data card, and architectural docs
+├── metrics/                   # Generated evaluation metrics (metrics.json)
+├── outputs/                   # Parquet summary tables for dashboard & evaluation
+├── sql/                       # DuckDB analytical transformation queries
+├── src/demand_planner/        # Core forecasting, simulation, and data pipeline
+├── tests/                     # Unit, integration, smoke, and traceability tests
+├── pyproject.toml             # Package metadata, dependencies, and tool settings
+└── requirements-dev.txt       # Development and testing dependencies
+```
+
+---
+
+## 7. Tools Used
+
+- **Language & Runtime:** Python 3.12, 3.14
+- **Modeling & Forecasting:** LightGBM, scikit-learn, SciPy, NumPy, Pandas, PyArrow
+- **Analytical Storage:** DuckDB, PyYAML
+- **Visualization & UI:** Streamlit, Plotly, Matplotlib
+- **Code Quality & CI/CD:** pytest, ruff, pre-commit, GitHub Actions
+
+---
+
+## 8. Data
 
 Due to competition licensing terms, the raw Kaggle Corporación Favorita dataset is not redistributed in this repository. To download raw CSVs, verify file hashes, and set up the local directory structure, refer to [data/README.md](data/README.md).
 
 ---
 
-## 7. Operational Assumptions & Limitations
+## 9. Operational Assumptions & Limitations
 
 1. **Evaluation Window Restrictions:**
    Model evaluation covers only **2017-05-12 to 2017-08-15** (CV Fold 1 test start through holdout test end). This backtest window excludes December holiday surges, annual peak seasons, and the April 2016 Manabi earthquake emergency relief period.
@@ -125,13 +169,15 @@ Due to competition licensing terms, the raw Kaggle Corporación Favorita dataset
 
 ---
 
-## 8. Documentation Index
+## 10. Documentation Index
 
-- 📋 **[Product Brief](docs/PRODUCT_BRIEF.md):** 2-page brief with metric tree, 5-store randomized pilot protocol, and scope roadmap.
-- 📊 **[Business Insights & SQL](docs/INSIGHTS.md):** Analysis of the 4 SQL analytical views and full per-family Holm-Bonferroni tables.
-- 📁 **[Data Card](docs/DATA_CARD.md):** Dataset lineage, schema definitions, missing calendar dates, and store opening audit.
-- 📜 **[Changelog](docs/CHANGELOG.md):** Historical iteration and reconciliation records.
-- 💻 **[Interactive App](app.py):** Interactive Streamlit dashboard (`streamlit run app.py`).
+- [Product Brief](docs/PRODUCT_BRIEF.md): 2-page brief with metric tree, 5-store randomized pilot protocol, and scope roadmap.
+- [Business Insights & SQL](docs/INSIGHTS.md): Analysis of the 4 SQL analytical views and full per-family Holm-Bonferroni tables.
+- [Data Card](docs/DATA_CARD.md): Dataset lineage, schema definitions, missing calendar dates, and store opening audit.
+- [Changelog](docs/CHANGELOG.md): Historical iteration and reconciliation records.
+- [Interactive App](app.py): Interactive Streamlit dashboard (`streamlit run app.py`).
+
+---
 
 ## License
 

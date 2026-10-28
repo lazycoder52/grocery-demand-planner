@@ -1,7 +1,7 @@
 # Product Brief: ML Demand Forecasting & Replenishment System
 
 **Product:** Corporación Favorita Demand Planner
-**Author:** Aditya
+**Author:** lazycoder52
 **Public dataset:** Corporación Favorita (Kaggle)
 **Status:** portfolio project; simulation-based evidence
 
