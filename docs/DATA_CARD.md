@@ -1,9 +1,8 @@
-# Data Card: Corporación Favorita Grocery Sales
+# Data Card: [Store Sales - Time Series Forecasting (Kaggle; Corporación Favorita data)](https://www.kaggle.com/competitions/store-sales-time-series-forecasting)
 
 ## 1. Overview & Dataset Description
 
-This project utilizes the public Corporación Favorita grocery sales dataset from the Kaggle
-competition [Store Sales - Time Series Forecasting](https://www.kaggle.com/competitions/store-sales-time-series-forecasting).
+This project utilizes the public [Store Sales - Time Series Forecasting (Kaggle; Corporación Favorita data)](https://www.kaggle.com/competitions/store-sales-time-series-forecasting) dataset.
 Corporación Favorita is one of Ecuador's largest supermarket chains.
 
 - **Primary Source:** Kaggle / Corporación Favorita
