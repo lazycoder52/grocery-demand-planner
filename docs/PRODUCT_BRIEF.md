@@ -2,7 +2,7 @@
 
 **Product:** Corporación Favorita Demand Planner
 **Author:** Aditya
-**Public dataset:** Corporación Favorita (Kaggle)
+**Public dataset:** [Store Sales - Time Series Forecasting (Kaggle; Corporación Favorita data)](https://www.kaggle.com/competitions/store-sales-time-series-forecasting)
 **Status:** portfolio project; simulation-based evidence
 
 ---
