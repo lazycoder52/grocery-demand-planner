@@ -1,4 +1,4 @@
-# Corporación Favorita Demand Planner: Portfolio project on public Favorita data
+# Corporación Favorita Demand Planner: Portfolio project on [Store Sales - Time Series Forecasting (Kaggle; Corporación Favorita data)](https://www.kaggle.com/competitions/store-sales-time-series-forecasting)
 
 > End-to-end ML demand forecasting and inventory replenishment system for an Ecuadorian supermarket chain (54 stores, 33 product families), reducing walk-forward forecast error from **16.33% to 13.49% WAPE** (**17.39% relative error reduction**, +2.84 pts FVA) and delivering a **-12.27% to -14.51% average simulated inventory reduction** at a matched 99.0% fill rate under periodic review replenishment.
 
@@ -145,7 +145,7 @@ grocery-demand-planner/
 
 ## 8. Data
 
-Due to competition licensing terms, the raw Kaggle Corporación Favorita dataset is not redistributed in this repository. To download raw CSVs, verify file hashes, and set up the local directory structure, refer to [data/README.md](data/README.md).
+Due to competition licensing terms, the raw [Store Sales - Time Series Forecasting (Kaggle; Corporación Favorita data)](https://www.kaggle.com/competitions/store-sales-time-series-forecasting) dataset is not redistributed in this repository. Data is used under the Kaggle competition's rules for non-commercial and academic use; raw competition data is not included, and tracked files are aggregated derivatives published for educational purposes. To download raw CSVs, verify file hashes, and set up the local directory structure, refer to [data/README.md](data/README.md).
 
 ---
 
